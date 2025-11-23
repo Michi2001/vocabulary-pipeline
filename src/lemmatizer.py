@@ -29,7 +29,9 @@ class Lemmatizer:
         try:
             self.nlp = spacy.load(language_model)
         except OSError:
-            logger.error(f"Model '{language_model}' not found. Install with: python -m spacy download {language_model}")
+            logger.error(
+                f"Model '{language_model}' not found. Install with: python -m spacy download {language_model}"
+            )
             raise
 
         self.nlp.max_length = 2000000
@@ -65,5 +67,12 @@ class Lemmatizer:
         Yields:
             Tuples of (lemma, pos_tag) for each token in the corpus
         """
+        total_sentences = 0
+        batch_count = 0
+
         for batch in sentence_batches:
             yield from self._process_sentences(batch)
+
+        logger.info(
+            f"Completed processing {batch_count} batches, {total_sentences:,} total sentences"
+        )
