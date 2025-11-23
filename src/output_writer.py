@@ -22,11 +22,9 @@ class OutputWriter:
             data: List of dictionaries with 'lemma', 'frequency', 'pos' keys
             output_path: Output file path
         """
-        logger.info(f"Writing CSV to {output_path}")
-
         with open(output_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["lemma", "frequency", "pos"])
             writer.writeheader()
             writer.writerows(data)
 
-        logger.info(f"CSV file written: {output_path} ({len(data):,} lemmas)")
+        logger.info(f"Output written: {output_path}")

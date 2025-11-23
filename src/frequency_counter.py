@@ -36,8 +36,8 @@ class FrequencyCounter:
                 if self.lemma_pos[lemma] != pos:
                     self.lemma_pos[lemma] = self._merge_pos(self.lemma_pos[lemma], pos)
 
-            if self.total_tokens % 100000 == 0:
-                logger.info(f"Processed {self.total_tokens:,} tokens, {len(self.lemma_counts):,} unique lemmas")
+            if self.total_tokens % 500000 == 0:
+                logger.info(f"Progress: {self.total_tokens:,} tokens")
 
     def _merge_pos(self, pos1: str, pos2: str) -> str:
         """
@@ -66,8 +66,6 @@ class FrequencyCounter:
         Returns:
             List of dictionaries with 'lemma', 'frequency', and 'pos' keys
         """
-        logger.info(f"Sorting {len(self.lemma_counts):,} lemmas by frequency")
-
         results = []
         for lemma, count in self.lemma_counts.items():
             if count >= min_frequency:
@@ -78,8 +76,6 @@ class FrequencyCounter:
                 })
 
         results.sort(key=lambda x: x['frequency'], reverse=True)
-
-        logger.info(f"Final results: {len(results):,} lemmas (filtered by min_frequency={min_frequency})")
         return results
 
     def get_statistics(self) -> Dict[str, any]:
