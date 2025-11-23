@@ -1,0 +1,80 @@
+import spacy
+from typing import List, Tuple, Generator
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+
+class Lemmatizer:
+    """
+    Lemmatizer using spaCy for contextual lemmatization.
+
+    Processes sentences in batches for efficient memory usage and performance.
+    """
+
+    def __init__(self, language_model: str = "es_core_news_sm", batch_size: int = 1000):
+        """
+        Initialize the lemmatizer.
+
+        Args:
+            language_model: spaCy model name (default: Spanish small model)
+            batch_size: Number of sentences to process in one spaCy batch
+        """
+        self.language_model = language_model
+        self.batch_size = batch_size
+
+        logger.info(f"Loading spaCy model: {language_model}")
+        try:
+            self.nlp = spacy.load(language_model)
+        except OSError:
+            logger.error(f"Model '{language_model}' not found. Please install it with:")
+            logger.error(f"python -m spacy download {language_model}")
+            raise
+
+        self.nlp.max_length = 2000000
+
+    def _process_sentences(
+        self, sentences: List[str]
+    ) -> Generator[Tuple[str, str], None, None]:
+        """
+        Process a batch of sentences and yield (lemma, pos) tuples.
+
+        Args:
+            sentences: List of sentences to process
+
+        Yields:
+            Tuples of (lemma, pos_tag) for each token
+        """
+        for doc in self.nlp.pipe(sentences, batch_size=self.batch_size):
+            for token in doc:
+                if not token.is_space and not token.is_punct:
+                    lemma = token.lemma_.lower()
+                    pos = token.pos_
+                    yield (lemma, pos)
+
+    def process_corpus_batches(
+        self, sentence_batches: Generator[List[str], None, None]
+    ) -> Generator[Tuple[str, str], None, None]:
+        """
+        Process batches of sentences from a corpus reader.
+
+        Args:
+            sentence_batches: Generator yielding batches of sentences
+
+        Yields:
+            Tuples of (lemma, pos_tag) for each token in the corpus
+        """
+        total_sentences = 0
+
+        for batch in sentence_batches:
+            logger.info(
+                f"Processing batch of {len(batch)} sentences (total: {total_sentences})"
+            )
+            total_sentences += len(batch)
+
+            yield from self._process_sentences(batch)
+
+        logger.info(f"Completed processing {total_sentences} sentences")
