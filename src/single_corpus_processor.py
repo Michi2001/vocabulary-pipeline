@@ -153,7 +153,7 @@ class SingleCorpusProcessor:
         )
 
         # Process with lemmatizer
-        lemma_pos_stream: Generator[Tuple[str, str], None, None] = (
+        lemma_pos_stream: Generator[Tuple[str, str, bool], None, None] = (
             self.lemmatizer.process_corpus_batches(sentence_batches)
         )
 

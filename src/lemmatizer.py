@@ -38,26 +38,27 @@ class Lemmatizer:
 
     def _process_sentences(
         self, sentences: List[str]
-    ) -> Generator[Tuple[str, str], None, None]:
+    ) -> Generator[Tuple[str, str, bool], None, None]:
         """
-        Process a batch of sentences and yield (lemma, pos) tuples.
+        Process a batch of sentences and yield (lemma, pos, is_oov) tuples.
 
         Args:
             sentences: List of sentences to process
 
         Yields:
-            Tuples of (lemma, pos_tag) for each token
+            Tuples of (lemma, pos_tag, is_oov) for each token
         """
         for doc in self.nlp.pipe(sentences, batch_size=self.batch_size):
             for token in doc:
                 if not token.is_space and not token.is_punct:
                     lemma = token.lemma_.lower()
                     pos = token.pos_
-                    yield (lemma, pos)
+                    is_oov = token.is_oov
+                    yield (lemma, pos, is_oov)
 
     def process_corpus_batches(
         self, sentence_batches: Generator[List[str], None, None]
-    ) -> Generator[Tuple[str, str], None, None]:
+    ) -> Generator[Tuple[str, str, bool], None, None]:
         """
         Process batches of sentences from a corpus reader.
 
@@ -65,7 +66,7 @@ class Lemmatizer:
             sentence_batches: Generator yielding batches of sentences
 
         Yields:
-            Tuples of (lemma, pos_tag) for each token in the corpus
+            Tuples of (lemma, pos_tag, is_oov) for each token in the corpus
         """
         total_sentences = 0
         batch_count = 0

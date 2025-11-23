@@ -75,16 +75,25 @@ if __name__ == "__main__":
     # Output results
     stats = counter.get_statistics()
     logger.info(
-        f"\nFinal statistics: {stats['total_tokens']:,} tokens, {stats['unique_lemmas']:,} unique lemmas"
+        f"\nFinal statistics:\n"
+        f"  Total tokens: {stats['total_tokens']:,}\n"
+        f"  Known lemmas: {stats['unique_lemmas']:,}\n"
+        f"  OOV tokens: {stats['total_oov_tokens']:,} ({stats['oov_percentage']:.2f}%)\n"
+        f"  Unique OOV: {stats['unique_oov']:,}"
     )
 
     min_freq = processing_config.get("min_frequency", 1)
-    frequencies = counter.get_sorted_frequencies(min_frequency=min_freq)
 
-    # Ensure output directory exists
+    # Write known words
+    frequencies = counter.get_sorted_frequencies(min_frequency=min_freq, oov=False)
     output_path = output_config["file_path"]
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    OutputWriter.write_csv(frequencies, output_path, oov=False)
 
-    OutputWriter.write_csv(frequencies, output_path)
+    # Write OOV words
+    oov_frequencies = counter.get_sorted_frequencies(min_frequency=min_freq, oov=True)
+    oov_output_path = output_config["oov_file_path"]
+    os.makedirs(os.path.dirname(oov_output_path), exist_ok=True)
+    OutputWriter.write_csv(oov_frequencies, oov_output_path, oov=True)
 
     logger.info("Pipeline completed!")
