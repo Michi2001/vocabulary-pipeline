@@ -9,6 +9,7 @@ import yaml
 import logging
 import os
 from pathlib import Path
+from typing import *
 
 from src.corpus_readers import LeipzigCorpusReader
 from src.lemmatizer import Lemmatizer
@@ -54,16 +55,20 @@ if __name__ == "__main__":
 
     counter = FrequencyCounter()
 
-    sentence_batches = reader.read_sentences(
+    sentence_batches: Generator[List[str], None, None] = reader.read_sentences(
         batch_size=processing_config.get("sentence_batch_size", 10000)
     )
 
-    lemma_pos_stream = lemmatizer.process_corpus_batches(sentence_batches)
+    lemma_pos_stream: Generator[Tuple[str, str], None, None] = (
+        lemmatizer.process_corpus_batches(sentence_batches)
+    )
 
     counter.update(lemma_pos_stream)
 
     stats = counter.get_statistics()
-    logger.info(f"Processed {stats['total_tokens']:,} tokens, {stats['unique_lemmas']:,} unique lemmas")
+    logger.info(
+        f"Processed {stats['total_tokens']:,} tokens, {stats['unique_lemmas']:,} unique lemmas"
+    )
 
     min_freq = processing_config.get("min_frequency", 1)
     frequencies = counter.get_sorted_frequencies(min_frequency=min_freq)
