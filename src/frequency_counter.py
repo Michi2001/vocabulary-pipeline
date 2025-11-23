@@ -105,6 +105,57 @@ class FrequencyCounter:
         results.sort(key=lambda x: x["frequency"], reverse=True)
         return results
 
+    def merge(self, other: "FrequencyCounter") -> None:
+        """
+        Merge frequencies from another FrequencyCounter into this one.
+
+        Args:
+            other: Another FrequencyCounter to merge from
+        """
+        for key, count in other.lemma_counts.items():
+            self.lemma_counts[key] += count
+
+            # Merge POS details
+            if key in other.lemma_pos_details:
+                self.lemma_pos_details[key].update(other.lemma_pos_details[key])
+
+        self.total_tokens += other.total_tokens
+
+    def to_dict(self) -> Dict[str, any]:
+        """
+        Export frequency data to dictionary for serialization.
+
+        Returns:
+            Dictionary with all counter data
+        """
+        return {
+            "lemma_counts": dict(self.lemma_counts),
+            "lemma_pos_details": {
+                k: list(v) for k, v in self.lemma_pos_details.items()
+            },
+            "total_tokens": self.total_tokens,
+            "main_pos_categories": list(self.MAIN_POS_CATEGORIES),
+        }
+
+    @staticmethod
+    def from_dict(data: Dict[str, any]) -> "FrequencyCounter":
+        """
+        Create FrequencyCounter from dictionary.
+
+        Args:
+            data: Dictionary created by to_dict()
+
+        Returns:
+            New FrequencyCounter instance with loaded data
+        """
+        counter = FrequencyCounter()
+        counter.lemma_counts = defaultdict(int, data["lemma_counts"])
+        counter.lemma_pos_details = defaultdict(
+            set, {k: set(v) for k, v in data["lemma_pos_details"].items()}
+        )
+        counter.total_tokens = data["total_tokens"]
+        return counter
+
     def get_statistics(self) -> Dict[str, any]:
         """
         Get statistics about the frequency data.

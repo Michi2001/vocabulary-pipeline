@@ -71,6 +71,8 @@ class Lemmatizer:
         batch_count = 0
 
         for batch in sentence_batches:
+            batch_count += 1
+            total_sentences += len(batch)
             yield from self._process_sentences(batch)
 
         logger.info(
