@@ -8,7 +8,9 @@ Analyzes text corpora, lemmatizes words in context, and generates frequency list
 import yaml
 import logging
 import os
+import shutil
 from pathlib import Path
+from datetime import datetime
 
 from src.lemmatizer import Lemmatizer
 from src.output_writer import OutputWriter
@@ -31,14 +33,27 @@ def load_config(config_path: str = "config.yaml") -> dict:
 if __name__ == "__main__":
     """Main pipeline execution."""
 
-    config = load_config()
+    config_path = "config.yaml"
+    config = load_config(config_path)
 
     lemma_config = config["lemmatization"]
     processing_config = config["processing"]
     output_config = config["output"]
     cache_config = config.get("cache", {"enabled": False})
 
+    # Create timestamped output directory
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    base_output_dir = output_config["directory"]
+    output_dir = os.path.join(base_output_dir, timestamp)
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Copy config file to output directory
+    config_backup_path = os.path.join(output_dir, "config.yaml")
+    shutil.copy2(config_path, config_backup_path)
+    logger.info(f"Config copied to: {config_backup_path}")
+
     logger.info("Starting pipeline...")
+    logger.info(f"Output directory: {output_dir}")
     logger.info(f"Model: {lemma_config['model']}")
     logger.info(f"Cache: {'enabled' if cache_config.get('enabled') else 'disabled'}")
 
@@ -86,14 +101,12 @@ if __name__ == "__main__":
 
     # Write known words
     frequencies = counter.get_sorted_frequencies(min_frequency=min_freq, oov=False)
-    output_path = output_config["file_path"]
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    output_path = os.path.join(output_dir, "output.csv")
     OutputWriter.write_csv(frequencies, output_path, oov=False)
 
     # Write OOV words
     oov_frequencies = counter.get_sorted_frequencies(min_frequency=min_freq, oov=True)
-    oov_output_path = output_config["oov_file_path"]
-    os.makedirs(os.path.dirname(oov_output_path), exist_ok=True)
+    oov_output_path = os.path.join(output_dir, "output_oov.csv")
     OutputWriter.write_csv(oov_frequencies, oov_output_path, oov=True)
 
     logger.info("Pipeline completed!")
