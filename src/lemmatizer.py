@@ -1,6 +1,7 @@
 import spacy
 from typing import List, Tuple, Generator
 import logging
+import re
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -36,6 +37,27 @@ class Lemmatizer:
 
         self.nlp.max_length = 2000000
 
+    def _clean_lemma(self, lemma: str) -> str:
+        """
+        Clean lemma by removing multi-word artifacts.
+
+        Args:
+            lemma: Raw lemma from spaCy
+
+        Returns:
+            Cleaned single-word lemma
+        """
+        # Only clean if it's a multi-word lemma
+        if " " in lemma:
+            # Remove enclitic pronouns that spaCy sometimes adds (e.g., "hacer él" -> "hacer")
+            lemma = re.sub(
+                r"\s+(yo|tú|él|ella|nosotros|vosotros|ellos|ellas|lo|la|los|las|le|les|me|te|se)$",
+                "",
+                lemma,
+            )
+
+        return lemma
+
     def _process_sentences(
         self, sentences: List[str]
     ) -> Generator[Tuple[str, str, bool], None, None]:
@@ -52,6 +74,7 @@ class Lemmatizer:
             for token in doc:
                 if not token.is_space and not token.is_punct:
                     lemma = token.lemma_.lower()
+                    lemma = self._clean_lemma(lemma)
                     pos = token.pos_
                     is_oov = token.is_oov
                     yield (lemma, pos, is_oov)
