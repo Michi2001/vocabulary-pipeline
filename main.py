@@ -16,7 +16,7 @@ from src.lemmatizer import Lemmatizer
 from src.output_writer import OutputWriter
 from src.single_corpus_processor import SingleCorpusProcessor
 from src.multi_corpus_processor import MultiCorpusProcessor
-from src.corpus_readers.leipzig_reader import LeipzigCorpusReader
+from src.corpus_readers import LeipzigCorpusReader, OpusCorpusReader
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -70,10 +70,25 @@ if __name__ == "__main__":
     # Create SingleCorpusProcessor for each corpus
     processors = []
     for corpus_config in corpora_configs:
-        reader = LeipzigCorpusReader(
-            file_path=corpus_config["file_path"],
-            encoding=corpus_config.get("encoding", "utf-8"),
-        )
+        corpus_type = corpus_config.get("type", "leipzig").lower()
+        max_sentences = corpus_config.get("max_sentences", None)
+        encoding = corpus_config.get("encoding", "utf-8")
+
+        if corpus_type == "leipzig":
+            reader = LeipzigCorpusReader(
+                file_path=corpus_config["file_path"],
+                encoding=encoding,
+                max_sentences=max_sentences,
+            )
+        elif corpus_type == "opus":
+            reader = OpusCorpusReader(
+                file_path=corpus_config["file_path"],
+                encoding=encoding,
+                max_sentences=max_sentences,
+            )
+        else:
+            raise ValueError(f"Unknown corpus type: {corpus_type}. Supported types: 'leipzig', 'opus'")
+
         processor = SingleCorpusProcessor(
             corpus_config=corpus_config,
             reader=reader,

@@ -1,5 +1,6 @@
 import os
-from typing import Generator, Dict, Any
+import random
+from typing import Generator, Dict, Any, Optional
 from .base_reader import BaseCorpusReader
 
 
@@ -11,16 +12,17 @@ class LeipzigCorpusReader(BaseCorpusReader):
     Tab-separated: Sentence_ID <TAB> Sentence
     """
 
-    def __init__(self, file_path: str, encoding: str = "utf-8", **kwargs):
+    def __init__(self, file_path: str, encoding: str = "utf-8", max_sentences: Optional[int] = None, **kwargs):
         """
         Initialize Leipzig corpus reader.
 
         Args:
             file_path: Path to *_sentences.txt file
             encoding: File encoding (default: utf-8)
+            max_sentences: Maximum number of sentences to process (None = all sentences)
             **kwargs: Additional parameters
         """
-        super().__init__(file_path, **kwargs)
+        super().__init__(file_path, max_sentences=max_sentences, **kwargs)
         self.encoding = encoding
 
         if not os.path.exists(file_path):
@@ -33,6 +35,7 @@ class LeipzigCorpusReader(BaseCorpusReader):
         Read sentences from Leipzig corpus in batches.
 
         Yields batches of sentences (without IDs) for memory-efficient processing.
+        If max_sentences is set, a random selection of sentences will be returned.
 
         Args:
             batch_size: Number of sentences per batch
@@ -40,27 +43,27 @@ class LeipzigCorpusReader(BaseCorpusReader):
         Yields:
             List of sentences (strings) for each batch
         """
-        batch = []
-
+        all_sentences = []
         with open(self.file_path, "r", encoding=self.encoding) as f:
             for line in f:
                 line = line.strip()
-
                 if not line:
                     continue
 
                 parts = line.split("\t", 1)
-
                 if len(parts) == 2:
-                    sentence_id, sentence = parts
-                    batch.append(sentence)
+                    _, sentence = parts
+                    all_sentences.append(sentence)
 
-                    if len(batch) >= batch_size:
-                        yield batch
-                        batch = []
+                    if self.max_sentences is None and len(all_sentences) >= batch_size:
+                        yield all_sentences
+                        all_sentences = []
 
-            if batch:
-                yield batch
+        if self.max_sentences is not None and len(all_sentences) > self.max_sentences:
+            all_sentences = random.sample(all_sentences, self.max_sentences)
+
+        for i in range(0, len(all_sentences), batch_size):
+            yield all_sentences[i:i + batch_size]
 
     def get_metadata(self) -> Dict[str, Any]:
         """

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generator, Dict, Any
+from typing import Generator, Dict, Any, Optional
 
 
 class BaseCorpusReader(ABC):
@@ -10,15 +10,18 @@ class BaseCorpusReader(ABC):
     (e.g., Leipzig, XML, JSON, plain text) without changing the processing pipeline.
     """
 
-    def __init__(self, file_path: str, **kwargs):
+    def __init__(self, file_path: str, max_sentences: Optional[int] = None, **kwargs):
         """
         Initialize the corpus reader.
 
         Args:
             file_path: Path to the corpus file
+            max_sentences: Maximum number of sentences to process (None = all sentences).
+                          If set, a random selection of sentences will be chosen.
             **kwargs: Additional format-specific parameters
         """
         self.file_path = file_path
+        self.max_sentences = max_sentences
         self.kwargs = kwargs
 
     @abstractmethod
