@@ -17,7 +17,7 @@ class FrequencyCounter:
     """
 
     # Main POS categories that should be treated as separate lemmas
-    MAIN_POS_CATEGORIES = {"NOUN", "VERB", "ADJ", "ADV"}
+    MAIN_POS_CATEGORIES = {"NOUN", "VERB", "ADJ", "ADV", "CONJ"}
 
     def __init__(self):
         """Initialize the frequency counter."""

@@ -35,9 +35,17 @@ class Lemmatizer:
             "ADV",  # Adverbs (modify verbs, adjectives, or other adverbs): muy, bien, siempre, ahora
             # either standalone (e.g. rápido) or derived from adjectives (e.g. rápidamente)
             "ADP",  # Prepositions: de, en, para, con
-            "CCONJ",  # Coordinating conjunctions: y, o, pero
-            "SCONJ",  # Subordinating conjunctions: que, si, porque
-            "AUX",  # Auxiliary verbs: ser, estar, haber
+            "CONJ",  # Conjunctions: y, o, pero, que, si, porque
+            "AUX",  # Auxiliary verbs: ser, estar, haber (will be merged with VERB)
+            "CCONJ",  # Coordinating conjunctions (will be merged with CONJ)
+            "SCONJ",  # Subordinating conjunctions (will be merged with CONJ)
+        }
+
+        # POS tag mappings for combining categories
+        self.pos_mappings = {
+            "AUX": "VERB",  # Merge auxiliary verbs with verbs
+            "CCONJ": "CONJ",  # Merge coordinating conjunctions
+            "SCONJ": "CONJ",  # Merge subordinating conjunctions
         }
 
         # POS tags to ignore (not count, no warning)
@@ -101,7 +109,9 @@ class Lemmatizer:
                         lemma = token.lemma_.lower()
                         lemma = self._clean_lemma(lemma)
                         is_oov = token.is_oov
-                        yield (lemma, pos, is_oov)
+                        # Apply POS mapping if applicable
+                        mapped_pos = self.pos_mappings.get(pos, pos)
+                        yield (lemma, mapped_pos, is_oov)
 
                     elif pos in self.ignored_pos:
                         # Silently ignore
