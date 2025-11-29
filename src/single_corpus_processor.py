@@ -8,6 +8,7 @@ from typing import Dict, Any, Generator, List, Tuple
 from src.corpus_readers.base_reader import BaseCorpusReader
 from src.lemmatizer import Lemmatizer
 from src.frequency_counter import FrequencyCounter
+from src.post_processor import FrequencyPostProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class SingleCorpusProcessor:
         lemmatizer: Lemmatizer,
         processing_config: Dict[str, Any],
         cache_config: Dict[str, Any] = None,
+        filter_config: Dict[str, Any] = None,
     ):
         """
         Initialize the single corpus processor.
@@ -36,12 +38,14 @@ class SingleCorpusProcessor:
             lemmatizer: Lemmatizer instance to use
             processing_config: Processing configuration (batch sizes, etc.)
             cache_config: Optional cache configuration (enabled, directory)
+            filter_config: Optional filter configuration (accepted_pos, pos_mappings, etc.)
         """
         self.corpus_config = corpus_config
         self.reader = reader
         self.lemmatizer = lemmatizer
         self.processing_config = processing_config
         self.cache_config = cache_config or {"enabled": False}
+        self.filter_config = filter_config or {}
 
         self.corpus_name = corpus_config.get(
             "name", Path(corpus_config["file_path"]).stem
@@ -51,8 +55,10 @@ class SingleCorpusProcessor:
         """
         Generate cache key from configuration.
 
-        Includes: corpus filename (not full path), file modification time, spaCy model,
-        MAIN_POS_CATEGORIES, and max_sentences.
+        Includes: corpus filename, file modification time, spaCy model, max_sentences.
+
+        Does NOT include filtering configuration (accepted_pos, pos_mappings, etc.)
+        as those are applied during post-processing.
 
         Batch sizes are NOT included as they only affect performance, not results.
 
@@ -68,7 +74,6 @@ class SingleCorpusProcessor:
             corpus_filename,
             str(file_mtime),
             self.lemmatizer.language_model,
-            str(sorted(FrequencyCounter.MAIN_POS_CATEGORIES)),
             str(max_sentences),
         ]
 
@@ -186,10 +191,10 @@ class SingleCorpusProcessor:
 
     def process(self) -> FrequencyCounter:
         """
-        Process corpus with optional caching.
+        Process corpus with optional caching and post-processing.
 
         Returns:
-            FrequencyCounter with frequency data
+            FrequencyCounter with filtered/transformed frequency data
         """
         # Check cache if enabled
         if self.cache_config.get("enabled", False):
@@ -197,14 +202,24 @@ class SingleCorpusProcessor:
             cached_counter = self._load_from_cache(cache_key)
 
             if cached_counter is not None:
-                return cached_counter
+                raw_counter = cached_counter
+            else:
+                # Process corpus and cache raw results
+                raw_counter = self._process_corpus()
+                self._save_to_cache(cache_key, raw_counter)
+        else:
+            # Process corpus without cache
+            raw_counter = self._process_corpus()
 
-        # Process corpus
-        counter = self._process_corpus()
-
-        # Save to cache if enabled
-        if self.cache_config.get("enabled", False):
-            cache_key = self._generate_cache_key()
-            self._save_to_cache(cache_key, counter)
-
-        return counter
+        # Apply post-processing filters
+        if self.filter_config:
+            logger.info(f"Applying post-processing filters to {self.corpus_name}...")
+            processor = FrequencyPostProcessor(self.filter_config)
+            filtered_counter = processor.process(raw_counter)
+            return filtered_counter
+        else:
+            # No filtering - return raw data
+            logger.info(
+                f"No filtering configured, returning raw data for {self.corpus_name}"
+            )
+            return raw_counter

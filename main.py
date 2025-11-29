@@ -37,6 +37,7 @@ if __name__ == "__main__":
     processing_config = config["processing"]
     output_config = config["output"]
     cache_config = config.get("cache", {"enabled": False})
+    filter_config = config.get("filtering", {})
 
     # Create timestamped output directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -68,6 +69,7 @@ if __name__ == "__main__":
     logger.info(f"Output directory: {output_dir}")
     logger.info(f"Model: {lemma_config['model']}")
     logger.info(f"Cache: {'enabled' if cache_config.get('enabled') else 'disabled'}")
+    logger.info(f"Filtering: {'enabled' if filter_config else 'disabled'}")
 
     # Initialize lemmatizer
     lemmatizer = Lemmatizer(
@@ -109,6 +111,7 @@ if __name__ == "__main__":
             lemmatizer=lemmatizer,
             processing_config=processing_config,
             cache_config=cache_config,
+            filter_config=filter_config,
         )
         processors.append(processor)
 

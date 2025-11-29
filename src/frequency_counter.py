@@ -12,12 +12,8 @@ class FrequencyCounter:
     Efficiently counts lemma frequencies from a stream of (lemma, pos) tuples
     without loading all data into memory at once.
 
-    Treats lemmas with different main POS categories (NOUN, VERB, ADJ, ADV)
-    as separate entries.
+    Stores raw frequencies with original POS tags without normalization.
     """
-
-    # Main POS categories that should be treated as separate lemmas
-    MAIN_POS_CATEGORIES = {"NOUN", "VERB", "ADJ", "ADV", "CONJ"}
 
     def __init__(self):
         """Initialize the frequency counter."""
@@ -28,34 +24,20 @@ class FrequencyCounter:
         self.total_tokens = 0
         self.total_oov_tokens = 0
 
-    def _normalize_pos(self, pos: str) -> str:
-        """
-        Normalize POS tag to main category if applicable.
-
-        Args:
-            pos: Original POS tag
-
-        Returns:
-            Main category if pos is in MAIN_POS_CATEGORIES, otherwise original pos
-        """
-        return pos if pos in self.MAIN_POS_CATEGORIES else "OTHER"
-
     def _create_lemma_key(self, lemma: str, pos: str) -> str:
         """
         Create a unique key for lemma+pos combination.
 
-        For main POS categories (NOUN, VERB, ADJ, ADV), creates separate keys.
-        For other POS tags, groups them together.
+        Stores original POS tags without normalization.
 
         Args:
             lemma: The lemma
-            pos: The POS tag
+            pos: The original POS tag from spaCy
 
         Returns:
-            Key string in format "lemma|POS" for main categories, "lemma|OTHER" for others
+            Key string in format "lemma|ORIGINAL_POS"
         """
-        normalized_pos = self._normalize_pos(pos)
-        return f"{lemma}|{normalized_pos}"
+        return f"{lemma}|{pos}"
 
     def update(
         self, lemma_pos_generator: Generator[Tuple[str, str, bool], None, None]
@@ -163,7 +145,6 @@ class FrequencyCounter:
             },
             "total_tokens": self.total_tokens,
             "total_oov_tokens": self.total_oov_tokens,
-            "main_pos_categories": list(self.MAIN_POS_CATEGORIES),
         }
 
     @staticmethod
