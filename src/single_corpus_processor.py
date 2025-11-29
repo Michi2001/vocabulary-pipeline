@@ -52,7 +52,7 @@ class SingleCorpusProcessor:
         Generate cache key from configuration.
 
         Includes: corpus filename (not full path), file modification time, spaCy model,
-        and MAIN_POS_CATEGORIES.
+        MAIN_POS_CATEGORIES, and max_sentences.
 
         Batch sizes are NOT included as they only affect performance, not results.
 
@@ -62,12 +62,14 @@ class SingleCorpusProcessor:
         corpus_path = self.corpus_config["file_path"]
         corpus_filename = Path(corpus_path).name
         file_mtime = os.path.getmtime(corpus_path) if os.path.exists(corpus_path) else 0
+        max_sentences = self.corpus_config.get("max_sentences", None)
 
         key_components = [
             corpus_filename,
             str(file_mtime),
             self.lemmatizer.language_model,
             str(sorted(FrequencyCounter.MAIN_POS_CATEGORIES)),
+            str(max_sentences),
         ]
 
         key_string = "|".join(key_components)
@@ -143,6 +145,20 @@ class SingleCorpusProcessor:
             FrequencyCounter with frequency data
         """
         logger.info(f"Processing corpus: {self.corpus_name}")
+
+        # Get and log metadata
+        metadata = self.reader.get_metadata()
+        total_sentences = metadata.get("total_sentences", "unknown")
+        max_sentences = self.corpus_config.get("max_sentences", None)
+
+        processed_sentences = (
+            min(total_sentences, max_sentences)
+            if max_sentences is not None
+            else total_sentences
+        )
+        logger.info(
+            f"Processing {processed_sentences:,}/{total_sentences:,} sentences from {self.corpus_name}"
+        )
 
         # Initialize counter
         counter = FrequencyCounter()

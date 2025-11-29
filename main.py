@@ -18,9 +18,6 @@ from src.single_corpus_processor import SingleCorpusProcessor
 from src.multi_corpus_processor import MultiCorpusProcessor
 from src.corpus_readers import LeipzigCorpusReader, OpusCorpusReader
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 logger = logging.getLogger(__name__)
 
 
@@ -47,10 +44,25 @@ if __name__ == "__main__":
     output_dir = os.path.join(base_output_dir, timestamp)
     os.makedirs(output_dir, exist_ok=True)
 
+    # Setup logging to file and console
+    log_file_path = os.path.join(output_dir, "pipeline.log")
+    file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
+    console_handler = logging.StreamHandler()
+
+    log_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    file_handler.setFormatter(log_format)
+    console_handler.setFormatter(log_format)
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(file_handler)
+    root_logger.addHandler(console_handler)
+
     # Copy config file to output directory
     config_backup_path = os.path.join(output_dir, "config.yaml")
     shutil.copy2(config_path, config_backup_path)
     logger.info(f"Config copied to: {config_backup_path}")
+    logger.info(f"Log file: {log_file_path}")
 
     logger.info("Starting pipeline...")
     logger.info(f"Output directory: {output_dir}")
@@ -87,7 +99,9 @@ if __name__ == "__main__":
                 max_sentences=max_sentences,
             )
         else:
-            raise ValueError(f"Unknown corpus type: {corpus_type}. Supported types: 'leipzig', 'opus'")
+            raise ValueError(
+                f"Unknown corpus type: {corpus_type}. Supported types: 'leipzig', 'opus'"
+            )
 
         processor = SingleCorpusProcessor(
             corpus_config=corpus_config,
