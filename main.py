@@ -50,7 +50,7 @@ if __name__ == "__main__":
     file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
     console_handler = logging.StreamHandler()
 
-    log_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    log_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(log_format)
     console_handler.setFormatter(log_format)
 
