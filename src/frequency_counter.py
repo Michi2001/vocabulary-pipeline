@@ -69,7 +69,9 @@ class FrequencyCounter:
                     f"({len(self.lemma_counts):,} known, {len(self.oov_counts):,} OOV)"
                 )
 
-    def get_sorted_frequencies(self, min_frequency: int = 1, oov: bool = False) -> List[Dict[str, any]]:
+    def get_sorted_frequencies(
+        self, min_frequency: int = 1, oov: bool = False
+    ) -> List[Dict[str, any]]:
         """
         Get lemma frequencies sorted by count (descending).
 
@@ -87,18 +89,21 @@ class FrequencyCounter:
         results = []
         for key, count in counts.items():
             if count >= min_frequency:
-                lemma, _ = key.split("|", 1)
+                lemma, normalized_pos = key.split("|", 1)
                 pos_details = sorted(pos_details_dict[key])
+
+                # Build POS string: normalized POS first, then additional POS (excluding normalized)
+                additional_pos = [pos for pos in pos_details if pos != normalized_pos]
+                if additional_pos:
+                    pos_string = f"{normalized_pos}/{'/'.join(additional_pos)}"
+                else:
+                    pos_string = normalized_pos
 
                 results.append(
                     {
                         "lemma": lemma,
                         "frequency": count,
-                        "pos": (
-                            "/".join(pos_details)
-                            if len(pos_details) > 1
-                            else pos_details[0]
-                        ),
+                        "pos": pos_string,
                     }
                 )
 
@@ -140,9 +145,7 @@ class FrequencyCounter:
                 k: list(v) for k, v in self.lemma_pos_details.items()
             },
             "oov_counts": dict(self.oov_counts),
-            "oov_pos_details": {
-                k: list(v) for k, v in self.oov_pos_details.items()
-            },
+            "oov_pos_details": {k: list(v) for k, v in self.oov_pos_details.items()},
             "total_tokens": self.total_tokens,
             "total_oov_tokens": self.total_oov_tokens,
         }
@@ -183,7 +186,11 @@ class FrequencyCounter:
             "total_oov_tokens": self.total_oov_tokens,
             "unique_lemmas": len(self.lemma_counts),
             "unique_oov": len(self.oov_counts),
-            "oov_percentage": (self.total_oov_tokens / self.total_tokens * 100) if self.total_tokens > 0 else 0,
+            "oov_percentage": (
+                (self.total_oov_tokens / self.total_tokens * 100)
+                if self.total_tokens > 0
+                else 0
+            ),
             "most_common": sorted(
                 self.lemma_counts.items(), key=lambda x: x[1], reverse=True
             )[:10],

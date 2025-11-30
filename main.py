@@ -11,12 +11,16 @@ import os
 import shutil
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
 
 from src.lemmatizer import Lemmatizer
 from src.output_writer import OutputWriter
 from src.single_corpus_processor import SingleCorpusProcessor
 from src.multi_corpus_processor import MultiCorpusProcessor
 from src.corpus_readers import LeipzigCorpusReader, OpusCorpusReader
+from src.llm_providers import create_provider
+from src.llm_corrector import LemmaCorrector
+
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +122,52 @@ if __name__ == "__main__":
     # Process all corpora
     multi_processor = MultiCorpusProcessor(processors=processors)
     counter = multi_processor.process()
+
+    # Optional: LLM-based correction
+    llm_config = config.get("llm_correction", {})
+    if llm_config.get("enabled", False):
+        logger.info("LLM correction enabled - applying corrections...")
+
+        # Load API key from environment
+        load_dotenv()
+        api_key = os.getenv("OPENAI_API_KEY")
+
+        try:
+            # Load system prompt from file
+            prompt_file = llm_config.get(
+                "system_prompt_file", "config/llm_system_prompt.txt"
+            )
+            with open(prompt_file, "r", encoding="utf-8") as f:
+                system_prompt = f.read()
+
+            if system_prompt:
+                # Get provider config
+                provider_type = llm_config["llm"]["type"]
+                provider_config = llm_config["llm"].get(provider_type, {})
+                provider_config["api_key"] = api_key
+
+                # Create provider
+                provider = create_provider(provider_type, provider_config)
+
+                # Create corrector
+                corrector_config = {
+                    "batch_size": llm_config.get("batch_size", 50),
+                    "system_prompt": system_prompt,
+                    "output_dir": output_dir,
+                    "cache_config": llm_config.get("cache", {}),
+                    "llm_model": provider_config.get("model", "gpt-4o-mini"),
+                }
+                corrector = LemmaCorrector(provider, corrector_config)
+
+                # Apply corrections
+                min_freq = processing_config.get("min_frequency", 1)
+                counter = corrector.correct(counter, min_frequency=min_freq)
+
+                logger.info("LLM correction completed successfully")
+
+        except Exception as e:
+            logger.error(f"LLM correction failed: {e}")
+            logger.warning("Continuing with uncorrected data")
 
     # Output results
     stats = counter.get_statistics()
