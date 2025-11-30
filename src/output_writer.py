@@ -14,7 +14,9 @@ class OutputWriter:
     """
 
     @staticmethod
-    def write_csv(data: List[Dict[str, any]], output_path: str, oov: bool = False) -> None:
+    def write_csv(
+        data: List[Dict[str, any]], output_path: str, oov: bool = False
+    ) -> None:
         """
         Write frequency data to CSV file.
 

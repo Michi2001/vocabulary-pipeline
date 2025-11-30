@@ -25,7 +25,9 @@ class BaseCorpusReader(ABC):
         self.kwargs = kwargs
 
     @abstractmethod
-    def read_sentences(self, batch_size: int = 10000) -> Generator[list[str], None, None]:
+    def read_sentences(
+        self, batch_size: int = 10000
+    ) -> Generator[list[str], None, None]:
         """
         Read sentences from the corpus in batches.
 

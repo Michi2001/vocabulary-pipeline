@@ -12,7 +12,13 @@ class LeipzigCorpusReader(BaseCorpusReader):
     Tab-separated: Sentence_ID <TAB> Sentence
     """
 
-    def __init__(self, file_path: str, encoding: str = "utf-8", max_sentences: Optional[int] = None, **kwargs):
+    def __init__(
+        self,
+        file_path: str,
+        encoding: str = "utf-8",
+        max_sentences: Optional[int] = None,
+        **kwargs,
+    ):
         """
         Initialize Leipzig corpus reader.
 
@@ -63,7 +69,7 @@ class LeipzigCorpusReader(BaseCorpusReader):
             all_sentences = random.sample(all_sentences, self.max_sentences)
 
         for i in range(0, len(all_sentences), batch_size):
-            yield all_sentences[i:i + batch_size]
+            yield all_sentences[i : i + batch_size]
 
     def get_metadata(self) -> Dict[str, Any]:
         """

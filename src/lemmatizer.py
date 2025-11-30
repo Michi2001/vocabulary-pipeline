@@ -49,7 +49,7 @@ class Lemmatizer:
                 # Skip whitespace and punctuation tokens only
                 if not token.is_space and not token.is_punct:
                     lemma = token.lemma_.lower()  # Keep original lemma
-                    pos = token.pos_                # Keep original POS tag
+                    pos = token.pos_  # Keep original POS tag
                     is_oov = token.is_oov
                     yield (lemma, pos, is_oov)
 

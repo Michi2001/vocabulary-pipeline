@@ -24,7 +24,9 @@ class BaseLLMProvider(ABC):
         self.config = config
 
     @abstractmethod
-    def correct_lemmas(self, batch: List[Dict[str, Any]], system_prompt: str) -> Dict[str, Any]:
+    def correct_lemmas(
+        self, batch: List[Dict[str, Any]], system_prompt: str
+    ) -> Dict[str, Any]:
         """
         Send batch of lemmas to LLM for correction.
 
@@ -57,4 +59,5 @@ class BaseLLMProvider(ABC):
 
 class LLMProviderError(Exception):
     """Custom exception for LLM provider errors."""
+
     pass

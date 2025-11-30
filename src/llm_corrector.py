@@ -36,13 +36,15 @@ class LemmaCorrector:
             }
         """
         self.provider = provider
-        self.batch_size = config.get('batch_size', 50)
-        self.system_prompt = config['system_prompt']
-        self.output_dir = Path(config['output_dir'])
-        self.cache_config = config.get('cache_config', {})
-        self.llm_model = config.get('llm_model', 'gpt-4o-mini')
+        self.batch_size = config.get("batch_size", 50)
+        self.system_prompt = config["system_prompt"]
+        self.output_dir = Path(config["output_dir"])
+        self.cache_config = config.get("cache_config", {})
+        self.llm_model = config.get("llm_model", "gpt-4o-mini")
 
-    def correct(self, counter: FrequencyCounter, min_frequency: int = 1) -> FrequencyCounter:
+    def correct(
+        self, counter: FrequencyCounter, min_frequency: int = 1
+    ) -> FrequencyCounter:
         """
         Apply LLM corrections to FrequencyCounter.
 
@@ -56,7 +58,9 @@ class LemmaCorrector:
         logger.info("Starting LLM-based lemma correction...")
 
         # Step 1: Get sorted frequencies (only known words)
-        frequencies = counter.get_sorted_frequencies(min_frequency=min_frequency, oov=False)
+        frequencies = counter.get_sorted_frequencies(
+            min_frequency=min_frequency, oov=False
+        )
         logger.info(f"Processing {len(frequencies)} lemmas for LLM correction")
 
         # Step 2: Assign IDs and create batches
@@ -68,7 +72,7 @@ class LemmaCorrector:
 
         # Step 4: Check cache
         all_corrections = None
-        if self.cache_config.get('enabled', True):
+        if self.cache_config.get("enabled", True):
             all_corrections = self._load_corrections_from_cache(cache_key)
 
         # Step 5: Process batches through LLM if cache miss
@@ -76,15 +80,19 @@ class LemmaCorrector:
             logger.info("Cache miss - processing batches through LLM...")
             all_corrections = []
             for i, batch in enumerate(batches):
-                logger.info(f"Processing batch {i+1}/{len(batches)} ({len(batch)} lemmas)")
+                logger.info(
+                    f"Processing batch {i+1}/{len(batches)} ({len(batch)} lemmas)"
+                )
                 corrections = self.provider.correct_lemmas(batch, self.system_prompt)
-                all_corrections.extend(corrections['corrections'])
+                all_corrections.extend(corrections["corrections"])
 
             # Save to cache
-            if self.cache_config.get('enabled', True):
+            if self.cache_config.get("enabled", True):
                 self._save_corrections_to_cache(cache_key, all_corrections)
         else:
-            logger.info(f"Cache hit - loaded {len(all_corrections)} corrections from cache")
+            logger.info(
+                f"Cache hit - loaded {len(all_corrections)} corrections from cache"
+            )
 
         # Step 6: Save original list with IDs
         original_path = self.output_dir / "original_with_ids.csv"
@@ -95,9 +103,13 @@ class LemmaCorrector:
         self._save_corrections(all_corrections, mapping_path)
 
         # Step 8: Apply corrections to counter
-        corrected_counter = self._apply_corrections(counter, id_mapping, all_corrections)
+        corrected_counter = self._apply_corrections(
+            counter, id_mapping, all_corrections
+        )
 
-        logger.info(f"LLM correction complete. Applied {len(all_corrections)} operations.")
+        logger.info(
+            f"LLM correction complete. Applied {len(all_corrections)} operations."
+        )
 
         return corrected_counter
 
@@ -117,13 +129,11 @@ class LemmaCorrector:
             SHA256 hash string
         """
         # Serialize frequencies (already sorted by frequency descending)
-        freq_strings = [f"{item['lemma']}|{item['pos']}|{item['frequency']}" for item in frequencies]
-
-        key_components = [
-            "|".join(freq_strings),
-            self.llm_model,
-            str(self.batch_size)
+        freq_strings = [
+            f"{item['lemma']}|{item['pos']}|{item['frequency']}" for item in frequencies
         ]
+
+        key_components = ["|".join(freq_strings), self.llm_model, str(self.batch_size)]
 
         key_string = "|".join(key_components)
         return hashlib.sha256(key_string.encode()).hexdigest()
@@ -138,7 +148,7 @@ class LemmaCorrector:
         Returns:
             List of corrections or None if cache miss
         """
-        cache_dir = Path(self.cache_config.get('directory', 'cache/llm_corrections'))
+        cache_dir = Path(self.cache_config.get("directory", "cache/llm_corrections"))
         cache_dir.mkdir(parents=True, exist_ok=True)
         cache_path = cache_dir / f"{cache_key}.json"
 
@@ -146,7 +156,7 @@ class LemmaCorrector:
             return None
 
         try:
-            with open(cache_path, 'r', encoding='utf-8') as f:
+            with open(cache_path, "r", encoding="utf-8") as f:
                 corrections = json.load(f)
 
             logger.info(f"Loaded corrections from cache (key: {cache_key[:8]}...)")
@@ -156,7 +166,9 @@ class LemmaCorrector:
             logger.warning(f"Failed to load cache: {e}")
             return None
 
-    def _save_corrections_to_cache(self, cache_key: str, corrections: List[Dict[str, Any]]) -> None:
+    def _save_corrections_to_cache(
+        self, cache_key: str, corrections: List[Dict[str, Any]]
+    ) -> None:
         """
         Save LLM corrections to cache.
 
@@ -164,12 +176,12 @@ class LemmaCorrector:
             cache_key: Cache key hash
             corrections: List of correction operations
         """
-        cache_dir = Path(self.cache_config.get('directory', 'cache/llm_corrections'))
+        cache_dir = Path(self.cache_config.get("directory", "cache/llm_corrections"))
         cache_dir.mkdir(parents=True, exist_ok=True)
         cache_path = cache_dir / f"{cache_key}.json"
 
         try:
-            with open(cache_path, 'w', encoding='utf-8') as f:
+            with open(cache_path, "w", encoding="utf-8") as f:
                 json.dump(corrections, f, ensure_ascii=False, indent=2)
 
             logger.info(f"Saved corrections to cache (key: {cache_key[:8]}...)")
@@ -177,7 +189,9 @@ class LemmaCorrector:
         except Exception as e:
             logger.warning(f"Failed to save cache: {e}")
 
-    def _create_batches(self, frequencies: List[Dict[str, Any]]) -> Tuple[Dict[str, Dict], List[List[Dict]]]:
+    def _create_batches(
+        self, frequencies: List[Dict[str, Any]]
+    ) -> Tuple[Dict[str, Dict], List[List[Dict]]]:
         """
         Assign IDs and create batches.
 
@@ -199,25 +213,27 @@ class LemmaCorrector:
 
             # Create key for FrequencyCounter lookup
             # First POS is always the normalized main category (e.g., "VERB/AUX" -> "VERB")
-            pos_parts = item['pos'].split('/')
+            pos_parts = item["pos"].split("/")
             normalized_pos = pos_parts[0]
             key = f"{item['lemma']}|{normalized_pos}"
 
             # Store in mapping
             id_mapping[item_id] = {
-                'lemma': item['lemma'],
-                'frequency': item['frequency'],
-                'pos': item['pos'],
-                'key': key
+                "lemma": item["lemma"],
+                "frequency": item["frequency"],
+                "pos": item["pos"],
+                "key": key,
             }
 
             # Add to batch
-            batch_items.append({
-                'id': item_id,
-                'lemma': item['lemma'],
-                'frequency': item['frequency'],
-                'pos': item['pos']
-            })
+            batch_items.append(
+                {
+                    "id": item_id,
+                    "lemma": item["lemma"],
+                    "frequency": item["frequency"],
+                    "pos": item["pos"],
+                }
+            )
 
             # Create batch when size reached
             if len(batch_items) >= self.batch_size:
@@ -234,7 +250,7 @@ class LemmaCorrector:
         self,
         counter: FrequencyCounter,
         id_mapping: Dict[str, Dict],
-        corrections: List[Dict[str, Any]]
+        corrections: List[Dict[str, Any]],
     ) -> FrequencyCounter:
         """
         Apply corrections to create new FrequencyCounter.
@@ -260,13 +276,13 @@ class LemmaCorrector:
 
         # First pass: build deletion and merge maps
         for correction in corrections:
-            item_id = correction['id']
-            operation = correction['operation']
+            item_id = correction["id"]
+            operation = correction["operation"]
 
-            if operation == 'DELETE':
+            if operation == "DELETE":
                 deleted_ids.add(item_id)
-            elif operation == 'MERGE':
-                target = correction['target']  # Expected format: "lemma|POS"
+            elif operation == "MERGE":
+                target = correction["target"]  # Expected format: "lemma|POS"
                 merge_sources[item_id] = target
 
         # Second pass: process KEEP operations
@@ -276,7 +292,7 @@ class LemmaCorrector:
             if item_id in deleted_ids or item_id in merge_sources:
                 continue
 
-            original_key = item_data['key']
+            original_key = item_data["key"]
 
             # KEEP: copy to corrected counter
             freq = counter.lemma_counts.get(original_key, 0)
@@ -287,13 +303,15 @@ class LemmaCorrector:
 
                 # Copy POS details
                 if original_key in counter.lemma_pos_details:
-                    corrected_counter.lemma_pos_details[original_key] = counter.lemma_pos_details[original_key].copy()
+                    corrected_counter.lemma_pos_details[original_key] = (
+                        counter.lemma_pos_details[original_key].copy()
+                    )
 
         # Third pass: process MERGE operations with accumulation
         merge_accumulator = {}  # target_key -> accumulated_frequency
 
         for item_id in merge_sources.keys():
-            original_key = id_mapping[item_id]['key']
+            original_key = id_mapping[item_id]["key"]
             target_key = merge_sources[item_id]
 
             # Get frequency from original counter
@@ -316,13 +334,15 @@ class LemmaCorrector:
                 corrected_counter.total_tokens += accumulated_freq
 
                 # Extract POS from target_key for pos_details
-                parts = target_key.split('|')
+                parts = target_key.split("|")
                 if len(parts) == 2:
                     corrected_counter.lemma_pos_details[target_key] = {parts[1]}
 
         # Copy OOV counts (unchanged)
         corrected_counter.oov_counts = counter.oov_counts.copy()
-        corrected_counter.oov_pos_details = {k: v.copy() for k, v in counter.oov_pos_details.items()}
+        corrected_counter.oov_pos_details = {
+            k: v.copy() for k, v in counter.oov_pos_details.items()
+        }
         corrected_counter.total_oov_tokens = counter.total_oov_tokens
 
         logger.info(
@@ -342,17 +362,21 @@ class LemmaCorrector:
             id_mapping: ID to lemma mapping
             output_path: Path to output CSV
         """
-        with open(output_path, 'w', encoding='utf-8', newline='') as f:
+        with open(output_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['id', 'lemma', 'frequency', 'pos'])
+            writer.writerow(["id", "lemma", "frequency", "pos"])
 
             for item_id in sorted(id_mapping.keys()):
                 item = id_mapping[item_id]
-                writer.writerow([item_id, item['lemma'], item['frequency'], item['pos']])
+                writer.writerow(
+                    [item_id, item["lemma"], item["frequency"], item["pos"]]
+                )
 
         logger.info(f"Original list with IDs saved: {output_path}")
 
-    def _save_corrections(self, corrections: List[Dict[str, Any]], output_path: Path) -> None:
+    def _save_corrections(
+        self, corrections: List[Dict[str, Any]], output_path: Path
+    ) -> None:
         """
         Save LLM corrections to CSV.
 
@@ -360,13 +384,15 @@ class LemmaCorrector:
             corrections: List of correction operations
             output_path: Path to output CSV
         """
-        with open(output_path, 'w', encoding='utf-8', newline='') as f:
+        with open(output_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['id', 'operation', 'target', 'reason'])
+            writer.writerow(["id", "operation", "target", "reason"])
 
             for correction in corrections:
-                target = correction.get('target', '')
-                reason = correction.get('reason', '')
-                writer.writerow([correction['id'], correction['operation'], target, reason])
+                target = correction.get("target", "")
+                reason = correction.get("reason", "")
+                writer.writerow(
+                    [correction["id"], correction["operation"], target, reason]
+                )
 
         logger.info(f"LLM corrections saved: {output_path}")
