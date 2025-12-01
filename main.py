@@ -60,6 +60,10 @@ if __name__ == "__main__":
 
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
+
+    # Clear any existing handlers to prevent duplicate logs
+    root_logger.handlers.clear()
+
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 

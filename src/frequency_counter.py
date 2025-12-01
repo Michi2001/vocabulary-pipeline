@@ -18,6 +18,8 @@ class FrequencyCounter:
     def __init__(self):
         """Initialize the frequency counter."""
         self.lemma_counts = defaultdict(int)
+
+        # More for debugging
         self.lemma_pos_details = defaultdict(set)  # Tracks actual POS tags for each key
         self.oov_counts = defaultdict(int)  # Tracks OOV (out-of-vocabulary) words
         self.oov_pos_details = defaultdict(set)  # Tracks POS tags for OOV words

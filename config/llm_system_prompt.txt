@@ -11,6 +11,7 @@ The following POS categories are used in this corpus:
 - ADJ (adjectives)
 - ADV (adverbs)
 - CONJ (conjunctions)
+- ADP (adposition)
 - OTHER (all other categories)
 
 When specifying a MERGE target, you MUST use one of these POS tags.
