@@ -12,42 +12,50 @@ The following POS categories are used in this corpus:
 - ADV (adverbs)
 - CONJ (conjunctions)
 - ADP (adposition)
-- OTHER (all other categories)
 
 When specifying a MERGE target, you MUST use one of these POS tags.
 
 ### ANALYSIS RULES
 
 **NOISE & ARTEFACTS (→ DELETE)**
-Remove entries that are clearly NOT valid Spanish words.
+Remove entries that are clearly NOT valid Spanish words, e.g.
 - OCR errors, isolated punctuation, fragments, URLs, emojis
 - Single letters (except valid words: 'y', 'o', 'a', 'e')
 - Foreign words (English, etc.) not established in Spanish usage
 Examples to DELETE: 'brick', 'working', 'sir', 'xxx', '---'
 
 **NORMALIZATION (→ MERGE)**
-Map words back to their canonical dictionary form if the lemmatizer failed:
+Map words back to their canonical dictionary form if the lemmatizer failed.
+**IMPORTANT: Only MERGE when you are confident about the correct target. When genuinely uncertain, DELETE.**
+**FREQUENCY CONSIDERATION: Consider the frequency when deciding between MERGE and DELETE. It makes little sense to merge a high-frequency error to an extremely rare target word.
 
-1. **Phantom Infinitives**: Non-existent infinitives from over-regularization
-   - 'tendrar' → MERGE to "tener|VERB" (from "tendrá")
-   - 'podrar' → MERGE to "poder|VERB"
-   - 'saldrar' → MERGE to "salir|VERB"
+1. **Phantom Infinitives**: Non-existent infinitives from over-regularization, e.g.
+   - 'tendrar', 'podrar', 'saldrar' - often ambiguous, merge only if clearly identifiable
 
-2. **Conjugated Verbs**: Force to infinitive form
+2. **Conjugated Verbs**: MERGE to infinitive form, e.g.
    - 'habéis' → MERGE to "haber|VERB"
    - 'soy' → MERGE to "ser|VERB"
 
-3. **Enclitic Pronouns**: Split and keep base verb
+3. **Enclitic Pronouns**: MERGE to base verb, e.g.
    - 'dime' → MERGE to "decir|VERB"
    - 'vámonos' → MERGE to "ir|VERB"
 
-4. **Affix Cleaning**: Remove artifacts
+4. **Affix Cleaning**: MERGE after removing artifacts, e.g.
    - '-decir' → MERGE to "decir|VERB"
    - 'respondeír' → MERGE to "responder|VERB"
 
-5. **Plural/Gender**: Normalize to canonical form if needed
-   - Plural nouns → singular
-   - Feminine-only adjectives → masculine (if applicable)
+5. **Plural/Gender**: MERGE to canonical form if needed
+   - Plural nouns → MERGE to singular (e.g., 'casas' → MERGE to "casa|NOUN")
+   - Feminine-only adjectives → MERGE to masculine if applicable (e.g., 'buena' → MERGE to "bueno|ADJ")
+
+6. **Adverbs with -mente**: MERGE to corresponding adjective, e.g.
+   - 'rápidamente' → MERGE to "rápido|ADJ"
+   - 'tristemente' → MERGE to "triste|ADJ"
+   - **EXCEPTION (KEEP as is, do NOT merge):**
+     1. Temporal and discourse markers (e.g., 'actualmente', 'finalmente')
+     2. Adverbs with **distinct meanings** significantly different from the adjective (semantic drift)
+        (e.g., 'prácticamente' [almost] vs. 'práctico' [handy]; 'seguramente' [probably] vs. 'seguro' [safe])
+
 
 **VALID LEMMAS (→ KEEP)**
 Keep words that are already correct canonical Spanish forms.
@@ -81,6 +89,11 @@ Structure:
 **CRITICAL REQUIREMENTS**:
 1. Every entry MUST have "id" and "operation" fields
 2. MERGE operations MUST include "target" in format "lemma|POS" using ONLY the POS categories listed above
-3. DELETE and MERGE operations MUST include "reason" (short English explanation)
+3. DELETE and MERGE operations MUST include "reason" with detailed explanation:
+   - Explain your linguistic reasoning (e.g., "conjugated form 'soy' from irregular verb ser")
+   - For MERGE: explain why this specific target is correct (e.g., "enclitic pronoun 'me' attached to imperative 'di' from decir")
+   - For DELETE: explain what makes it invalid (e.g., "English word, not Spanish" or "phantom infinitive, unclear source verb")
+   - Consider frequency in your reasoning when relevant
+   - Avoid generic reasons like "conjugated verb; normalize to infinitive" - be specific about WHICH verb and WHY
 4. KEEP operations should NOT include "reason"
 5. All IDs from input MUST appear in output (no omissions)

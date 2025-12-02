@@ -1,0 +1,51 @@
+id,operation,target,reason
+001,KEEP,,
+002,DELETE,,"OCR error, not a valid Spanish word"
+003,MERGE,haber|VERB,"Conjugated form 'habiar', likely intended to be the auxiliary 'haber'"
+004,KEEP,,
+005,KEEP,,
+006,MERGE,rápido|ADJ,Adverb formed from the adjective 'rápido'
+007,DELETE,,"English word, not Spanish"
+008,MERGE,decir|VERB,Affixed form '-decir' incorrectly represents the base verb 'decir'
+009,KEEP,,
+010,MERGE,tener|VERB,"Phantom infinitive 'tendrar', likely intended to be 'tender' or 'tener'"
+011,MERGE,poder|VERB,"Phantom infinitive 'podrar', likely intended to be 'poder'"
+012,MERGE,dar|VERB,Enclitic form 'dame' attached to the base verb 'dar'
+013,MERGE,decir|VERB,Enclitic form 'decirme' attached to the base verb 'decir'
+014,DELETE,,"Foreign word, not a valid Spanish adjective"
+015,DELETE,,"Phantom infinitive 'pudiser', unclear source verb; 'poder' may have been intended"
+016,DELETE,,"Phantom infinitive 'serar', likely a mistake on the infinitive 'ser'"
+017,DELETE,,"Phantom infinitive 'estariar', likely attempting to refer to 'estar'"
+018,DELETE,,"Phantom infinitive 'querrar', perhaps intended as 'querer'"
+019,KEEP,,
+020,DELETE,,"English word, not a valid Spanish noun"
+021,DELETE,,"English word, not a valid Spanish noun"
+022,MERGE,atrever|VERB,Affixed form 'atreveír' incorrectly represents the base verb 'atrever'
+023,MERGE,haber|VERB,"Conjugated form 'fuéramos', a first person form of 'haber'"
+024,KEEP,,
+025,MERGE,triste|ADJ,Adverb formed from the adjective 'triste'
+026,MERGE,ayudar|VERB,Infinitive form represented by enclitic 'ayudarnos' from 'ayudar'
+027,DELETE,,"Phantom infinitive 'quisierar', unclear source verb; 'querer' may have been intended"
+028,KEEP,,
+029,DELETE,,"LaTeX command, not a valid Spanish noun"
+030,KEEP,,
+031,KEEP,,
+032,KEEP,,
+033,KEEP,,
+034,KEEP,,
+035,DELETE,,Phantom infinitive; 'hablar' likely intended
+036,KEEP,,
+037,DELETE,,"Phantom infinitive 'haztir', unclear source verb"
+038,MERGE,quedar|VERB,Infinitive form represented by 'quedarte' with enclitic
+039,KEEP,,
+040,KEEP,,
+041,DELETE,,"English word, not a valid Spanish noun"
+042,KEEP,,
+043,KEEP,,
+044,DELETE,,"English word, not a valid Spanish noun"
+045,DELETE,,"Phantom infinitive 'dímelir', unclear source verb; intended may be 'decir'"
+046,DELETE,,Phantom infinitive; unclear source verb potentially 'hablar'
+047,DELETE,,Phantom infinitive; unclear source verb potentially 'sentar'
+048,DELETE,,"Phantom infinitive 'comencer', likely intended as 'comenzar'"
+049,KEEP,,
+050,KEEP,,
