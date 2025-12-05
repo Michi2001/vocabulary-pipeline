@@ -11,8 +11,9 @@ Requires: OPENAI_API_KEY environment variable
 import unittest
 import os
 import csv
+import sys
 from pathlib import Path
-from llm_providers import create_provider
+from src.llm_providers import create_provider
 from datetime import datetime
 
 
@@ -50,15 +51,16 @@ def load_expected_output(csv_path):
 
 
 # Load test data from CSV files
-TEST_INPUT = load_test_input(Path(__file__).parent / "test_case_input.csv")
-EXPECTED_OUTPUT = load_expected_output(Path(__file__).parent / "test_case_output.csv")
+TEST_INPUT = load_test_input(Path("test/data/corrector_input.csv"))
+EXPECTED_OUTPUT = load_expected_output(Path("test/data/corrector_exp_output.csv"))
 PROMPT_FILE = "config/llm_system_prompt.txt"
 PROVIDER_TYPE = "openai"
-PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-4o-mini"}
+PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5-mini"}
+BATCH_SIZE = 25  # Number of items to process per batch
 # add current timestamp to output path to avoid overwriting
-OUTPUT_CSV_PATH = (
-    f"test/outputs/provider_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-)
+TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
+OUTPUT_CSV_PATH = f"test/outputs/test_provider/model_output_{PROVIDER_TYPE}_{PROVIDER_CONFIG['model']}_{TIMESTAMP}.csv"
+OUTPUT_LOG_PATH = f"test/outputs/test_provider/{PROVIDER_TYPE}_{PROVIDER_CONFIG['model']}_{TIMESTAMP}.log"
 
 
 class TestProviderCorrections(unittest.TestCase):
@@ -74,9 +76,22 @@ class TestProviderCorrections(unittest.TestCase):
         cls.provider = create_provider(PROVIDER_TYPE, PROVIDER_CONFIG)
 
     def test_provider_corrections_all_cases(self):
-        """Test all 50 cases and collect all errors."""
-        # Call provider with test input
-        response = self.provider.correct_lemmas(TEST_INPUT, self.system_prompt)
+        """Test all cases with configurable batch size and collect all errors."""
+        # Split input into batches based on BATCH_SIZE
+        total_items = len(TEST_INPUT)
+        all_corrections = []
+
+        for i in range(0, total_items, BATCH_SIZE):
+            batch_input = TEST_INPUT[i:i + BATCH_SIZE]
+            batch_num = (i // BATCH_SIZE) + 1
+            total_batches = (total_items + BATCH_SIZE - 1) // BATCH_SIZE
+
+            print(f"\nProcessing batch {batch_num}/{total_batches} ({len(batch_input)} items)...")
+            batch_response = self.provider.correct_lemmas(batch_input, self.system_prompt)
+            all_corrections.extend(batch_response["corrections"])
+
+        # Combine all responses
+        response = {"corrections": all_corrections}
 
         # Validate response structure
         self.assertIn("corrections", response, "Response missing 'corrections' key")
@@ -162,4 +177,9 @@ class TestProviderCorrections(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # Create output directory and redirect stdout/stderr
+    Path(OUTPUT_LOG_PATH).parent.mkdir(parents=True, exist_ok=True)
+
+    with open(OUTPUT_LOG_PATH, "w", encoding="utf-8") as f:
+        sys.stdout = sys.stderr = f
+        unittest.main(verbosity=2)
