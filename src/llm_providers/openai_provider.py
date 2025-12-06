@@ -75,6 +75,14 @@ class OpenAIProvider(BaseLLMProvider):
                 if not self.validate_response(parsed):
                     raise LLMProviderError(f"Invalid response structure: {parsed}")
 
+                # Add token usage info to response
+                if hasattr(response, 'usage'):
+                    parsed['_token_usage'] = {
+                        'prompt_tokens': response.usage.prompt_tokens,
+                        'completion_tokens': response.usage.completion_tokens,
+                        'total_tokens': response.usage.total_tokens
+                    }
+
                 logger.info(f"Successfully corrected batch of {len(batch)} lemmas")
                 return parsed
 

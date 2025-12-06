@@ -57,7 +57,7 @@ TEST_INPUT = load_test_input(Path("test/data/corrector_input.csv"))
 EXPECTED_OUTPUT = load_expected_output(Path("test/data/corrector_exp_output.csv"))
 PROMPT_FILE = "config/llm_system_prompt.txt"
 PROVIDER_TYPE = "openai"
-PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5-mini"}
+PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5-nano"}
 BATCH_SIZE = 26  # Number of items to process per batch
 # add current timestamp to output path to avoid overwriting
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -82,6 +82,7 @@ class TestProviderCorrections(unittest.TestCase):
         # Split input into batches based on BATCH_SIZE
         total_items = len(TEST_INPUT)
         all_corrections = []
+        total_tokens = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
 
         for i in range(0, total_items, BATCH_SIZE):
             batch_input = TEST_INPUT[i : i + BATCH_SIZE]
@@ -95,6 +96,21 @@ class TestProviderCorrections(unittest.TestCase):
                 batch_input, self.system_prompt
             )
             all_corrections.extend(batch_response["corrections"])
+
+            # Aggregate token usage
+            if "_token_usage" in batch_response:
+                usage = batch_response["_token_usage"]
+                total_tokens["prompt_tokens"] += usage["prompt_tokens"]
+                total_tokens["completion_tokens"] += usage["completion_tokens"]
+                total_tokens["total_tokens"] += usage["total_tokens"]
+
+        # Print aggregated token usage
+        print(f"\n{'='*60}")
+        print(f"TOTAL TOKEN USAGE (all batches combined):")
+        print(f"  Prompt tokens:     {total_tokens['prompt_tokens']}")
+        print(f"  Completion tokens: {total_tokens['completion_tokens']}")
+        print(f"  Total tokens:      {total_tokens['total_tokens']}")
+        print(f"{'='*60}\n")
 
         # Combine all responses
         response = {"corrections": all_corrections}
@@ -174,14 +190,14 @@ class TestProviderCorrections(unittest.TestCase):
                 if expected.get("alternative_operation"):
                     error_msg += f" OR {expected['alternative_operation']}"
                     if expected["alternative_operation"] == "MERGE":
-                        error_msg += f" (target: {expected.get('alternative_target', '')})"
+                        error_msg += (
+                            f" (target: {expected.get('alternative_target', '')})"
+                        )
 
                 error_msg += f"\n  Got: {actual_operation}"
                 if actual_operation == "MERGE":
                     error_msg += f" (target: {actual_target})"
-                error_msg += (
-                    f"\n  Lemma: {input_item['lemma']} ({input_item['frequency']} occurrences, {input_item['pos']})"
-                )
+                error_msg += f"\n  Lemma: {input_item['lemma']} ({input_item['frequency']} occurrences, {input_item['pos']})"
                 errors.append(error_msg)
                 failed_ids.add(expected["id"])
                 continue

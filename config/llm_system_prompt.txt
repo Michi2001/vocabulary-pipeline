@@ -26,14 +26,22 @@ Remove entries that are clearly NOT valid Spanish words, e.g.
 - Numbers (standalone digits or numeric strings: '1', '2024', '3.14', etc.)
 - OCR errors, isolated punctuation, fragments, URLs, emojis
 - Single letters (except valid words: 'y', 'o', 'a', 'e')
-- Foreign words (English, etc.) not established in Spanish usage
-  **IMPORTANT**: Do NOT merge English words to their Spanish equivalents (e.g., 'tweet' should be DELETED, NOT merged to 'tuit')
-Examples to DELETE: 'brick', 'working', 'sir', 'xxx', '---', '2024', '15', 'tweet'
+- **Incorrect POS tags**: If the POS tag does not match the actual word class, DELETE the entry
+  (e.g., a noun tagged as VERB, an adjective tagged as NOUN, etc.)
+- English loanwords (anglicismos): DELETE unless VERY well-established in everyday Spanish
+  **IMPORTANT**: Do NOT merge English words to their Spanish equivalents (e.g., 'tweet' → DELETE, NOT merge to 'tuit')
+  **KEEP exceptions**: Only widely established loanwords like 'internet', 'web', 'wifi', 'email' (if extremely common)
+  **DELETE examples**: 'flash', 'click', 'tweet', 'post', 'online', 'download', 'feedback', 'link', 'working', 'sir'
+  **Frequency consideration**: If an English loanword has unusually high frequency, it likely comes from English text sections in the corpus → DELETE
+Examples to DELETE: 'brick', 'working', 'sir', 'xxx', '---', '2024', '15', 'tweet', 'flash', 'click'
 
 **NORMALIZATION (→ MERGE)**
 Map words back to their canonical dictionary form if the lemmatizer failed.
 **IMPORTANT: Only MERGE when you are confident about the correct target. When genuinely uncertain, DELETE.**
 **FREQUENCY CONSIDERATION: Consider the frequency when deciding between MERGE and DELETE. It makes little sense to merge a high-frequency error to an extremely rare target word.
+**REFLEXIVE VERBS NOT SUPPORTED: NEVER use reflexive infinitives (ending in 'se') as merge targets. Always use the non-reflexive form.**
+   - Correct: MERGE to "atrever|VERB" (NOT "atreverse|VERB")
+   - Correct: MERGE to "levantar|VERB" (NOT "levantarse|VERB")
 
 1. **Phantom Infinitives**: Non-existent infinitives from over-regularization, e.g.
    - 'tendrar', 'podrar', 'saldrar' - often ambiguous, merge only if clearly identifiable
@@ -54,7 +62,14 @@ Map words back to their canonical dictionary form if the lemmatizer failed.
    - Plural nouns → MERGE to singular (e.g., 'casas' → MERGE to "casa|NOUN")
    - Feminine-only adjectives → MERGE to masculine if applicable (e.g., 'buena' → MERGE to "bueno|ADJ")
 
-6. **Adverbs with -mente**: MERGE to corresponding adjective, e.g.
+6. **Past Participles as Adjectives**: MERGE to base verb infinitive, e.g.
+   - 'condicionado' (ADJ) → MERGE to "condicionar|VERB"
+   - 'completado' (ADJ) → MERGE to "completar|VERB"
+   - 'bordado' (ADJ) → MERGE to "bordar|VERB"
+   - **EXCEPTION (KEEP as ADJ)**: If the adjective is lexicalized and the verb form is uncommon/rare in modern Spanish, KEEP the adjective
+     (e.g., 'descabellado' [absurd/crazy] → KEEP, because 'descabellar' is rarely used as a verb)
+
+7. **Adverbs with -mente**: MERGE to corresponding adjective, e.g.
    - 'rápidamente' → MERGE to "rápido|ADJ"
    - 'tristemente' → MERGE to "triste|ADJ"
    - **EXCEPTION (KEEP as is, do NOT merge):**
@@ -65,8 +80,8 @@ Map words back to their canonical dictionary form if the lemmatizer failed.
 
 **VALID LEMMAS (→ KEEP)**
 Keep words that are already correct canonical Spanish forms.
-- Proper nouns (names, places) if frequent and valid
-- Honorifics: 'don', 'sr', 'sra'
+- **NO proper nouns**: DELETE all proper nouns (names of people, places, brands, etc.) as they are not supported in the vocabulary list
+- Honorifics like 'don', 'sr', 'sra' can be kept if they function as common nouns in context
 
 ### OUTPUT FORMAT
 Reply EXCLUSIVELY with a JSON object containing a "corrections" array.
