@@ -57,7 +57,7 @@ TEST_INPUT = load_test_input(Path("test/data/corrector_input.csv"))
 EXPECTED_OUTPUT = load_expected_output(Path("test/data/corrector_exp_output.csv"))
 PROMPT_FILE = "config/llm_system_prompt.txt"
 PROVIDER_TYPE = "openai"
-PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5-nano"}
+PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5-mini"}
 BATCH_SIZE = 26  # Number of items to process per batch
 # add current timestamp to output path to avoid overwriting
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -128,15 +128,12 @@ class TestProviderCorrections(unittest.TestCase):
 
         # Save actual results to CSV
         with open(OUTPUT_CSV_PATH, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(
-                f, fieldnames=["id", "reasoning", "operation", "target"]
-            )
+            writer = csv.DictWriter(f, fieldnames=["id", "operation", "target"])
             writer.writeheader()
             for correction in response["corrections"]:
                 writer.writerow(
                     {
                         "id": correction.get("id", ""),
-                        "reasoning": correction.get("reasoning", ""),
                         "operation": correction.get("operation", ""),
                         "target": correction.get("target", ""),
                     }

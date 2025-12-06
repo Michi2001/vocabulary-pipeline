@@ -389,13 +389,12 @@ class LemmaCorrector:
         """
         with open(output_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["id", "operation", "target", "reason"])
+            writer.writerow(["id", "operation", "target"])
 
             for correction in corrections:
                 target = correction.get("target", "")
-                reason = correction.get("reason", "")
                 writer.writerow(
-                    [correction["id"], correction["operation"], target, reason]
+                    [correction["id"], correction["operation"], target]
                 )
 
         logger.info(f"LLM corrections saved: {output_path}")
