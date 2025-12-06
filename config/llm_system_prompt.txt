@@ -76,31 +76,32 @@ Structure:
   "corrections": [
     {
       "id": "000001",
-      "operation": "KEEP",
-      "reason": "Valid canonical Spanish verb, useful for learners"
+      "reasoning": "Valid canonical Spanish verb, useful for learners",
+      "operation": "KEEP"
     },
     {
       "id": "000002",
-      "operation": "DELETE",
-      "reason": "OCR error, not a valid Spanish word"
+      "reasoning": "OCR error, not a valid Spanish word",
+      "operation": "DELETE"
     },
     {
       "id": "000003",
+      "reasoning": "Phantom infinitive from 'tendrá'",
       "operation": "MERGE",
-      "target": "tener|VERB",
-      "reason": "Phantom infinitive from 'tendrá'"
+      "target": "tener|VERB"
     }
   ]
 }
 
 **CRITICAL REQUIREMENTS**:
-1. Every entry MUST have "id" and "operation" fields
-2. MERGE operations MUST include "target" in format "lemma|POS" using ONLY the POS categories listed above
-3. All operations (KEEP, DELETE, MERGE) MUST include "reason" with detailed explanation:
+1. Every entry MUST have "id", "reasoning", and "operation" fields
+2. The "reasoning" field MUST come BEFORE "operation" in the JSON (think before deciding)
+3. All operations (KEEP, DELETE, MERGE) MUST include detailed "reasoning":
    - For KEEP: explain why the word is valid and useful for learners (e.g., "Valid canonical noun, common Spanish word")
    - For MERGE: explain why this specific target is correct (e.g., "enclitic pronoun 'me' attached to imperative 'di' from decir")
    - For DELETE: explain what makes it invalid (e.g., "English word, not Spanish" or "phantom infinitive, unclear source verb")
    - Explain your linguistic reasoning (e.g., "conjugated form 'soy' from irregular verb ser")
    - Consider frequency in your reasoning when relevant
    - Avoid generic reasons like "conjugated verb; normalize to infinitive" - be specific about WHICH verb and WHY
-4. All IDs from input MUST appear in output (no omissions)
+4. MERGE operations MUST include "target" in format "lemma|POS" using ONLY the POS categories listed above
+5. All IDs from input MUST appear in output (no omissions)

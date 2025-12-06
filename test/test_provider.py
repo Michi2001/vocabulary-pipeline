@@ -106,23 +106,23 @@ class TestProviderCorrections(unittest.TestCase):
         )
         self.assertEqual(
             len(response["corrections"]),
-            50,
-            f"Expected 50 corrections, got {len(response['corrections'])}",
+            len(EXPECTED_OUTPUT),
+            f"Expected {len(EXPECTED_OUTPUT)} corrections, got {len(response['corrections'])}",
         )
 
         # Save actual results to CSV
         with open(OUTPUT_CSV_PATH, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(
-                f, fieldnames=["id", "operation", "target", "reason"]
+                f, fieldnames=["id", "reasoning", "operation", "target"]
             )
             writer.writeheader()
             for correction in response["corrections"]:
                 writer.writerow(
                     {
                         "id": correction.get("id", ""),
+                        "reasoning": correction.get("reasoning", ""),
                         "operation": correction.get("operation", ""),
                         "target": correction.get("target", ""),
-                        "reason": correction.get("reason", ""),
                     }
                 )
 
@@ -153,25 +153,34 @@ class TestProviderCorrections(unittest.TestCase):
             alternative_match = False
 
             if expected.get("alternative_operation"):
-                alternative_match = (
-                    actual_operation == expected["alternative_operation"]
-                )
-                # If alternative is MERGE, also check target
-                if alternative_match and expected["alternative_operation"] == "MERGE":
-                    alternative_match = actual_target == expected.get(
-                        "alternative_target", ""
-                    )
+                if actual_operation == expected["alternative_operation"]:
+                    # If alternative is MERGE, also check target
+                    if expected["alternative_operation"] == "MERGE":
+                        alternative_match = actual_target == expected.get(
+                            "alternative_target", ""
+                        )
+                    else:
+                        # For DELETE/KEEP alternatives, operation match is enough
+                        alternative_match = True
 
             if not primary_match and not alternative_match:
                 error_msg = (
                     f"ID {expected['id']}: operation mismatch\n"
                     f"  Expected: {expected['operation']}"
                 )
+                if expected["operation"] == "MERGE":
+                    error_msg += f" (target: {expected['target']})"
+
                 if expected.get("alternative_operation"):
                     error_msg += f" OR {expected['alternative_operation']}"
+                    if expected["alternative_operation"] == "MERGE":
+                        error_msg += f" (target: {expected.get('alternative_target', '')})"
+
+                error_msg += f"\n  Got: {actual_operation}"
+                if actual_operation == "MERGE":
+                    error_msg += f" (target: {actual_target})"
                 error_msg += (
-                    f"\n  Got: {actual_operation}\n"
-                    f"  Lemma: {input_item['lemma']} ({input_item['frequency']} occurrences, {input_item['pos']})"
+                    f"\n  Lemma: {input_item['lemma']} ({input_item['frequency']} occurrences, {input_item['pos']})"
                 )
                 errors.append(error_msg)
                 failed_ids.add(expected["id"])
