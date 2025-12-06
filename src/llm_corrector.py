@@ -67,32 +67,28 @@ class LemmaCorrector:
         id_mapping, batches = self._create_batches(frequencies)
         logger.info(f"Created {len(batches)} batches of size {self.batch_size}")
 
-        # Step 3: Generate cache key
-        cache_key = self._generate_cache_key(frequencies)
+        # Step 3: Process batches with per-batch caching
+        all_corrections = []
+        for i, batch in enumerate(batches):
+            logger.info(f"Processing batch {i+1}/{len(batches)} ({len(batch)} lemmas)")
 
-        # Step 4: Check cache
-        all_corrections = None
-        if self.cache_config.get("enabled", True):
-            all_corrections = self._load_corrections_from_cache(cache_key)
+            batch_cache_key = self._generate_batch_cache_key(batch)
 
-        # Step 5: Process batches through LLM if cache miss
-        if all_corrections is None:
-            logger.info("Cache miss - processing batches through LLM...")
-            all_corrections = []
-            for i, batch in enumerate(batches):
-                logger.info(
-                    f"Processing batch {i+1}/{len(batches)} ({len(batch)} lemmas)"
-                )
-                corrections = self.provider.correct_lemmas(batch, self.system_prompt)
-                all_corrections.extend(corrections["corrections"])
-
-            # Save to cache
+            # Try to load from cache
+            batch_corrections = None
             if self.cache_config.get("enabled", True):
-                self._save_corrections_to_cache(cache_key, all_corrections)
-        else:
-            logger.info(
-                f"Cache hit - loaded {len(all_corrections)} corrections from cache"
-            )
+                batch_corrections = self._load_corrections_from_cache(batch_cache_key)
+
+            if batch_corrections is None:
+                response = self.provider.correct_lemmas(batch, self.system_prompt)
+                batch_corrections = response["corrections"]
+
+                if self.cache_config.get("enabled", True):
+                    self._save_corrections_to_cache(batch_cache_key, batch_corrections)
+            else:
+                logger.info(f"  Cache hit - loaded batch {i+1} from cache")
+
+            all_corrections.extend(batch_corrections)
 
         # Step 6: Save original list with IDs
         original_path = self.output_dir / "original_with_ids.csv"
@@ -113,27 +109,31 @@ class LemmaCorrector:
 
         return corrected_counter
 
-    def _generate_cache_key(self, frequencies: List[Dict[str, Any]]) -> str:
+    def _generate_batch_cache_key(self, batch: List[Dict[str, Any]]) -> str:
         """
-        Generate SHA256 hash for cache key.
+        Generate SHA256 hash for a single batch cache key.
 
         Key components:
-        - Serialized frequencies (sorted for determinism)
+        - Batch items (id, lemma, frequency, pos)
         - LLM model name
-        - Batch size
+        - System prompt hash
 
         Args:
-            frequencies: List from get_sorted_frequencies()
+            batch: Single batch with items containing 'id', 'lemma', 'frequency', 'pos'
 
         Returns:
             SHA256 hash string
         """
-        # Serialize frequencies (already sorted by frequency descending)
-        freq_strings = [
-            f"{item['lemma']}|{item['pos']}|{item['frequency']}" for item in frequencies
+        # Serialize batch items (order matters since IDs are sequential)
+        batch_strings = [
+            f"{item['id']}|{item['lemma']}|{item['frequency']}|{item['pos']}"
+            for item in batch
         ]
 
-        key_components = ["|".join(freq_strings), self.llm_model, str(self.batch_size)]
+        # Hash system prompt to detect prompt changes
+        prompt_hash = hashlib.sha256(self.system_prompt.encode()).hexdigest()[:8]
+
+        key_components = ["|".join(batch_strings), self.llm_model, prompt_hash]
 
         key_string = "|".join(key_components)
         return hashlib.sha256(key_string.encode()).hexdigest()
@@ -393,8 +393,6 @@ class LemmaCorrector:
 
             for correction in corrections:
                 target = correction.get("target", "")
-                writer.writerow(
-                    [correction["id"], correction["operation"], target]
-                )
+                writer.writerow([correction["id"], correction["operation"], target])
 
         logger.info(f"LLM corrections saved: {output_path}")
