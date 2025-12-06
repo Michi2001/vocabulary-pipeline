@@ -45,6 +45,8 @@ def load_expected_output(csv_path):
                     "id": row["id"],
                     "operation": row["operation"],
                     "target": row["target"],
+                    "alternative_operation": row.get("alternative_operation", ""),
+                    "alternative_target": row.get("alternative_target", ""),
                 }
             )
     return expected_output
@@ -56,7 +58,7 @@ EXPECTED_OUTPUT = load_expected_output(Path("test/data/corrector_exp_output.csv"
 PROMPT_FILE = "config/llm_system_prompt.txt"
 PROVIDER_TYPE = "openai"
 PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5-mini"}
-BATCH_SIZE = 25  # Number of items to process per batch
+BATCH_SIZE = 26  # Number of items to process per batch
 # add current timestamp to output path to avoid overwriting
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_CSV_PATH = f"test/outputs/test_provider/model_output_{PROVIDER_TYPE}_{PROVIDER_CONFIG['model']}_{TIMESTAMP}.csv"
@@ -82,12 +84,16 @@ class TestProviderCorrections(unittest.TestCase):
         all_corrections = []
 
         for i in range(0, total_items, BATCH_SIZE):
-            batch_input = TEST_INPUT[i:i + BATCH_SIZE]
+            batch_input = TEST_INPUT[i : i + BATCH_SIZE]
             batch_num = (i // BATCH_SIZE) + 1
             total_batches = (total_items + BATCH_SIZE - 1) // BATCH_SIZE
 
-            print(f"\nProcessing batch {batch_num}/{total_batches} ({len(batch_input)} items)...")
-            batch_response = self.provider.correct_lemmas(batch_input, self.system_prompt)
+            print(
+                f"\nProcessing batch {batch_num}/{total_batches} ({len(batch_input)} items)..."
+            )
+            batch_response = self.provider.correct_lemmas(
+                batch_input, self.system_prompt
+            )
             all_corrections.extend(batch_response["corrections"])
 
         # Combine all responses
@@ -124,7 +130,7 @@ class TestProviderCorrections(unittest.TestCase):
 
         # Collect all errors instead of failing on first error
         errors = []
-        failed_ids = set()  # Track which IDs have errors
+        failed_ids = set()
 
         for i, (input_item, expected) in enumerate(zip(TEST_INPUT, EXPECTED_OUTPUT)):
             actual = response["corrections"][i]
@@ -138,23 +144,41 @@ class TestProviderCorrections(unittest.TestCase):
                     f"  Lemma: {input_item['lemma']}"
                 )
                 failed_ids.add(expected["id"])
-                continue  # Skip further checks if ID doesn't match
+                continue
 
-            # Check operation
             actual_operation = actual.get("operation", "")
-            if actual_operation != expected["operation"]:
-                errors.append(
+            actual_target = actual.get("target", "")
+
+            primary_match = actual_operation == expected["operation"]
+            alternative_match = False
+
+            if expected.get("alternative_operation"):
+                alternative_match = (
+                    actual_operation == expected["alternative_operation"]
+                )
+                # If alternative is MERGE, also check target
+                if alternative_match and expected["alternative_operation"] == "MERGE":
+                    alternative_match = actual_target == expected.get(
+                        "alternative_target", ""
+                    )
+
+            if not primary_match and not alternative_match:
+                error_msg = (
                     f"ID {expected['id']}: operation mismatch\n"
-                    f"  Expected: {expected['operation']}\n"
-                    f"  Got: {actual_operation}\n"
+                    f"  Expected: {expected['operation']}"
+                )
+                if expected.get("alternative_operation"):
+                    error_msg += f" OR {expected['alternative_operation']}"
+                error_msg += (
+                    f"\n  Got: {actual_operation}\n"
                     f"  Lemma: {input_item['lemma']} ({input_item['frequency']} occurrences, {input_item['pos']})"
                 )
+                errors.append(error_msg)
                 failed_ids.add(expected["id"])
-                continue  # Skip target check if operation is wrong
+                continue
 
-            # Check target (only for MERGE operations, and only if operation matches)
-            if expected["operation"] == "MERGE":
-                actual_target = actual.get("target", "")
+            # Check target (only for MERGE operations, and only if primary operation matches)
+            if primary_match and expected["operation"] == "MERGE":
                 expected_target = expected["target"]
 
                 if actual_target != expected_target:

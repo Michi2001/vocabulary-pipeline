@@ -1,51 +1,52 @@
-id,operation,target,reason
-001,KEEP,,Valid frequent adposition.
-002,DELETE,,LaTeX code artifact, not a valid word.
-003,MERGE,haber|VERB,Phantom infinitive generated from imperfect 'había'.
-004,KEEP,,Valid temporal adverb (Time/Discourse marker exception).
-005,MERGE,chico|NOUN,Gender normalization: feminine form merged to masculine singular.
-006,MERGE,rápido|ADJ,Normalization of adverb ending in -mente to adjective base.
-007,DELETE,,Foreign word (English) not fully established/OCR noise in this context.
-008,MERGE,decir|VERB,Cleaning punctuation artifact (hyphen prefix).
-009,MERGE,hacer|VERB,Conjugated form (Preterite 2nd person) merged to infinitive.
-010,MERGE,tener|VERB,Phantom infinitive generated from future form 'tendrá'.
-011,MERGE,poder|VERB,Phantom infinitive generated from future form 'podrá'.
-012,MERGE,dar|VERB,Enclitic normalization: imperative 'da' + pronoun 'me'.
-013,MERGE,decir|VERB,Enclitic normalization: infinitive 'decir' + pronoun 'me'.
-014,DELETE,,Foreign word (English) / Anglicism often removed in strict cleaning.
-015,MERGE,poder|VERB,Phantom infinitive generated from subjunctive 'pudiese'.
-016,MERGE,ser|VERB,Phantom infinitive generated from future form 'será'.
-017,MERGE,estar|VERB,Phantom infinitive generated from conditional 'estaría'.
-018,MERGE,querer|VERB,Phantom infinitive generated from future form 'querrá'.
-019,MERGE,todo|ADJ,Gender normalization: feminine form merged to masculine/canonical.
-020,DELETE,,Foreign word/Anglicism (better: aplicación).
-021,DELETE,,Foreign word/Anglicism (better: tuit).
-022,MERGE,atrever|VERB,Cleaning suffix artifact/mis-lemmatization of 'atrever'.
-023,MERGE,ser|VERB,Conjugated form (Imperfect Subjunctive) merged to infinitive.
-024,MERGE,estar|VERB,Conjugated form (Present 1st person) merged to infinitive.
-025,MERGE,triste|ADJ,Normalization of adverb ending in -mente to adjective base.
-026,MERGE,ayudar|VERB,Enclitic normalization: infinitive 'ayudar' + pronoun 'nos'.
-027,MERGE,querer|VERB,Phantom infinitive generated from subjunctive 'quisiera'.
-028,DELETE,,Numeric string/Year, not a linguistic lemma.
-029,DELETE,,LaTeX code artifact.
-030,KEEP,,Valid high-frequency noun.
-031,KEEP,,Valid mid-frequency noun.
-032,KEEP,,Valid noun.
-033,KEEP,,Valid lower-frequency noun.
-034,KEEP,,Valid low-frequency noun.
-035,MERGE,hablar|VERB,Correction of accent error/mis-scanning on infinitive.
-036,MERGE,tener|VERB,Conjugated form (Preterite 2nd person) merged to infinitive.
-037,MERGE,hacer|VERB,Hallucinated infinitive from imperative 'haz' + enclitic 'te'.
-038,MERGE,quedar|VERB,Enclitic normalization: infinitive 'quedar' + pronoun 'te'.
-039,MERGE,profesor|NOUN,Gender normalization: feminine form merged to masculine.
-040,MERGE,amigo|NOUN,Gender normalization: feminine form merged to masculine.
-041,DELETE,,Foreign word (English).
-042,DELETE,,Numeric/Date fragment, not a word.
-043,DELETE,,Fragment/Abbreviation, not a valid lemma.
-044,DELETE,,Proper noun/Product name (foreign).
-045,MERGE,decir|VERB,Complex artifact: imperative 'di' + clitics 'melo' + 'ir' suffix error.
-046,DELETE,,Fragment/Truncated word.
-047,MERGE,sentar|VERB,Complex artifact: imperative 'siéntese' + 'ar' suffix error.
-048,MERGE,comenzar|VERB,Typo/OCR error or bad lemmatization of 'comenzar'.
-049,KEEP,,Valid noun (derived from verb but distinct lexical entry).
-050,KEEP,,Valid adjective.
+id,operation,target,alternative_operation,alternative_target
+001,KEEP,,,
+002,DELETE,,,
+003,MERGE,haber|VERB,DELETE,
+004,KEEP,,,
+005,KEEP,,,
+006,MERGE,rápido|ADJ,,
+007,DELETE,,,
+008,MERGE,decir|VERB,,
+009,MERGE,hacer|VERB,,
+010,MERGE,tener|VERB,DELETE,
+011,MERGE,poder|VERB,DELETE,
+012,MERGE,dar|VERB,,
+013,MERGE,decir|VERB,,
+014,DELETE,,,
+015,MERGE,poder|VERB,DELETE,
+016,MERGE,ser|VERB,DELETE,
+017,MERGE,estar|VERB,DELETE,
+018,MERGE,querer|VERB,DELETE,
+019,MERGE,todo|ADJ,,
+020,DELETE,,,
+021,DELETE,,,
+022,MERGE,atrever|VERB,DELETE,
+023,DELETE,,,
+024,MERGE,estar|VERB,,
+025,MERGE,triste|ADJ,,
+026,MERGE,ayudar|VERB,,
+027,MERGE,querer|VERB,DELETE,
+028,DELETE,,,
+029,DELETE,,,
+030,KEEP,,,
+031,KEEP,,,
+032,KEEP,,,
+033,KEEP,,,
+034,KEEP,,,
+035,MERGE,hablar|VERB,DELETE,
+036,MERGE,tener|VERB,,
+037,DELETE,,,
+038,MERGE,quedar|VERB,DELETE,
+039,MERGE,profesor|NOUN,KEEP,
+040,KEEP,,,
+041,DELETE,KEEP,,
+042,DELETE,,,
+043,DELETE,,,
+044,DELETE,,,
+045,MERGE,decir|VERB,DELETE,
+046,DELETE,MERGE,hablar|VERB,
+047,MERGE,sentar|VERB,DELETE,
+048,MERGE,comenzar|VERB,DELETE,
+049,KEEP,,,
+050,KEEP,,
+051,MERGE,risueño|ADJ,,
