@@ -21,10 +21,7 @@ class FrequencyCounter:
 
         # More for debugging
         self.lemma_pos_details = defaultdict(set)  # Tracks actual POS tags for each key
-        self.oov_counts = defaultdict(int)  # Tracks OOV (out-of-vocabulary) words
-        self.oov_pos_details = defaultdict(set)  # Tracks POS tags for OOV words
         self.total_tokens = 0
-        self.total_oov_tokens = 0
 
     def _create_lemma_key(self, lemma: str, pos: str) -> str:
         """
@@ -42,57 +39,43 @@ class FrequencyCounter:
         return f"{lemma}|{pos}"
 
     def update(
-        self, lemma_pos_generator: Generator[Tuple[str, str, bool], None, None]
+        self, lemma_pos_generator: Generator[Tuple[str, str], None, None]
     ) -> None:
         """
-        Update frequency counts from a generator of (lemma, pos, is_oov) tuples.
+        Update frequency counts from a generator of (lemma, pos) tuples.
 
         Args:
-            lemma_pos_generator: Generator yielding (lemma, pos, is_oov) tuples
+            lemma_pos_generator: Generator yielding (lemma, pos) tuples
         """
-        for lemma, pos, is_oov in lemma_pos_generator:
-            if is_oov:
-                # Track OOV words separately
-                key = self._create_lemma_key(lemma, pos)
-                self.oov_counts[key] += 1
-                self.oov_pos_details[key].add(pos)
-                self.total_oov_tokens += 1
-            else:
-                # Track known words
-                key = self._create_lemma_key(lemma, pos)
-                self.lemma_counts[key] += 1
-                self.lemma_pos_details[key].add(pos)
-
+        for lemma, pos in lemma_pos_generator:
+            key = self._create_lemma_key(lemma, pos)
+            self.lemma_counts[key] += 1
+            self.lemma_pos_details[key].add(pos)
             self.total_tokens += 1
 
             if self.total_tokens % 100000 == 0:
                 logger.info(
                     f"Processed {self.total_tokens:,} tokens "
-                    f"({len(self.lemma_counts):,} known, {len(self.oov_counts):,} OOV)"
+                    f"({len(self.lemma_counts):,} unique lemmas)"
                 )
 
     def get_sorted_frequencies(
-        self, min_frequency: int = 1, oov: bool = False
+        self, min_frequency: int = 1
     ) -> List[Dict[str, any]]:
         """
         Get lemma frequencies sorted by count (descending).
 
         Args:
             min_frequency: Minimum frequency threshold (default: 1)
-            oov: If True, return OOV words; if False, return known words (default: False)
 
         Returns:
             List of dictionaries with 'lemma', 'frequency', and 'pos' keys
         """
-        # Select which counts to use based on oov parameter
-        counts = self.oov_counts if oov else self.lemma_counts
-        pos_details_dict = self.oov_pos_details if oov else self.lemma_pos_details
-
         results = []
-        for key, count in counts.items():
+        for key, count in self.lemma_counts.items():
             if count >= min_frequency:
                 lemma, normalized_pos = key.split("|", 1)
-                pos_details = sorted(pos_details_dict[key])
+                pos_details = sorted(self.lemma_pos_details[key])
 
                 # Build POS string: normalized POS first, then additional POS (excluding normalized)
                 additional_pos = [pos for pos in pos_details if pos != normalized_pos]
@@ -119,20 +102,12 @@ class FrequencyCounter:
         Args:
             other: Another FrequencyCounter to merge from
         """
-        # Merge known words
         for key, count in other.lemma_counts.items():
             self.lemma_counts[key] += count
             if key in other.lemma_pos_details:
                 self.lemma_pos_details[key].update(other.lemma_pos_details[key])
 
-        # Merge OOV words
-        for key, count in other.oov_counts.items():
-            self.oov_counts[key] += count
-            if key in other.oov_pos_details:
-                self.oov_pos_details[key].update(other.oov_pos_details[key])
-
         self.total_tokens += other.total_tokens
-        self.total_oov_tokens += other.total_oov_tokens
 
     def to_dict(self) -> Dict[str, any]:
         """
@@ -146,10 +121,7 @@ class FrequencyCounter:
             "lemma_pos_details": {
                 k: list(v) for k, v in self.lemma_pos_details.items()
             },
-            "oov_counts": dict(self.oov_counts),
-            "oov_pos_details": {k: list(v) for k, v in self.oov_pos_details.items()},
             "total_tokens": self.total_tokens,
-            "total_oov_tokens": self.total_oov_tokens,
         }
 
     @staticmethod
@@ -168,12 +140,7 @@ class FrequencyCounter:
         counter.lemma_pos_details = defaultdict(
             set, {k: set(v) for k, v in data["lemma_pos_details"].items()}
         )
-        counter.oov_counts = defaultdict(int, data.get("oov_counts", {}))
-        counter.oov_pos_details = defaultdict(
-            set, {k: set(v) for k, v in data.get("oov_pos_details", {}).items()}
-        )
         counter.total_tokens = data["total_tokens"]
-        counter.total_oov_tokens = data.get("total_oov_tokens", 0)
         return counter
 
     def get_statistics(self) -> Dict[str, any]:
@@ -185,14 +152,7 @@ class FrequencyCounter:
         """
         return {
             "total_tokens": self.total_tokens,
-            "total_oov_tokens": self.total_oov_tokens,
             "unique_lemmas": len(self.lemma_counts),
-            "unique_oov": len(self.oov_counts),
-            "oov_percentage": (
-                (self.total_oov_tokens / self.total_tokens * 100)
-                if self.total_tokens > 0
-                else 0
-            ),
             "most_common": sorted(
                 self.lemma_counts.items(), key=lambda x: x[1], reverse=True
             )[:10],

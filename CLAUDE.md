@@ -68,7 +68,6 @@ This separation enables cache reusability across different filter configurations
 **FrequencyCounter** (src/frequency_counter.py)
 - Stores raw frequencies with original POS tags (no normalization)
 - Keys format: `lemma|ORIGINAL_POS` (e.g., "ser|AUX", "hablar|VERB")
-- Separate tracking for OOV (out-of-vocabulary) words
 - Supports serialization via `to_dict()`/`from_dict()` for caching
 
 **PostProcessor** (src/post_processor.py)
@@ -103,8 +102,7 @@ Results are written to timestamped directories:
 output/spanish_lemma_frequencies/YYYYMMDD_HHMMSS/
 ├── config.yaml           # Snapshot of configuration used
 ├── pipeline.log          # Complete terminal output log
-├── output.csv           # Known words (lemma, frequency, pos)
-└── output_oov.csv       # Out-of-vocabulary words
+└── output.csv           # Lemma frequency list (lemma, frequency, pos)
 ```
 
 ### Memory Efficiency Design

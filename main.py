@@ -178,21 +178,14 @@ if __name__ == "__main__":
     logger.info(
         f"\nFinal statistics:\n"
         f"  Total tokens: {stats['total_tokens']:,}\n"
-        f"  Known lemmas: {stats['unique_lemmas']:,}\n"
-        f"  OOV tokens: {stats['total_oov_tokens']:,} ({stats['oov_percentage']:.2f}%)\n"
-        f"  Unique OOV: {stats['unique_oov']:,}"
+        f"  Unique lemmas: {stats['unique_lemmas']:,}"
     )
 
     min_freq = processing_config.get("min_frequency", 1)
 
-    # Write known words
-    frequencies = counter.get_sorted_frequencies(min_frequency=min_freq, oov=False)
+    # Write output
+    frequencies = counter.get_sorted_frequencies(min_frequency=min_freq)
     output_path = os.path.join(output_dir, "output.csv")
-    OutputWriter.write_csv(frequencies, output_path, oov=False)
-
-    # Write OOV words
-    oov_frequencies = counter.get_sorted_frequencies(min_frequency=min_freq, oov=True)
-    oov_output_path = os.path.join(output_dir, "output_oov.csv")
-    OutputWriter.write_csv(oov_frequencies, oov_output_path, oov=True)
+    OutputWriter.write_csv(frequencies, output_path)
 
     logger.info("Pipeline completed!")

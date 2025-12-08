@@ -173,38 +173,6 @@ class FrequencyPostProcessor:
 
             filtered_count += 1
 
-        # Process OOV words (same logic)
-        for raw_key, count in raw_counter.oov_counts.items():
-            parts = raw_key.split("|")
-            if len(parts) != 2:
-                continue
-
-            lemma, original_pos = parts
-
-            if self.accepted_pos and original_pos not in self.accepted_pos:
-                # Special handling for PROPNs: check if it's in allowed list
-                if original_pos == "PROPN" and lemma in self.allowed_propns:
-                    # Allow this specific PROPN
-                    pass
-                else:
-                    continue
-
-            mapped_pos = self.pos_mappings.get(original_pos, original_pos)
-            cleaned_lemma = self._clean_lemma(lemma)
-            normalized_pos = self._normalize_pos(mapped_pos)
-            new_key = f"{cleaned_lemma}|{normalized_pos}"
-
-            filtered_counter.oov_counts[new_key] += count
-            filtered_counter.total_oov_tokens += count
-
-            if new_key not in filtered_counter.oov_pos_details:
-                filtered_counter.oov_pos_details[new_key] = set()
-
-            if raw_key in raw_counter.oov_pos_details:
-                filtered_counter.oov_pos_details[new_key].update(
-                    raw_counter.oov_pos_details[raw_key]
-                )
-
         logger.info(
             f"Post-processing complete: "
             f"{total_raw_lemmas:,} raw lemmas → "

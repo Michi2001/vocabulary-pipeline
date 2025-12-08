@@ -57,10 +57,8 @@ class LemmaCorrector:
         """
         logger.info("Starting LLM-based lemma correction...")
 
-        # Step 1: Get sorted frequencies (only known words)
-        frequencies = counter.get_sorted_frequencies(
-            min_frequency=min_frequency, oov=False
-        )
+        # Step 1: Get sorted frequencies
+        frequencies = counter.get_sorted_frequencies(min_frequency=min_frequency)
         logger.info(f"Processing {len(frequencies)} lemmas for LLM correction")
 
         # Step 2: Assign IDs and create batches
@@ -340,13 +338,6 @@ class LemmaCorrector:
                 parts = target_key.split("|")
                 if len(parts) == 2:
                     corrected_counter.lemma_pos_details[target_key] = {parts[1]}
-
-        # Copy OOV counts (unchanged)
-        corrected_counter.oov_counts = counter.oov_counts.copy()
-        corrected_counter.oov_pos_details = {
-            k: v.copy() for k, v in counter.oov_pos_details.items()
-        }
-        corrected_counter.total_oov_tokens = counter.total_oov_tokens
 
         logger.info(
             f"Applied corrections: "
