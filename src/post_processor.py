@@ -2,6 +2,8 @@ import re
 import logging
 from typing import Dict, Any
 
+from babel import Locale
+
 from src.frequency_counter import FrequencyCounter
 
 logger = logging.getLogger(__name__)
@@ -28,6 +30,7 @@ class FrequencyPostProcessor:
                 'pos_mappings': dict mapping original POS to target POS
                 'main_pos_categories': list for final grouping
                 'clean_lemmas': bool to enable/disable lemma cleaning
+                'include_countries': bool to automatically include all country names from babel
             }
         """
         self.accepted_pos = set(filter_config.get("accepted_pos", []))
@@ -35,13 +38,28 @@ class FrequencyPostProcessor:
         self.main_pos_categories = set(filter_config.get("main_pos_categories", []))
         self.clean_lemmas = filter_config.get("clean_lemmas", True)
 
+        self.allowed_propns = set()
+        if filter_config.get("include_countries", False):
+            country_names = self._load_country_names()
+            self.allowed_propns = country_names
+            logger.info(f"Loaded {len(country_names)} country names from babel")
+
         logger.info(
             f"PostProcessor initialized: "
             f"{len(self.accepted_pos)} accepted POS, "
             f"{len(self.pos_mappings)} mappings, "
             f"{len(self.main_pos_categories)} main categories, "
-            f"cleaning={'enabled' if self.clean_lemmas else 'disabled'}"
+            f"cleaning={'enabled' if self.clean_lemmas else 'disabled'}, "
+            f"{len(self.allowed_propns)} allowed country PROPNs"
         )
+
+    def _load_country_names(self) -> set:
+        """Load country names from babel for Spanish locale."""
+        locale = Locale("es")
+        country_names = [
+            name for code, name in locale.territories.items() if code.isalpha()
+        ]
+        return set(country_names)
 
     def _clean_lemma(self, lemma: str) -> str:
         """
@@ -122,8 +140,11 @@ class FrequencyPostProcessor:
 
             # Step 1: Apply POS filtering
             if self.accepted_pos and original_pos not in self.accepted_pos:
-                skipped_count += 1
-                continue
+                if original_pos == "PROPN" and lemma in self.allowed_propns:
+                    pass
+                else:
+                    skipped_count += 1
+                    continue
 
             # Step 2: Apply POS mapping
             mapped_pos = self.pos_mappings.get(original_pos, original_pos)
@@ -161,7 +182,12 @@ class FrequencyPostProcessor:
             lemma, original_pos = parts
 
             if self.accepted_pos and original_pos not in self.accepted_pos:
-                continue
+                # Special handling for PROPNs: check if it's in allowed list
+                if original_pos == "PROPN" and lemma in self.allowed_propns:
+                    # Allow this specific PROPN
+                    pass
+                else:
+                    continue
 
             mapped_pos = self.pos_mappings.get(original_pos, original_pos)
             cleaned_lemma = self._clean_lemma(lemma)

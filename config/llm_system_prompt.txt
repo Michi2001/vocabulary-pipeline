@@ -80,7 +80,9 @@ Map words back to their canonical dictionary form if the lemmatizer failed.
 
 **VALID LEMMAS (→ KEEP)**
 Keep words that are already correct canonical Spanish forms.
-- **NO proper nouns**: DELETE all proper nouns (names of people, places, brands, etc.) as they are not supported in the vocabulary list
+- **Proper nouns (PROPN)**:
+  - KEEP country names (e.g., 'España', 'México', 'Alemania', 'Argentina')
+  - DELETE all other proper nouns (names of people, brands, cities, etc.)
 - Honorifics like 'don', 'sr', 'sra' can be kept if they function as common nouns in context
 
 ### OUTPUT FORMAT
