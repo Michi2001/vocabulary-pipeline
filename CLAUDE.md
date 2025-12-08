@@ -130,3 +130,12 @@ This design enables cache reuse across different filter configurations.
 **Leipzig Corpora:** Place files in `data/Leipzig_Wortschatz/{corpus_name}/{corpus_name}-sentences.txt` format.
 **OPUS Corpora:** Place .txt files with one sentence per line anywhere (path specified in config.yaml).
 
+
+
+# Claude Code Rules
+
+* Keep the code as simple as possible.
+* Inline comments: Add comments only for non-obvious lines or logic. Avoid unnecessary inline comments.
+* Docstrings:
+    * Use a short one-line docstring for most functions.
+    + Only explain parameters or behavior when they are not immediately obvious from the code itself.
