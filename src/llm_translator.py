@@ -55,7 +55,7 @@ class LemmaTranslator:
         Translate lemmas and write to JSON file.
 
         Args:
-            counter: Input FrequencyCounter with Spanish lemmas
+            counter: Input FrequencyCounter with Spanish lemmas (potentially already corrected)
             min_frequency: Minimum frequency threshold
         """
         logger.info("Starting LLM-based lemma translation...")

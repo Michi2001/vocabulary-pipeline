@@ -161,6 +161,7 @@ if __name__ == "__main__":
                     "output_dir": output_dir,
                     "cache_config": llm_config.get("cache", {}),
                     "llm_model": provider_config.get("model", "gpt-5-mini"),
+                    "slice": llm_config.get("slice", None),
                 }
                 corrector = LemmaCorrector(provider, corrector_config)
 

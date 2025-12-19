@@ -32,7 +32,8 @@ class LemmaCorrector:
                 'system_prompt': str,
                 'output_dir': str (for audit files),
                 'cache_config': dict (enabled, directory),
-                'llm_model': str (for cache key)
+                'llm_model': str (for cache key),
+                'slice': [start_rank, end_rank] or None (1-indexed, inclusive)
             }
         """
         self.provider = provider
@@ -41,6 +42,7 @@ class LemmaCorrector:
         self.output_dir = Path(config["output_dir"])
         self.cache_config = config.get("cache_config", {})
         self.llm_model = config.get("llm_model", "gpt-5-mini")
+        self.slice = config.get("slice", None)
 
     def correct(
         self, counter: FrequencyCounter, min_frequency: int = 1
@@ -59,13 +61,30 @@ class LemmaCorrector:
 
         # Step 1: Get sorted frequencies
         frequencies = counter.get_sorted_frequencies(min_frequency=min_frequency)
-        logger.info(f"Processing {len(frequencies)} lemmas for LLM correction")
+        logger.info(f"Total lemmas in counter: {len(frequencies)}")
 
-        # Step 2: Assign IDs and create batches
-        id_mapping, batches = self._create_batches(frequencies)
+        # Step 2: Apply slice if configured
+        if self.slice:
+            start_rank, end_rank = self.slice
+            logger.info(
+                f"Slice configured: correcting only ranks {start_rank} to {end_rank}"
+            )
+            # Convert to 0-indexed
+            start_idx = max(0, start_rank - 1)
+            end_idx = min(len(frequencies), end_rank)
+            frequencies_to_correct = frequencies[start_idx:end_idx]
+            logger.info(
+                f"Processing {len(frequencies_to_correct)} lemmas for LLM correction (slice)"
+            )
+        else:
+            frequencies_to_correct = frequencies
+            logger.info(f"Processing {len(frequencies)} lemmas for LLM correction (all)")
+
+        # Step 3: Assign IDs and create batches
+        id_mapping, batches = self._create_batches(frequencies_to_correct)
         logger.info(f"Created {len(batches)} batches of size {self.batch_size}")
 
-        # Step 3: Process batches with per-batch caching
+        # Step 4: Process batches with per-batch caching
         all_corrections = []
         for i, batch in enumerate(batches):
             logger.info(f"Processing batch {i+1}/{len(batches)} ({len(batch)} lemmas)")
@@ -88,15 +107,15 @@ class LemmaCorrector:
 
             all_corrections.extend(batch_corrections)
 
-        # Step 6: Save original list with IDs
+        # Step 5: Save original list with IDs
         original_path = self.output_dir / "original_with_ids.csv"
         self._save_original(id_mapping, original_path)
 
-        # Step 7: Save correction mapping
+        # Step 6: Save correction mapping
         mapping_path = self.output_dir / "llm_corrections.csv"
         self._save_corrections(all_corrections, mapping_path)
 
-        # Step 8: Apply corrections to counter
+        # Step 7: Apply corrections to counter
         corrected_counter = self._apply_corrections(
             counter, id_mapping, all_corrections
         )
