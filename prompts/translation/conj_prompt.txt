@@ -1,0 +1,199 @@
+# POS-spezifischer Prompt: CONJ (Konjunktion)
+
+## JSON-Struktur für Konjunktionen
+
+```json
+{
+  "id": "00XXX",
+  "lemma": "cuando",
+  "pos": "CONJ",
+  "meanings": [
+    {
+      "structure": "cuando [pasado]",
+      "example_es": "Ejemplo en español.",
+      "estimated_share": 0.4,
+      "flags": [], 
+      "translations": [
+        {
+          "text": "als"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Besonderheiten für Konjunktionen
+
+### Structure-Feld (wichtig für Tempus/Modus!)
+Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des folgenden Verbs, da dies die Bedeutung beeinflussen kann:
+
+#### Temporale Konjunktionen mit verschiedenen Zeiten:
+✅ **Mit Tempus-Platzhalter:**
+- `cuando [pasado]` = als (einmalige Handlung in Vergangenheit)
+- `cuando [presente]` = wenn/immer wenn (wiederholte Handlung)
+- `cuando [subjuntivo]` = sobald/wenn (zukünftige Handlung)
+
+#### Konditionale Konjunktionen:
+- `si [condición]` = wenn/falls (mit Indikativ - reale Bedingung)
+- `si [pregunta indirecta]` = ob (indirekte Frage)
+
+#### Konzessive Konjunktionen mit Modus:
+- `aunque [indicativo]` = obwohl (bekannte Tatsache)
+- `aunque [subjuntivo]` = selbst wenn/auch wenn (hypothetisch)
+
+### Mehrere Übersetzungen
+Viele Konjunktionen haben mehrere deutsche Entsprechungen:
+
+```json
+"translations": [
+  {"text": "wenn"},
+  {"text": "falls"}
+]
+```
+
+Sortiere nach:
+1. Häufigkeit der Verwendung
+2. Natürlichkeit in der deutschen Sprache
+
+### Beispielsätze
+Beispielsätze bei Konjunktionen sollten:
+- Den **Modus/Tempus** klar zeigen
+- Natürlich und alltagsnah sein
+- Die Bedeutung der Konjunktion verdeutlichen
+
+✅ Gute Beispiele:
+- `cuando [pasado]`: "Cuando llegué a casa, vi que la puerta estaba abierta."
+- `si [condición]`: "Si llueve mañana, cancelaremos la barbacoa."
+- `aunque [indicativo]`: "Voy a salir a correr aunque hace mucho frío."
+
+### Hints bei Konjunktionen
+Meist nicht nötig, außer bei:
+- Fachsprachlichen Verwendungen
+- Regionalen Varianten
+- Wenn die Unterscheidung zwischen Modus/Tempus zusätzliche Erklärung braucht
+
+### Wichtige Hinweise
+- Der Modus (Indikativ vs. Subjuntiv) kann die Bedeutung stark verändern
+- Tempus-Unterschiede sind wichtig (z.B. cuando + Vergangenheit vs. Gegenwart)
+- Viele Konjunktionen können mehrere grammatische Funktionen haben
+
+
+# Examples
+
+```json
+[
+  {
+    "id": "00801",
+    "lemma": "cuando",
+    "pos": "CONJ",
+    "meanings": [
+      {
+        "structure": "cuando [pasado]",
+        "example_es": "Cuando llegué a casa, vi que la puerta estaba abierta.",
+        "estimated_share": 0.4,
+        "flags": [],
+        "translations": [
+          {
+            "text": "als"
+          }
+        ]
+      },
+      {
+        "structure": "cuando [presente]",
+        "example_es": "Cuando voy al supermercado, siempre compro chocolate.",
+        "estimated_share": 0.35,
+        "flags": [],
+        "translations": [
+          {
+            "text": "immer wenn"
+          },
+          {
+            "text": "wenn"
+          }
+        ]
+      },
+      {
+        "structure": "cuando [subjuntivo]",
+        "example_es": "Cuando tengas tiempo, llámame.",
+        "estimated_share": 0.25,
+        "flags": [],
+        "translations": [
+          {
+            "text": "sobald"
+          },
+          {
+            "text": "wenn"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "00802",
+    "lemma": "si",
+    "pos": "CONJ",
+    "meanings": [
+      {
+        "structure": "si [condición]",
+        "example_es": "Si llueve mañana, cancelaremos la barbacoa.",
+        "estimated_share": 0.7,
+        "flags": [],
+        "translations": [
+          {
+            "text": "wenn"
+          },
+          {
+            "text": "falls"
+          }
+        ]
+      },
+      {
+        "structure": "si [pregunta indirecta]",
+        "example_es": "No sé si Juan vendrá a la fiesta o se quedará en casa.",
+        "estimated_share": 0.3,
+        "flags": [],
+        "translations": [
+          {
+            "text": "ob"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "00803",
+    "lemma": "aunque",
+    "pos": "CONJ",
+    "meanings": [
+      {
+        "structure": "aunque [indicativo]",
+        "example_es": "Voy a salir a correr aunque hace mucho frío.",
+        "estimated_share": 0.6,
+        "flags": [],
+        "translations": [
+          {
+            "text": "obwohl"
+          },
+          {
+            "text": "obgleich"
+          }
+        ]
+      },
+      {
+        "structure": "aunque [subjuntivo]",
+        "example_es": "No compraría ese coche aunque fuera rico.",
+        "estimated_share": 0.4,
+        "flags": [],
+        "translations": [
+          {
+            "text": "selbst wenn"
+          },
+          {
+            "text": "auch wenn"
+          }
+        ]
+      }
+    ]
+  }
+]

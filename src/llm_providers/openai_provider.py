@@ -22,7 +22,7 @@ class OpenAIProvider(BaseLLMProvider):
         Args:
             config: {
                 'api_key': str,
-                'model': str (default: 'gpt-4o-mini'),
+                'model': str (default: 'gpt-5-mini'),
                 'max_retries': int (default: 3),
                 'retry_delay': int (default: 2),
                 'timeout': int (default: 60)
@@ -30,7 +30,7 @@ class OpenAIProvider(BaseLLMProvider):
         """
         super().__init__(config)
         self.client = OpenAI(api_key=config["api_key"])
-        self.model = config.get("model", "gpt-4o-mini")
+        self.model = config.get("model", "gpt-5-mini")
         self.max_retries = config.get("max_retries", 3)
         self.retry_delay = config.get("retry_delay", 2)
         self.timeout = config.get("timeout", 180)
@@ -72,15 +72,15 @@ class OpenAIProvider(BaseLLMProvider):
                 parsed = json.loads(content)
 
                 # Validate
-                if not self.validate_response(parsed):
+                if not self.validate_correction_response(parsed):
                     raise LLMProviderError(f"Invalid response structure: {parsed}")
 
                 # Add token usage info to response
-                if hasattr(response, 'usage'):
-                    parsed['_token_usage'] = {
-                        'prompt_tokens': response.usage.prompt_tokens,
-                        'completion_tokens': response.usage.completion_tokens,
-                        'total_tokens': response.usage.total_tokens
+                if hasattr(response, "usage"):
+                    parsed["_token_usage"] = {
+                        "prompt_tokens": response.usage.prompt_tokens,
+                        "completion_tokens": response.usage.completion_tokens,
+                        "total_tokens": response.usage.total_tokens,
                     }
 
                 logger.info(f"Successfully corrected batch of {len(batch)} lemmas")
@@ -112,7 +112,83 @@ class OpenAIProvider(BaseLLMProvider):
             )
         return "\n".join(lines)
 
-    def validate_response(self, response: Dict[str, Any]) -> bool:
+    def translate_lemmas(
+        self, batch: List[Dict[str, Any]], system_prompt: str
+    ) -> Dict[str, Any]:
+        """
+        Send batch to OpenAI API for translation.
+
+        Args:
+            batch: List of dicts with 'id', 'lemma', 'frequency', 'pos' keys
+            system_prompt: Combined general + POS-specific translation prompt
+
+        Returns:
+            Dict with parsed translations
+
+        Raises:
+            LLMProviderError: If all retries fail
+        """
+        user_message = self._format_batch(batch)
+
+        for attempt in range(self.max_retries):
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    response_format={"type": "json_object"},
+                    timeout=self.timeout,
+                )
+
+                content = response.choices[0].message.content
+                parsed = json.loads(content)
+
+                if not self._validate_translation_response(parsed):
+                    raise LLMProviderError(f"Invalid translation response structure")
+
+                if hasattr(response, "usage"):
+                    parsed["_token_usage"] = {
+                        "prompt_tokens": response.usage.prompt_tokens,
+                        "completion_tokens": response.usage.completion_tokens,
+                        "total_tokens": response.usage.total_tokens,
+                    }
+
+                logger.info(f"Successfully translated batch of {len(batch)} lemmas")
+                return parsed
+
+            except Exception as e:
+                logger.warning(f"Attempt {attempt + 1}/{self.max_retries} failed: {e}")
+                if attempt < self.max_retries - 1:
+                    time.sleep(self.retry_delay)
+                else:
+                    raise LLMProviderError(
+                        f"Failed after {self.max_retries} attempts: {e}"
+                    )
+
+    def _validate_translation_response(self, response: Dict[str, Any]) -> bool:
+        """Validate translation response structure."""
+        if "translations" not in response:
+            logger.error("Response missing 'translations' key")
+            return False
+
+        if not isinstance(response["translations"], list):
+            logger.error("'translations' is not a list")
+            return False
+
+        for translation in response["translations"]:
+            if (
+                "id" not in translation
+                or "lemma" not in translation
+                or "meanings" not in translation
+            ):
+                logger.error(f"Translation missing required fields: {translation}")
+                return False
+
+        return True
+
+    def validate_correction_response(self, response: Dict[str, Any]) -> bool:
         """
         Validate OpenAI response.
 

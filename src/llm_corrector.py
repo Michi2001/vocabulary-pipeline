@@ -40,7 +40,7 @@ class LemmaCorrector:
         self.system_prompt = config["system_prompt"]
         self.output_dir = Path(config["output_dir"])
         self.cache_config = config.get("cache_config", {})
-        self.llm_model = config.get("llm_model", "gpt-4o-mini")
+        self.llm_model = config.get("llm_model", "gpt-5-mini")
 
     def correct(
         self, counter: FrequencyCounter, min_frequency: int = 1

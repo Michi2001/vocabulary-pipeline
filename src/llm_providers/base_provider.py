@@ -44,7 +44,27 @@ class BaseLLMProvider(ABC):
         pass
 
     @abstractmethod
-    def validate_response(self, response: Dict[str, Any]) -> bool:
+    def translate_lemmas(
+        self, batch: List[Dict[str, Any]], system_prompt: str
+    ) -> Dict[str, Any]:
+        """
+        Send batch of lemmas to LLM for translation.
+
+        Args:
+            batch: List of dicts with 'id', 'lemma', 'frequency', 'pos' keys
+            system_prompt: Combined general + POS-specific translation prompt
+
+        Returns:
+            Dict with 'translations' key containing list of translation objects
+            Format: {"translations": [{"id": "001", "lemma": "...", "pos": "...", "meanings": [...]}, ...]}
+
+        Raises:
+            LLMProviderError: On API errors
+        """
+        pass
+
+    @abstractmethod
+    def validate_correction_response(self, response: Dict[str, Any]) -> bool:
         """
         Validate LLM response structure.
 

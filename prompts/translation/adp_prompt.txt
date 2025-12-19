@@ -1,0 +1,249 @@
+# POS-spezifischer Prompt: ADP (Adposition/Präposition)
+
+## JSON-Struktur für Präpositionen
+
+```json
+{
+  "id": "00XXX",
+  "lemma": "por",
+  "pos": "ADP",
+  "meanings": [
+    {
+      "structure": "por [motivo]",
+      "example_es": "Ejemplo en español.",
+      "estimated_share": 0.4,
+      "flags": [], 
+      "translations": [
+        {
+          "text": "wegen"
+        },
+        {
+          "text": "aufgrund"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Besonderheiten für Präpositionen
+
+### Structure-Feld (SEHR wichtig!)
+Bei Präpositionen ist das structure-Feld **essentiell**, da es die **Funktion** der Präposition anzeigt:
+
+#### Zeige die semantische Funktion:
+✅ **IMMER mit Platzhalter:**
+- `por [motivo]` = wegen (kausale Bedeutung)
+- `por [lugar]` = durch (lokale Bedeutung)
+- `por [precio / intercambio]` = für/gegen (Austausch)
+- `[participio] por [alguien]` = von (Passiv-Agens)
+- `para [infinitivo]` = um...zu (finale Bedeutung)
+- `para [alguien]` = für (Destinativ)
+- `para [lugar]` = nach/in Richtung (direktionale Bedeutung)
+- `en [lugar]` = auf/in (lokale Bedeutung)
+- `en [tiempo]` = im/in (temporale Bedeutung)
+- `en [transporte]` = mit (Transportmittel)
+
+### Typische Präpositions-Funktionen
+
+#### 1. Lokal (Ort)
+- `en [lugar]` = auf/in/bei
+- `por [lugar]` = durch
+- `para [lugar]` = nach/in Richtung
+
+#### 2. Temporal (Zeit)
+- `en [tiempo]` = im/in
+- `por [tiempo]` = für (Zeitdauer)
+
+#### 3. Kausal (Grund/Ursache)
+- `por [motivo]` = wegen/aufgrund
+
+#### 4. Final (Zweck)
+- `para [infinitivo]` = um...zu
+- `para [alguien]` = für
+
+#### 5. Modal (Art und Weise)
+- `en [transporte]` = mit (Transportmittel)
+
+#### 6. Agentiv (Handelnde Person im Passiv)
+- `[participio] por [alguien]` = von
+
+### Mehrere Übersetzungen
+Präpositionen haben oft mehrere deutsche Entsprechungen:
+- Sortiere nach Häufigkeit
+- Die erste Übersetzung sollte die natürlichste sein
+
+Beispiel für `en [lugar]`:
+```json
+"translations": [
+  {"text": "in"},
+  {"text": "auf"},
+  {"text": "bei"}
+]
+```
+
+### Hints bei Präpositionen
+Verwende hints bei:
+- Spezialisierten Verwendungen: `"hint": "Wetter / Militär"`
+- Fachsprachlichen Bedeutungen
+- Wenn die Funktion nicht aus dem Platzhalter klar wird
+
+
+# Examples
+
+```json
+[
+  {
+    "id": "00701",
+    "lemma": "por",
+    "pos": "ADP",
+    "meanings": [
+      {
+        "structure": "por [motivo]",
+        "example_es": "No pudimos salir a pasear por la lluvia.",
+        "estimated_share": 0.4,
+        "flags": [],
+        "translations": [
+          {
+            "text": "wegen"
+          },
+          {
+            "text": "aufgrund"
+          }
+        ]
+      },
+      {
+        "structure": "por [lugar]",
+        "example_es": "El ladrón entró en la casa por la ventana.",
+        "estimated_share": 0.3,
+        "flags": [],
+        "translations": [
+          {
+            "text": "durch"
+          }
+        ]
+      },
+      {
+        "structure": "por [precio / intercambio]",
+        "example_es": "Te cambio mi bocadillo por tu manzana.",
+        "estimated_share": 0.1,
+        "flags": [],
+        "translations": [
+          {
+            "text": "gegen"
+          },
+          {
+            "text": "für"
+          }
+        ]
+      },
+      {
+        "structure": "[participio] por [alguien]",
+        "example_es": "Este libro fue escrito por García Márquez.",
+        "estimated_share": 0.2,
+        "flags": [],
+        "translations": [
+          {
+            "text": "von"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "00702",
+    "lemma": "para",
+    "pos": "ADP",
+    "meanings": [
+      {
+        "structure": "para [infinitivo]",
+        "example_es": "Necesito gafas nuevas para ver mejor de lejos.",
+        "estimated_share": 0.4,
+        "flags": [],
+        "translations": [
+          {
+            "text": "um ... zu"
+          },
+          {
+            "text": "zum"
+          }
+        ]
+      },
+      {
+        "structure": "para [alguien]",
+        "example_es": "He comprado un regalo para mi madre.",
+        "estimated_share": 0.45,
+        "flags": [],
+        "translations": [
+          {
+            "text": "für"
+          }
+        ]
+      },
+      {
+        "structure": "para [lugar]",
+        "example_es": "El tren sale para Madrid en cinco minutos.",
+        "estimated_share": 0.15,
+        "flags": [],
+        "translations": [
+          {
+            "text": "nach"
+          },
+          {
+            "text": "in Richtung"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "00703",
+    "lemma": "en",
+    "pos": "ADP",
+    "meanings": [
+      {
+        "structure": "en [lugar]",
+        "example_es": "Las llaves están en la mesa de la cocina.",
+        "estimated_share": 0.7,
+        "flags": [],
+        "translations": [
+          {
+            "text": "auf"
+          },
+          {
+            "text": "in"
+          },
+          {
+            "text": "bei"
+          }
+        ]
+      },
+      {
+        "structure": "ir en [transporte]",
+        "example_es": "Prefiero ir al trabajo en bicicleta para hacer deporte.",
+        "estimated_share": 0.15,
+        "flags": [],
+        "translations": [
+          {
+            "text": "mit"
+          }
+        ]
+      },
+      {
+        "structure": "en [tiempo]",
+        "example_es": "Nací en 1990, en el mes de agosto.",
+        "estimated_share": 0.15,
+        "flags": [],
+        "translations": [
+          {
+            "text": "im"
+          },
+          {
+            "text": "in"
+          }
+        ]
+      }
+    ]
+  }
+]
+```

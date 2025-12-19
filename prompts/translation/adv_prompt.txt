@@ -1,0 +1,214 @@
+# POS-spezifischer Prompt: ADV (Adverb)
+
+## JSON-Struktur für Adverbien
+
+```json
+{
+  "id": "00XXX",
+  "lemma": "bien",
+  "pos": "ADV",
+  "meanings": [
+    {
+      "structure": "bien",
+      "example_es": "Ejemplo en español.",
+      "estimated_share": 0.5,
+      "flags": [], 
+      "translations": [
+        {
+          "text": "gut"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Besonderheiten für Adverbien
+
+### Structure-Feld
+Bei Adverbien ist das structure-Feld wichtig, wenn:
+
+#### Position oder Kombination relevant ist:
+✅ **MIT Platzhalter:**
+- `ya [verbo]` = schon (zeigt Position vor Verb)
+- `ya no [verbo]` = nicht mehr (feste Kombination)
+- `bien [adjetivo]` = sehr/ziemlich (modifiziert Adjektiv)
+- `cerca de [algo]` = in der Nähe von (mit Präposition)
+
+❌ **OHNE Platzhalter:**
+- `bien` = gut (wenn es Verb modifiziert - das ist Standard)
+- `cerca` = in der Nähe (ohne Präposition)
+- `lejos` = weit
+- `aquí` = hier
+
+### Typische Adverb-Strukturen
+
+#### 1. Temporale Adverbien
+- `ya [verbo]` = schon
+- `ya no [verbo]` = nicht mehr
+- `todavía` = noch/immer noch
+- `aún` = noch/sogar
+
+#### 2. Modale Adverbien
+- `bien` = gut
+- `mal` = schlecht
+- `así` = so
+
+#### 3. Lokale Adverbien
+- `cerca` = in der Nähe
+- `cerca de [algo]` = in der Nähe von
+- `lejos` = weit
+- `aquí/ahí/allí` = hier/da/dort
+
+#### 4. Graduale Adverbien
+- `muy` = sehr
+- `bien [adjetivo]` = sehr/ziemlich/echt
+- `bastante` = ziemlich
+
+### Feste Wendungen
+Wenn das Adverb in einer festen Wendung vorkommt:
+- `estar bien` = gut gehen (Person/Situation)
+- Erstelle einen separaten meaning-Eintrag dafür
+
+### Hints bei Adverbien
+Verwende hints bei:
+- Kontextspezifischen Bedeutungen
+- Umgangssprachlichen Varianten
+
+
+# Examples
+
+```json
+[
+  {
+    "id": "00501",
+    "lemma": "ya",
+    "pos": "ADV",
+    "meanings": [
+      {
+        "structure": "ya [verbo]",
+        "example_es": "No tengo hambre, ya he comido en casa.",
+        "estimated_share": 0.5,
+        "flags": [],
+        "translations": [
+          {
+            "text": "schon"
+          },
+          {
+            "text": "bereits"
+          }
+        ]
+      },
+      {
+        "structure": "ya no [verbo]",
+        "example_es": "Antes fumaba un paquete al día, pero ya no fumo.",
+        "estimated_share": 0.4,
+        "flags": [],
+        "translations": [
+          {
+            "text": "nicht mehr"
+          }
+        ]
+      },
+      {
+        "structure": "ya",
+        "example_es": "¡Limpia tu habitación ya, no quiero esperar más!",
+        "estimated_share": 0.1,
+        "flags": [],
+        "translations": [
+          {
+            "text": "sofort"
+          },
+          {
+            "text": "jetzt gleich"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "00502",
+    "lemma": "bien",
+    "pos": "ADV",
+    "meanings": [
+      {
+        "structure": "bien",
+        "example_es": "Tu hijo dibuja muy bien para su edad.",
+        "estimated_share": 0.55,
+        "flags": [],
+        "translations": [
+          {
+            "text": "gut"
+          }
+        ]
+      },
+      {
+        "structure": "bien [adjetivo]",
+        "example_es": "El agua de la piscina está bien fría hoy.",
+        "estimated_share": 0.1,
+        "flags": [],
+        "translations": [
+          {
+            "text": "sehr"
+          },
+          {
+            "text": "ziemlich"
+          },
+          {
+            "text": "echt"
+          }
+        ]
+      },
+      {
+        "structure": "estar bien",
+        "example_es": "No te preocupes por mí, estoy bien.",
+        "estimated_share": 0.35,
+        "flags": [],
+        "translations": [
+          {
+            "text": "gut"
+          },
+          {
+            "text": "wohlauf"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "00503",
+    "lemma": "cerca",
+    "pos": "ADV",
+    "meanings": [
+      {
+        "structure": "cerca",
+        "example_es": "¿Podemos ir andando? Sí, el restaurante está cerca.",
+        "estimated_share": 0.5,
+        "flags": [],
+        "translations": [
+          {
+            "text": "in der Nähe"
+          },
+          {
+            "text": "nah"
+          }
+        ]
+      },
+      {
+        "structure": "cerca de [algo]",
+        "example_es": "Me gusta vivir cerca de la playa para ver el mar.",
+        "estimated_share": 0.5,
+        "flags": [],
+        "translations": [
+          {
+            "text": "in der Nähe von"
+          },
+          {
+            "text": "nahe bei"
+          }
+        ]
+      }
+    ]
+  }
+]
+```

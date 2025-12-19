@@ -20,6 +20,7 @@ from src.multi_corpus_processor import MultiCorpusProcessor
 from src.corpus_readers import LeipzigCorpusReader, OpusCorpusReader
 from src.llm_providers import create_provider
 from src.llm_corrector import LemmaCorrector
+from src.llm_translator import LemmaTranslator
 
 
 logger = logging.getLogger(__name__)
@@ -159,7 +160,7 @@ if __name__ == "__main__":
                     "system_prompt": system_prompt,
                     "output_dir": output_dir,
                     "cache_config": llm_config.get("cache", {}),
-                    "llm_model": provider_config.get("model", "gpt-4o-mini"),
+                    "llm_model": provider_config.get("model", "gpt-5-mini"),
                 }
                 corrector = LemmaCorrector(provider, corrector_config)
 
@@ -173,19 +174,51 @@ if __name__ == "__main__":
             logger.error(f"LLM correction failed: {e}")
             logger.warning("Continuing with uncorrected data")
 
-    # Output results
+    # Output lemma frequencies to CSV
     stats = counter.get_statistics()
     logger.info(
         f"\nFinal statistics:\n"
         f"  Total tokens: {stats['total_tokens']:,}\n"
         f"  Unique lemmas: {stats['unique_lemmas']:,}"
     )
-
     min_freq = processing_config.get("min_frequency", 1)
-
-    # Write output
     frequencies = counter.get_sorted_frequencies(min_frequency=min_freq)
     output_path = os.path.join(output_dir, "output.csv")
     OutputWriter.write_csv(frequencies, output_path)
+
+    # Optional: LLM-based translation
+    translation_config = config.get("llm_translation", {})
+    if translation_config.get("enabled", False):
+        logger.info("LLM translation enabled - translating lemmas...")
+
+        try:
+            # Reuse provider if available, otherwise create new one
+            if not llm_config.get("enabled", False) or "provider" not in locals():
+                load_dotenv()
+                api_key = os.getenv("OPENAI_API_KEY")
+                provider_type = translation_config["llm"]["type"]
+                provider_config = translation_config["llm"].get(provider_type, {})
+                provider_config["api_key"] = api_key
+                provider = create_provider(provider_type, provider_config)
+
+            translator_config = {
+                "batch_size": translation_config.get("batch_size", 25),
+                "prompts_dir": translation_config.get(
+                    "prompt_directory", "prompts/translation"
+                ),
+                "output_dir": output_dir,
+                "cache_config": translation_config.get("cache", {}),
+                "llm_model": provider_config.get("model", "gpt-5-mini"),
+            }
+
+            translator = LemmaTranslator(provider, translator_config)
+            min_freq = processing_config.get("min_frequency", 1)
+            translator.translate(counter, min_frequency=min_freq)
+
+            logger.info("LLM translation completed - output: translations.json")
+
+        except Exception as e:
+            logger.error(f"LLM translation failed: {e}")
+            logger.warning("Continuing without translation")
 
     logger.info("Pipeline completed!")
