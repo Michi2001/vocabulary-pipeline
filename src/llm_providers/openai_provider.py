@@ -169,15 +169,15 @@ class OpenAIProvider(BaseLLMProvider):
 
     def _validate_translation_response(self, response: Dict[str, Any]) -> bool:
         """Validate translation response structure."""
-        if "translations" not in response:
-            logger.error("Response missing 'translations' key")
+        if "all_lemma_translations" not in response:
+            logger.error("Response missing 'all_lemma_translations' key")
             return False
 
-        if not isinstance(response["translations"], list):
-            logger.error("'translations' is not a list")
+        if not isinstance(response["all_lemma_translations"], list):
+            logger.error("'all_lemma_translations' is not a list")
             return False
 
-        for translation in response["translations"]:
+        for translation in response["all_lemma_translations"]:
             if (
                 "id" not in translation
                 or "lemma" not in translation

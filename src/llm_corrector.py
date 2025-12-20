@@ -78,7 +78,9 @@ class LemmaCorrector:
             )
         else:
             frequencies_to_correct = frequencies
-            logger.info(f"Processing {len(frequencies)} lemmas for LLM correction (all)")
+            logger.info(
+                f"Processing {len(frequencies)} lemmas for LLM correction (all)"
+            )
 
         # Step 3: Assign IDs and create batches
         id_mapping, batches = self._create_batches(frequencies_to_correct)

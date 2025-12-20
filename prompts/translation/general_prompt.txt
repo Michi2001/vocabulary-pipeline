@@ -83,4 +83,33 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - Konsistenz in Formatierung und Stil
 
 ## Output-Format
-Gib nur valides JSON zurück, ohne zusätzlichen Text oder Erklärungen.
+Gib ein JSON-Objekt mit folgendem Format zurück:
+
+```json
+{
+  "all_lemma_translations": [
+    {
+      "id": "...",
+      "lemma": "...",
+      "pos": "...",
+      "meanings": [
+        {
+          "structure": "...",
+          "example_es": "...",
+          "estimated_share": 0.4,
+          "flags": [],
+          "translations": [
+            {"text": "..."},
+            {"text": "...", "hint": "..."}
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Wichtig**:
+- Das gesamte Output muss in einem Top-Level-Objekt mit dem Key `"all_lemma_translations"` sein
+- Dieser Key enthält ein Array von Lemma-Objekten
+- Gib keinen zusätzlichen Text außerhalb des JSON-Objekts zurück

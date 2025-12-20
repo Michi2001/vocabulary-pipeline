@@ -125,7 +125,7 @@ class LemmaTranslator:
 
                 if batch_translations is None:
                     response = self.provider.translate_lemmas(batch, system_prompt)
-                    batch_translations = response["translations"]
+                    batch_translations = response["all_lemma_translations"]
 
                     if self.cache_config.get("enabled", True):
                         self._save_to_cache(batch_cache_key, batch_translations)
