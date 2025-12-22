@@ -46,7 +46,7 @@ def load_translation_input(csv_path):
 INPUT_CSV = Path("test/data/translation_input.csv")
 PROMPT_FOLDER = Path("prompts/translation")
 PROVIDER_TYPE = "openai"
-PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5.2"}
+PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5-mini"}
 BATCH_SIZE = 10  # Number of items to process per batch
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_DIR = Path(f"test/outputs/test_translation/{TIMESTAMP}")

@@ -86,16 +86,30 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   - `"flags": ["offensive", "regionalism"]` (mehrere Flags)
 
 ### 5. Übersetzungen (translations)
-- Gib mehrere deutsche Übersetzungen an, wenn sie gleichwertig sind.
-- Sortiere nach Häufigkeit und Natürlichkeit.
-- Verwende `hint` nach folgenden strengen Regeln:
+- Gib nur so viele deutsche Übersetzungen an, wie wirklich nötig und gleichwertig sind
+- Sortiere nach Häufigkeit und Natürlichkeit
+- **WICHTIG: Verwende hints sehr sparsam!** Integriere Informationen direkt in den Text, wann immer möglich
+- Folge diesen strengen Regeln:
 
-  **a) Hints nur zur Disambiguierung, nicht zur Bedeutungsvervollständigung**
-  - Ein `hint` dient nur dazu, zwischen verschiedenen Bedeutungen eines Wortes zu unterscheiden (Disambiguierung).
-  - Wenn eine Information ein essentieller Teil der Bedeutung ist, um das spanische Lemma präzise abzubilden, integriere sie direkt in den Text:
-    - Schlecht: {"text": "treffen", "hint": "zufällig / begegnen"}
-    - Gut: {"text": "zufällig treffen"} (Das "zufällig" vervollständigt hier die Bedeutung).
-  - Faustregel: Wenn die Kernbedeutung ohne den Hint unklar, vage oder unvollständig wäre, gehört die Information direkt in das Feld "text".
+  **a) Hints NUR zur Disambiguierung - Integration in Text bevorzugen**
+  - **Grundregel**: Hints dienen AUSSCHLIESSLICH zur Unterscheidung zwischen verschiedenen Bedeutungen desselben deutschen Wortes
+  - **Bevorzuge Integration**: Wenn eine Information die Bedeutung vervollständigt oder spezifiziert, integriere sie DIREKT in den Text
+
+  **Beispiele für FALSCHE hint-Verwendung** (stattdessen in Text integrieren):
+  - ❌ Schlecht: `{"text": "treffen", "hint": "zufällig"}`
+  - ✅ Gut: `{"text": "zufällig treffen"}`
+
+  - ❌ Schlecht: `{"text": "kennenlernen", "hint": "zum ersten Mal"}`
+  - ✅ Gut: `{"text": "kennenlernen"}` (ohne hint - "zum ersten Mal" ist bereits in der Bedeutung enthalten)
+
+  - ❌ Schlecht: `{"text": "verdienen", "hint": "Geld"}`
+  - ✅ Gut: `{"text": "Geld verdienen"}` (wenn es spezifisch um Geld geht)
+
+  - ❌ Schlecht: `{"text": "sich leisten", "hint": "finanziell"}`
+  - ✅ Gut: `{"text": "sich leisten"}` (ohne hint - ist immer finanziell)
+
+  - ❌ Schlecht: `{"text": "gewinnen", "hint": "Wettkampf"}`
+  - ✅ Gut: `{"text": "gewinnen"}` (ohne hint - Kontext klar aus Beispielsatz)
 
   **b) Mehrdeutige Übersetzungen (Homonyme)**
   - Verwende den Hint, wenn das deutsche Wort allein zwar präzise ist, aber verschiedene Konzepte abdecken könnte.
@@ -118,11 +132,23 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   - Wenn die Übersetzung bereits präzise und kontextuell eindeutig ist, ist kein Hint zulässig.
   - Beispiele ohne Hint: {"text": "Instrument"}, {"text": "drängen"}, {"text": "die Hand schütteln"}.
 
-  **f) Vermeidung von Redundanz**
-  - Gib keine semantisch identischen Varianten an. Bevorzuge die prägnante Form (z. B. "verengen" statt zusätzlich "enger machen").
-  - Wenn eine Information bereits im Text steht, darf sie nicht im Hint wiederholt werden:
-    - Gut: {"text": "hinterziehen", "hint": "Steuern"} ODER {"text": "Steuern hinterziehen"} (je nach Regel a).
-    - Vermeide: {"text": "Steuern hinterziehen", "hint": "Steuern"} (redundant).
+  **f) STRIKTE Vermeidung von Redundanz**
+  - **Keine semantisch identischen Varianten**: Gib NICHT mehrere Übersetzungen an, die dasselbe bedeuten
+  - **Bevorzuge die prägnante Form**: Ein-Wort-Übersetzungen sind besser als Umschreibungen
+
+  **Beispiele für VERBOTENE Redundanz**:
+  - ❌ Vermeide: `{"text": "verengen"}` UND `{"text": "enger machen"}` (beide bedeuten dasselbe)
+  - ✅ Gut: Nur `{"text": "verengen"}`
+
+  - ❌ Vermeide: `{"text": "erschaffen"}` UND `{"text": "erschaffen / erstellen"}`
+  - ✅ Gut: Nur `{"text": "erschaffen"}` oder nur `{"text": "erstellen"}` (je nach Kontext)
+
+  - ❌ Vermeide: Mehrere identische Übersetzungen mit minimal verschiedenen hints
+  - ✅ Gut: Konsolidiere zu einer Übersetzung oder erstelle separate meanings
+
+  - **Hints dürfen nicht wiederholen, was im Text steht**:
+    - ❌ Vermeide: `{"text": "Steuern hinterziehen", "hint": "Steuern"}`
+    - ✅ Gut: `{"text": "hinterziehen", "hint": "Steuern"}` ODER `{"text": "Steuern hinterziehen"}`
 
   **g) Keine unterschiedlichen Bedeutungen mit Schrägstrich kombinieren**
   - Der Schrägstrich "/" darf nur für echte, gleichwertige Synonyme verwendet werden.
@@ -134,10 +160,13 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   - Wenn mehrere Informationen nötig sind, verwende das Format: "hint": "Kontext1 / Kontext2" (z. B. "Wetter / Front" oder "med. / Technik").
 
 ### 6. Qualitätsstandards
-- Genauigkeit über Vollständigkeit
-- Fokus auf die 2-4 wichtigsten Bedeutungen
-- Realistische `estimated_share` Werte basierend auf tatsächlicher Sprachverwendung
-- Konsistenz in Formatierung und Stil
+- **Qualität über Quantität**: Weniger, präzise Übersetzungen sind besser als viele ähnliche
+- **Genauigkeit über Vollständigkeit**: Fokussiere auf die wichtigsten Bedeutungen
+- **Sparsamkeit bei hints**: Maximal 20-30% der Übersetzungen sollten hints haben
+- **Fokus auf 2-4 Bedeutungen**: Mehr nur wenn wirklich nötig
+- **Realistische `estimated_share` Werte**: Basierend auf tatsächlicher Sprachverwendung
+- **Konsistenz**: Einheitliche Formatierung und Stil
+- **Keine Redundanz**: Jede Übersetzung muss einen eindeutigen Mehrwert bieten
 
 ## Output-Format
 Gib ein JSON-Objekt mit folgendem Format zurück:
