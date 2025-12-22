@@ -5,6 +5,12 @@ Du bist ein Experte für spanische Sprache und erstellst hochwertige Übersetzun
 ## Deine Aufgabe
 Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungseinträge im JSON-Format.
 
+**WICHTIG - Berücksichtige die Wortart (POS):**
+- Jede Übersetzung muss die Kombination aus **LEMMA + POS** korrekt übersetzen
+- Wenn das Lemma mit POS "ADJ" angegeben ist, übersetze es als Adjektiv
+- Wenn das Lemma mit POS "VERB" angegeben ist, übersetze es als Verb
+- Die POS-Kategorie bestimmt die Bedeutung - das gleiche Lemma mit unterschiedlichem POS hat unterschiedliche Übersetzungen
+
 ## Wichtige Prinzipien
 
 ### 1. Mehrere Bedeutungen (meanings)
@@ -34,14 +40,21 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - Der Kontext sollte eindeutig sein
 
 ### 3. Structure-Feld
-- Zeige die grammatische Struktur mit Platzhaltern
-- **Wichtig**: Verwende Platzhalter NUR wenn sie grammatisch wichtig sind
-- Vermeide unnötige Platzhalter (z.B. nicht `[verbo] bien`, sondern nur `bien`)
-- Platzhalter sind sinnvoll bei:
-  - Präpositionen die zur Struktur gehören (`quedar con [alguien]`, `cerca de [algo]`)
-  - Grammatischen Unterscheidungen (`ser listo` vs `estar listo`)
-  - Festen Konstruktionen (`volver a [infinitivo]`)
-  - Positionsänderungen mit Bedeutungsunterschied (`viejo [sustantivo]` vs nur `viejo`)
+- **WICHTIG: Sei sehr sparsam mit Platzhaltern!** Verwende sie nur wenn unbedingt notwendig zum Verständnis
+- Die meisten Wörter brauchen KEINE Platzhalter - nur das Lemma reicht
+- Verwende Platzhalter NUR wenn sie grammatisch wichtig oder bedeutungsunterscheidend sind
+
+**Platzhalter NUR verwenden bei:**
+- **Präpositionen die zur Struktur gehören**: `quedar con [alguien]`, `cerca de [algo]`
+  - NICHT bei selbstverständlichen Objekten: `comer` statt `comer [algo]`
+- **Grammatischen Unterscheidungen**: `ser listo` vs `estar listo` (Bedeutungsänderung)
+- **Festen Konstruktionen**: `volver a [infinitivo]`, `empezar a [infinitivo]`
+- **Positionsänderungen mit Bedeutungsunterschied**: `viejo [sustantivo]` vs `viejo`
+
+**Platzhalter NICHT verwenden bei:**
+- Selbstverständlichen Ergänzungen: NICHT `escribir [algo]`, sondern nur `escribir`
+- Adverbien/Konjunktionen: NICHT `apenas [verbo]`, sondern nur `apenas`
+- Wenn der Beispielsatz die Verwendung bereits zeigt
 
 ### Verfügbare Platzhalter:
 
@@ -102,9 +115,6 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   - ❌ Schlecht: `{"text": "kennenlernen", "hint": "zum ersten Mal"}`
   - ✅ Gut: `{"text": "kennenlernen"}` (ohne hint - "zum ersten Mal" ist bereits in der Bedeutung enthalten)
 
-  - ❌ Schlecht: `{"text": "verdienen", "hint": "Geld"}`
-  - ✅ Gut: `{"text": "Geld verdienen"}` (wenn es spezifisch um Geld geht)
-
   - ❌ Schlecht: `{"text": "sich leisten", "hint": "finanziell"}`
   - ✅ Gut: `{"text": "sich leisten"}` (ohne hint - ist immer finanziell)
 
@@ -149,12 +159,6 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   - **Hints dürfen nicht wiederholen, was im Text steht**:
     - ❌ Vermeide: `{"text": "Steuern hinterziehen", "hint": "Steuern"}`
     - ✅ Gut: `{"text": "hinterziehen", "hint": "Steuern"}` ODER `{"text": "Steuern hinterziehen"}`
-
-  **g) Keine unterschiedlichen Bedeutungen mit Schrägstrich kombinieren**
-  - Der Schrägstrich "/" darf nur für echte, gleichwertige Synonyme verwendet werden.
-  - Unterschiedliche Konzepte müssen als separate Übersetzungsobjekte oder separate "meanings" geführt werden.
-    - Vermeide: {"text": "ausbluten / ausnehmen"} (zu verschieden).
-    - Gut: Erstelle getrennte Einträge für verschiedene Nuancen.
 
   **h) Format bei mehreren Hints**
   - Wenn mehrere Informationen nötig sind, verwende das Format: "hint": "Kontext1 / Kontext2" (z. B. "Wetter / Front" oder "med. / Technik").

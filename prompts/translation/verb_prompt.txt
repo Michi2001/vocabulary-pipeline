@@ -55,6 +55,17 @@ Das structure-Feld ist bei Verben besonders wichtig:
 - Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
 - Keine Pronomen in Klammern
 
+**WICHTIG - Wann reflexive Formen als separate meaning hinzufügen:**
+- ✅ **NUR wenn die reflexive Form eine eigenständige Bedeutung hat**:
+  - `encontrar` → "finden" vs. `encontrarse` → "sich treffen" (UNTERSCHIEDLICHE Bedeutung)
+  - `ir` → "gehen" vs. `irse` → "weggehen/abreisen" (UNTERSCHIEDLICHE Bedeutung)
+  - `dormir` → "schlafen" vs. `dormirse` → "einschlafen" (UNTERSCHIEDLICHE Bedeutung)
+
+- ❌ **NICHT wenn die reflexive Form nur "sich + Grundform" bedeutet**:
+  - `vender` → "verkaufen" vs. `venderse` → "sich verkaufen" (GLEICHE Bedeutung, nur reflexiv)
+  - `lavar` → "waschen" vs. `lavarse` → "sich waschen" (GLEICHE Bedeutung, nur reflexiv)
+  - In diesen Fällen: Erstelle KEINE separate meaning für die reflexive Form
+
 ### Typische Verb-Strukturen im Spanischen
 - Verb + Präposition + Objekt: `hablar de [algo]`, `pensar en [alguien]`
 - Verb + Reflexivpronomen: `quedarse`, `irse`
