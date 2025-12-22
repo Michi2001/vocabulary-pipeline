@@ -56,6 +56,9 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - Adverbien/Konjunktionen: NICHT `apenas [verbo]`, sondern nur `apenas`
 - Wenn der Beispielsatz die Verwendung bereits zeigt
 
+**VERBOTEN - Keine zusätzlichen Erklärungen in Klammern:**
+- Das structure-Feld darf NUR die grammatische Struktur enthalten, KEINE Erklärungen, insbesondere keine Erklärungen in Klammern
+
 ### Verfügbare Platzhalter:
 
 **Objekte/Personen:**

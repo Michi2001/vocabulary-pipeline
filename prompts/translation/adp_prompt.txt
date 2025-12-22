@@ -44,30 +44,6 @@ Bei Präpositionen ist das structure-Feld **essentiell**, da es die **Funktion**
 - `en [tiempo]` = im/in (temporale Bedeutung)
 - `en [transporte]` = mit (Transportmittel)
 
-### Typische Präpositions-Funktionen
-
-#### 1. Lokal (Ort)
-- `en [lugar]` = auf/in/bei
-- `por [lugar]` = durch
-- `para [lugar]` = nach/in Richtung
-
-#### 2. Temporal (Zeit)
-- `en [tiempo]` = im/in
-- `por [tiempo]` = für (Zeitdauer)
-
-#### 3. Kausal (Grund/Ursache)
-- `por [motivo]` = wegen/aufgrund
-
-#### 4. Final (Zweck)
-- `para [infinitivo]` = um...zu
-- `para [alguien]` = für
-
-#### 5. Modal (Art und Weise)
-- `en [transporte]` = mit (Transportmittel)
-
-#### 6. Agentiv (Handelnde Person im Passiv)
-- `[participio] por [alguien]` = von
-
 ### Mehrere Übersetzungen
 Präpositionen haben oft mehrere deutsche Entsprechungen:
 - Sortiere nach Häufigkeit

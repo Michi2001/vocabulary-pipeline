@@ -26,51 +26,11 @@
 ## Besonderheiten für Konjunktionen
 
 ### Structure-Feld (wichtig für Tempus/Modus!)
-Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des folgenden Verbs, da dies die Bedeutung beeinflussen kann:
+Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des folgenden Verbs, da dies die Bedeutung beeinflussen kann.
 
-#### Temporale Konjunktionen mit verschiedenen Zeiten:
-✅ **Mit Tempus-Platzhalter:**
-- `cuando [pasado]` = als (einmalige Handlung in Vergangenheit)
-- `cuando [presente]` = wenn/immer wenn (wiederholte Handlung)
-- `cuando [subjuntivo]` = sobald/wenn (zukünftige Handlung)
-
-#### Konditionale Konjunktionen:
-- `si [condición]` = wenn/falls (mit Indikativ - reale Bedingung)
-- `si [pregunta indirecta]` = ob (indirekte Frage)
-
-#### Konzessive Konjunktionen mit Modus:
-- `aunque [indicativo]` = obwohl (bekannte Tatsache)
-- `aunque [subjuntivo]` = selbst wenn/auch wenn (hypothetisch)
-
-### Mehrere Übersetzungen
-Viele Konjunktionen haben mehrere deutsche Entsprechungen:
-
-```json
-"translations": [
-  {"text": "wenn"},
-  {"text": "falls"}
-]
-```
-
-Sortiere nach:
-1. Häufigkeit der Verwendung
-2. Natürlichkeit in der deutschen Sprache
-
-### Beispielsätze
-Beispielsätze bei Konjunktionen sollten:
-- Den **Modus/Tempus** klar zeigen
-- Natürlich und alltagsnah sein
-- Die Bedeutung der Konjunktion verdeutlichen
-
-✅ Gute Beispiele:
-- `cuando [pasado]`: "Cuando llegué a casa, vi que la puerta estaba abierta."
-- `si [condición]`: "Si llueve mañana, cancelaremos la barbacoa."
-- `aunque [indicativo]`: "Voy a salir a correr aunque hace mucho frío."
-
-### Wichtige Hinweise
-- Der Modus (Indikativ vs. Subjuntiv) kann die Bedeutung stark verändern
-- Tempus-Unterschiede sind wichtig (z.B. cuando + Vergangenheit vs. Gegenwart)
-- Viele Konjunktionen können mehrere grammatische Funktionen haben
+**Beispiele:**
+- `cuando [pasado]` = als vs. `cuando [presente]` = wenn (Tempus ändert Bedeutung)
+- `aunque [indicativo]` = obwohl vs. `aunque [subjuntivo]` = selbst wenn (Modus ändert Bedeutung)
 
 
 # Examples

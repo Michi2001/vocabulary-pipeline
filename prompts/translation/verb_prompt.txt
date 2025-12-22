@@ -83,7 +83,7 @@ Das structure-Feld ist bei Verben besonders wichtig:
     "pos": "VERB",
     "meanings": [
       {
-        "structure": "tocar [algo / a alguien]",
+        "structure": "tocar",
         "example_es": "Por favor, no toques las pinturas del museo.",
         "estimated_share": 0.35,
         "flags": [],
@@ -97,14 +97,13 @@ Das structure-Feld ist bei Verben besonders wichtig:
         ]
       },
       {
-        "structure": "tocar [algo]",
+        "structure": "tocar",
         "example_es": "Mi hermano toca la guitarra en una banda.",
         "estimated_share": 0.3,
         "flags": [],
         "translations": [
           {
-            "text": "spielen",
-            "hint": "Instrument"
+            "text": "Instrument spielen"
           }
         ]
       },
@@ -115,8 +114,7 @@ Das structure-Feld ist bei Verben besonders wichtig:
         "flags": [],
         "translations": [
           {
-            "text": "gewinnen",
-            "hint": "Lotterie, Glücksspiel"
+            "text": "gewinnen"
           }
         ]
       },
@@ -171,12 +169,6 @@ Das structure-Feld ist bei Verben besonders wichtig:
         "translations": [
           {
             "text": "übrig bleiben"
-          },
-          {
-            "text": "noch da sein"
-          },
-          {
-            "text": "verbleiben"
           }
         ]
       },
@@ -206,7 +198,7 @@ Das structure-Feld ist bei Verben besonders wichtig:
           },
           {
             "text": "passen",
-            "hint": "Kleidung, Größe"
+            "hint": "Kleidung / Größe"
           }
         ]
       }
