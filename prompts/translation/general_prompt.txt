@@ -74,7 +74,23 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 ### 5. Übersetzungen (translations)
 - Gib mehrere deutsche Übersetzungen an, wenn sie gleichwertig sind
 - Sortiere nach Häufigkeit/Natürlichkeit
-- Verwende `hint` für wichtige Kontextinformationen (z.B. "Instrument", "Kleidung", "Wetter")
+- Verwende `hint` in folgenden Fällen:
+
+  **a) Mehrdeutige Übersetzungen**
+  - Wenn die Bedeutung aus dem Text allein nicht eindeutig ist
+  - Beispiel: `"text": "löschen", "hint": "Durst"` (nicht klar ob Feuer oder Durst gemeint ist)
+
+  **b) Fachbegriffe und spezialisierte Wörter**
+  - Bei medizinischen, technischen oder anderen Fachbegriffen, die dem allgemeinen Sprecher nicht bekannt sind
+  - Beispiele:
+    - `"text": "Karpaltunnel", "hint": "med."`
+    - `"text": "Prozessor", "hint": "IT"`
+    - `"text": "Sehne", "hint": "Anatomie"`
+
+  **c) Kein hint bei eindeutigen Übersetzungen**
+  - Beispiel ohne hint: `"text": "Instrument"` (eindeutig, kein hint nötig)
+
+- Bei mehreren Hints verwende das Format: `"hint": "Kontext1 / Kontext2"` (z.B. "Wetter / Front" oder "med. / Technik")
 
 ### 6. Qualitätsstandards
 - Genauigkeit über Vollständigkeit

@@ -59,12 +59,6 @@
 - Nur bei speziellen Konstruktionen oder wenn die Position wichtig ist
 - Beispiel: Wenn das Substantiv in einer festen Wendung vorkommt
 
-### Hints
-Verwende hints bei:
-- Fachbegriffen (z.B. `"hint": "Medizin"`, `"hint": "Technik"`)
-- Kontextspezifischen Bedeutungen (z.B. `"hint": "Wetter / Militär"`)
-
-
 # Examples
 
 ```json

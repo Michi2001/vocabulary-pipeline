@@ -61,12 +61,6 @@ Manche Adjektive ändern die Bedeutung je nach Position:
 - `[sustantivo] grande` → nur `grande`
 - `bonito [sustantivo]` → nur `bonito` (Position ändert nichts)
 
-### Hints bei Adjektiven
-Meist nicht nötig, außer bei:
-- Fachsprachlichen Bedeutungen
-- Regionalen Varianten
-- Mehrdeutigen Übersetzungen
-
 
 # Examples
 

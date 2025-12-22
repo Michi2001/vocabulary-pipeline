@@ -82,13 +82,6 @@ Beispiel für `en [lugar]`:
 ]
 ```
 
-### Hints bei Präpositionen
-Verwende hints bei:
-- Spezialisierten Verwendungen: `"hint": "Wetter / Militär"`
-- Fachsprachlichen Bedeutungen
-- Wenn die Funktion nicht aus dem Platzhalter klar wird
-
-
 # Examples
 
 ```json

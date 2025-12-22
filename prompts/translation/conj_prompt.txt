@@ -67,12 +67,6 @@ Beispielsätze bei Konjunktionen sollten:
 - `si [condición]`: "Si llueve mañana, cancelaremos la barbacoa."
 - `aunque [indicativo]`: "Voy a salir a correr aunque hace mucho frío."
 
-### Hints bei Konjunktionen
-Meist nicht nötig, außer bei:
-- Fachsprachlichen Verwendungen
-- Regionalen Varianten
-- Wenn die Unterscheidung zwischen Modus/Tempus zusätzliche Erklärung braucht
-
 ### Wichtige Hinweise
 - Der Modus (Indikativ vs. Subjuntiv) kann die Bedeutung stark verändern
 - Tempus-Unterschiede sind wichtig (z.B. cuando + Vergangenheit vs. Gegenwart)

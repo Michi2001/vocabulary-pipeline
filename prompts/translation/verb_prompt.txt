@@ -55,11 +55,6 @@ Das structure-Feld ist bei Verben besonders wichtig:
 - Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
 - Keine Pronomen in Klammern
 
-### Hints bei Verben
-Verwende hints für:
-- Spezifische Kontexte: `"hint": "Instrument"`, `"hint": "Lotterie, Glücksspiel"`
-- Fachsprache: `"hint": "Technik"`, `"hint": "Medizin"`
-
 ### Typische Verb-Strukturen im Spanischen
 - Verb + Präposition + Objekt: `hablar de [algo]`, `pensar en [alguien]`
 - Verb + Reflexivpronomen: `quedarse`, `irse`
