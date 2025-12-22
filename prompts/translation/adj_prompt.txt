@@ -34,10 +34,14 @@ Viele spanische Adjektive haben **unterschiedliche Bedeutungen** mit ser und est
 - `ser listo` = schlau / `estar listo` = fertig
 - `ser rico` = reich / `estar rico` = lecker
 - `ser malo` = böse / `estar malo` = krank/schlecht
+- `ser aburrido` = langweilig / `estar aburrido` = gelangweilt
+- `ser bueno` = gut (Charakter) / `estar bueno` = lecker/gut aussehen
 
 ❌ **NEIN** - Wenn Bedeutung gleich:
 - `ser/estar feliz` = glücklich (gleiche Bedeutung) → nur `feliz`
 - `ser/estar importante` = wichtig → nur `importante`
+- `ser celoso` / `estar celoso` = eifersüchtig (Unterschied nur dauerhaft vs. momentan, aber gleiche Bedeutung) → nur `celoso`
+- **WICHTIG**: Wenn ser/estar nur den Unterschied zwischen "charakterliche Eigenschaft" vs. "momentanes Gefühl" markiert, aber die deutsche Übersetzung identisch bleibt, KEINE separaten meanings erstellen!
 
 ### Position des Adjektivs
 Manche Adjektive ändern die Bedeutung je nach Position:

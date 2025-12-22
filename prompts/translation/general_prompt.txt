@@ -7,11 +7,25 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 
 ## Wichtige Prinzipien
 
-### 1. Mehrere Bedeutungen
+### 1. Mehrere Bedeutungen (meanings)
 - Analysiere alle relevanten Bedeutungen des Wortes
 - Priorisiere häufig verwendete Bedeutungen
 - Nutze `estimated_share` um die relative Häufigkeit anzugeben (Werte zwischen 0 und 1, Summe = 1.0)
 - Sei realistisch: Häufige Alltagsbedeutungen haben höhere Werte als seltene/fachsprachliche Bedeutungen
+
+**Wann separate meanings erstellen:**
+- **Unterschiedliche deutsche Übersetzungen**: Wenn die Grundbedeutung im Deutschen anders ist
+  - Beispiel: `muñeca` → "Handgelenk" vs. "Puppe" (zwei komplett verschiedene Konzepte)
+- **Grammatische Unterschiede**: Wenn sich grammatische Eigenschaften ändern
+  - Beispiel: Unterschiedliches Geschlecht im Deutschen, auch wenn die Bedeutung ähnlich ist
+- **Unterschiedlicher Kontext**: Wenn der Verwendungskontext so verschieden ist, dass ein gemeinsamer Begriff den Kern nicht mehr trifft
+  - Beispiel: Technische vs. alltägliche Verwendung mit unterschiedlicher Kernbedeutung
+
+**Wann KEINE separaten meanings erstellen:**
+- **Gleiche Übersetzung und Kernbedeutung**: Wenn die deutsche Übersetzung und die Kernbedeutung identisch sind, auch wenn die Kontexte verschieden sind
+  - Beispiel: `visibilidad` → "Sichtbarkeit" (physisch im Wetter UND metaphorisch für Bekanntheit - beides ist "Sichtbarkeit", keine separaten meanings nötig)
+  - Das deutsche Wort deckt beide Verwendungen ab, genau wie im Spanischen
+- **Nur stilistische oder graduelle Unterschiede**: Wenn es nur um Nuancen oder Register geht, nicht um grundsätzlich verschiedene Bedeutungen
 
 ### 2. Beispielsätze (example_es)
 - Verwende natürliche, alltägliche spanische Sätze
@@ -54,7 +68,7 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - `[tiempo]`
 - `[motivo]`
 - `[transporte]`
-- **Du kannst weitere Kontext-Platzhalter erstellen**, wenn sie sinnvoll und klar verständlich sind (z.B. `[precio]`, `[condición]`, `[cantidad]`, etc.)
+- **Du kannst weitere Kontext-Platzhalter erstellen**, wenn sie sinnvoll und klar verständlich sind (z.B. `[precio]`, `[condición]`, `[cantidad]`, `[gol / punto]` etc.)
 
 **Kombination:** Mit Schrägstrich: `[algo / alguien]`
 
@@ -87,16 +101,32 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
     - `"text": "Prozessor", "hint": "IT"`
     - `"text": "Sehne", "hint": "Anatomie"`
 
-  **c) Kein hint bei eindeutigen Übersetzungen**
-  - Beispiel ohne hint: `"text": "Instrument"` (eindeutig, kein hint nötig)
+  **c) Konnotation und Stilebene**
+  - Verwende hints für wichtige Konnotationen oder stilistische Unterschiede:
+    - Konnotation: `"text": "durchtrieben", "hint": "negativ konnotiert"`
+    - Register: `"text": "krass", "hint": "umgangssprachlich"`
+    - Formalität: `"text": "verzehren", "hint": "gehoben"`
+  - Diese Hinweise helfen dem Lerner, das Wort angemessen zu verwenden
 
-  **d) Vermeide redundante Übersetzungen**
+  **d) Kein hint bei eindeutigen Übersetzungen**
+  - Beispiel ohne hint: `"text": "Instrument"` (eindeutig, kein hint nötig)
+  - Besipiel ohne hint: `"text": "drängen"` (eindeutig, kein hint nötig)
+  - Beispiel ohne hint: `"text": "die Hand schütteln"` (eindeutig, kein hint nötig)
+
+  **e) Vermeide redundante Übersetzungen**
   - Gib keine Übersetzungen an, die semantisch identisch sind
-  - Wenn der hint-Kontext bereits im Übersetzungstext enthalten ist, ist das redundant
-  - Bevorzuge in solchen Fällen die kompakte Variante mit hint:
+  - Vermeide umschreibende Varianten, die dasselbe bedeuten:
+    - Vermeide: `"verengen"` UND `"enger machen"` (beides bedeutet dasselbe)
+    - Gut: Nur `"verengen"` (bevorzuge die prägnante Form)
+  - Wenn der hint-Kontext bereits im Übersetzungstext enthalten ist, ist das redundant:
     - Gut: `{"text": "hinterziehen", "hint": "Steuern"}`
     - Vermeide: zusätzlich `{"text": "Steuern hinterziehen"}`
   - Der hint dient zur Kontextklärung, nicht zur Erzeugung zusätzlicher Varianten
+
+  **f) Keine unterschiedlichen Bedeutungen mit Schrägstrich kombinieren**
+  - Der Schrägstrich soll NUR für gleichwertige Synonyme verwendet werden
+  - Vermeide: `"text": "ausbluten / ausnehmen"` (zwei verschiedene Bedeutungen)
+  - Gut: Erstelle separate Übersetzungseinträge oder separate meanings, wenn die Bedeutungen unterschiedlich sind
 
 - Bei mehreren Hints verwende das Format: `"hint": "Kontext1 / Kontext2"` (z.B. "Wetter / Front" oder "med. / Technik")
 
