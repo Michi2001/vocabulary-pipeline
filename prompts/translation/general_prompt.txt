@@ -56,8 +56,25 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - Adverbien/Konjunktionen: NICHT `apenas [verbo]`, sondern nur `apenas`
 - Wenn der Beispielsatz die Verwendung bereits zeigt
 
-**VERBOTEN - Keine zusätzlichen Erklärungen in Klammern:**
-- Das structure-Feld darf NUR die grammatische Struktur enthalten, KEINE Erklärungen, insbesondere keine Erklärungen in Klammern
++**KRITISCH VERBOTEN - Keine Erklärungen in Klammern im structure-Feld:**   
+- Das structure-Feld darf NUR Platzhalter enthalten, KEINE Erklärungen     
+- **NIEMALS Klammern mit Erklärungen** wie (exclamativo), (causal), (simultaneidad) verwenden                                                         
+- ❌ FALSCH: `"que [subjuntivo] (exclamativo / desiderativo)"`             
+- ✅ RICHTIG: `"que [subjuntivo]"             
+- ❌ FALSCH: `"mientras [indicativo] (simultaneidad)"`                     
+- ✅ RICHTIG: `"mientras"` oder `"mientras [indicativo]"`               
+- ❌ FALSCH: `"sino [sustantivo] (contraste tras negación)"`
+- ✅ RICHTIG: `"sino [sustantivo]"`
+- **Wenn du eine Funktion zeigen willst, mach daraus einen Platzhalter, KEINE Klammer-Erklärung**
+
+**WICHTIG - Keine Redundanz zwischen structure und hint:**
+- Wenn eine Erklärung ins hint-Feld gehört, darf sie NICHT auch im structure-Feld stehen
+- Structure = nur grammatische Struktur mit Platzhaltern
+- Hint = Erklärungen und zusätzliche Informationen
+- ❌ FALSCH: `"structure": "a [persona] (marcador de OD)"` + `"hint": "Markiert das direkte Objekt"`
+- ✅ RICHTIG: `"structure": "a [persona]"` + `"hint": "Markiert das direkte Objekt bei Personen"`
+- ❌ FALSCH: `"structure": "ni (enfático)"` + `"hint": "verstärkend"`
+- ✅ RICHTIG: `"structure": "ni"` + `"hint": "verstärkend"` ODER `"structure": "ni [enfático]"`
 
 ### Verfügbare Platzhalter:
 
@@ -96,6 +113,14 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   - `"offensive"`: Anstößige/vulgäre Bedeutung
   - `"regionalism"`: Regionalismus (spezifisch für bestimmte Länder/Regionen)
   - `"false_friend"`: Falscher Freund (ähnlich zu Deutsch aber andere Bedeutung)
+
+**WICHTIG - Wann "offensive" verwenden:**
+- ✅ Verwende `"offensive"` für: Vulgärsprache, Schimpfwörter, explizite/crude Slang-Begriffe
+- ❌ NICHT verwenden für: Medizinische/anatomische Begriffe, neutrale Beschreibungen, akzeptable Euphemismen
+- **Sexuelle Begriffe**: Nur vulgäre/explizite Slang-Begriffe sind offensive (z.B. "follar")
+  - NICHT offensive: medizinische Begriffe ("pene", "vagina"), neutrale Beschreibungen ("relaciones sexuales"), akzeptable Euphemismen ("hacer el amor")
+- **Regel**: Tagge nur als offensive, wenn der Begriff in normaler Konversation sozial inakzeptabel wäre
+
 - Beispiele:
   - `"flags": []` (keine Warnungen)
   - `"flags": ["regionalism"]` (nur in bestimmten Regionen verwendet)
@@ -107,8 +132,13 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - **WICHTIG: Verwende hints sehr sparsam!** Integriere Informationen direkt in den Text, wann immer möglich
 - Folge diesen strengen Regeln:
 
+  **WICHTIG - Verwendung des hint-Feldes:**
+  - Hints dienen zur Disambiguierung UND für zusätzliche Erklärungen, wenn nötig
+  - Das hint-Feld kann verwendet werden für: Kontext, Fachgebiet, Register, grammatische Hinweise, Bedeutungserklärungen
+  - **Aber**: Bevorzuge Integration in den Text, wenn möglich
+
   **a) Hints NUR zur Disambiguierung - Integration in Text bevorzugen**
-  - **Grundregel**: Hints dienen AUSSCHLIESSLICH zur Unterscheidung zwischen verschiedenen Bedeutungen desselben deutschen Wortes
+  - **Grundregel**: Hints dienen PRIMÄR zur Unterscheidung zwischen verschiedenen Bedeutungen desselben deutschen Wortes
   - **Bevorzuge Integration**: Wenn eine Information die Bedeutung vervollständigt oder spezifiziert, integriere sie DIREKT in den Text
 
   **Beispiele für FALSCHE hint-Verwendung** (stattdessen in Text integrieren):
@@ -123,6 +153,16 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 
   - ❌ Schlecht: `{"text": "gewinnen", "hint": "Wettkampf"}`
   - ✅ Gut: `{"text": "gewinnen"}` (ohne hint - Kontext klar aus Beispielsatz)
+
+  **KRITISCH VERBOTEN - Keine Erklärungen in Klammern im text-Feld:**
+  - Das text-Feld darf NUR die deutsche Übersetzung enthalten, KEINE Erklärungen in Klammern
+  - **Wenn du zusätzliche Informationen brauchst, verwende das hint-Feld**
+  - ❌ FALSCH: `{"text": "jetzt (als Übergang)"}`
+  - ✅ RICHTIG: `{"text": "jetzt", "hint": "Übergang"}` ODER nur `{"text": "jetzt"}`
+  - ❌ FALSCH: `{"text": "kaum (in der Bedeutung 'sobald/gleich nachdem')"}`
+  - ✅ RICHTIG: `{"text": "kaum"}` mit separatem meaning für "sobald" ODER `{"text": "kaum", "hint": "zeitlich"}`
+  - ❌ FALSCH: `{"text": "nach (zeitlich)"}`
+  - ✅ RICHTIG: `{"text": "nach", "hint": "zeitlich"}` ODER nur `{"text": "nach"}`
 
   **b) Mehrdeutige Übersetzungen (Homonyme)**
   - Verwende den Hint, wenn das deutsche Wort allein zwar präzise ist, aber verschiedene Konzepte abdecken könnte.
@@ -144,6 +184,16 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   **e) Kein Hint bei eindeutigen Übersetzungen**
   - Wenn die Übersetzung bereits präzise und kontextuell eindeutig ist, ist kein Hint zulässig.
   - Beispiele ohne Hint: {"text": "Instrument"}, {"text": "drängen"}, {"text": "die Hand schütteln"}.
+
+  **e.2) Nicht übersetzbare Wörter / Grammatische Funktionswörter**
+  - Wenn ein spanisches Wort keine direkte deutsche Entsprechung hat (z.B. grammatische Marker), verwende:
+    - **text-Feld**: `"—"` (em-dash als Platzhalter für "keine Übersetzung")
+    - **hint-Feld**: Kurze Erklärung der Funktion/Bedeutung
+  - Beispiele:
+    - {"text": "—", "hint": "Markiert das direkte Objekt"} für spanisches "a" bei Personen
+    - {"text": "—", "hint": "Höflichkeitspartikel"} für nicht übersetzbare Partikeln
+    - {"text": "—", "hint": "Verstärkung"} für grammatische Verstärkungspartikel
+  - **WICHTIG**: Verwende `"—"` (em-dash), NICHT "(keine Entsprechung)" oder ähnliche Texte
 
   **f) STRIKTE Vermeidung von Redundanz**
   - **Keine semantisch identischen Varianten**: Gib NICHT mehrere Übersetzungen an, die dasselbe bedeuten
