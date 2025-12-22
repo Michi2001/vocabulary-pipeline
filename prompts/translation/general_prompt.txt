@@ -86,49 +86,52 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   - `"flags": ["offensive", "regionalism"]` (mehrere Flags)
 
 ### 5. Übersetzungen (translations)
-- Gib mehrere deutsche Übersetzungen an, wenn sie gleichwertig sind
-- Sortiere nach Häufigkeit/Natürlichkeit
-- Verwende `hint` in folgenden Fällen:
+- Gib mehrere deutsche Übersetzungen an, wenn sie gleichwertig sind.
+- Sortiere nach Häufigkeit und Natürlichkeit.
+- Verwende `hint` nach folgenden strengen Regeln:
 
-  **a) Mehrdeutige Übersetzungen**
-  - Wenn die Bedeutung aus dem Text allein nicht eindeutig ist
-  - Beispiel: `"text": "löschen", "hint": "Durst"` (nicht klar ob Feuer oder Durst gemeint ist)
+  **a) Hints nur zur Disambiguierung, nicht zur Bedeutungsvervollständigung**
+  - Ein `hint` dient nur dazu, zwischen verschiedenen Bedeutungen eines Wortes zu unterscheiden (Disambiguierung).
+  - Wenn eine Information ein essentieller Teil der Bedeutung ist, um das spanische Lemma präzise abzubilden, integriere sie direkt in den Text:
+    - Schlecht: {"text": "treffen", "hint": "zufällig / begegnen"}
+    - Gut: {"text": "zufällig treffen"} (Das "zufällig" vervollständigt hier die Bedeutung).
+  - Faustregel: Wenn die Kernbedeutung ohne den Hint unklar, vage oder unvollständig wäre, gehört die Information direkt in das Feld "text".
 
-  **b) Fachbegriffe und spezialisierte Wörter**
-  - Bei medizinischen, technischen oder anderen Fachbegriffen, die dem allgemeinen Sprecher nicht bekannt sind
+  **b) Mehrdeutige Übersetzungen (Homonyme)**
+  - Verwende den Hint, wenn das deutsche Wort allein zwar präzise ist, aber verschiedene Konzepte abdecken könnte.
+  - Beispiel: {"text": "löschen", "hint": "Durst"} vs. {"text": "löschen", "hint": "Feuer"}.
+
+  **c) Fachbegriffe und spezialisierte Wörter**
+  - Kennzeichne medizinische, technische oder fachspezifische Begriffe, die nicht zum allgemeinsprachlichen Kern gehören.
   - Beispiele:
-    - `"text": "Karpaltunnel", "hint": "med."`
-    - `"text": "Prozessor", "hint": "IT"`
-    - `"text": "Sehne", "hint": "Anatomie"`
+    - {"text": "Karpaltunnel", "hint": "med."}
+    - {"text": "Prozessor", "hint": "IT"}
+    - {"text": "Sehne", "hint": "Anatomie"}
 
-  **c) Konnotation und Stilebene**
-  - Verwende hints für wichtige Konnotationen oder stilistische Unterschiede:
-    - Konnotation: `"text": "durchtrieben", "hint": "negativ konnotiert"`
-    - Register: `"text": "krass", "hint": "umgangssprachlich"`
-    - Formalität: `"text": "verzehren", "hint": "gehoben"`
-  - Diese Hinweise helfen dem Lerner, das Wort angemessen zu verwenden
+  **d) Konnotation, Stilebene und Register**
+  - Nutze Hints, um dem Lerner den angemessenen Gebrauch zu vermitteln:
+    - Konnotation: {"text": "durchtrieben", "hint": "negativ"}
+    - Register: {"text": "krass", "hint": "ugs."}
+    - Formalität: {"text": "verzehren", "hint": "gehoben"}
 
-  **d) Kein hint bei eindeutigen Übersetzungen**
-  - Beispiel ohne hint: `"text": "Instrument"` (eindeutig, kein hint nötig)
-  - Besipiel ohne hint: `"text": "drängen"` (eindeutig, kein hint nötig)
-  - Beispiel ohne hint: `"text": "die Hand schütteln"` (eindeutig, kein hint nötig)
+  **e) Kein Hint bei eindeutigen Übersetzungen**
+  - Wenn die Übersetzung bereits präzise und kontextuell eindeutig ist, ist kein Hint zulässig.
+  - Beispiele ohne Hint: {"text": "Instrument"}, {"text": "drängen"}, {"text": "die Hand schütteln"}.
 
-  **e) Vermeide redundante Übersetzungen**
-  - Gib keine Übersetzungen an, die semantisch identisch sind
-  - Vermeide umschreibende Varianten, die dasselbe bedeuten:
-    - Vermeide: `"verengen"` UND `"enger machen"` (beides bedeutet dasselbe)
-    - Gut: Nur `"verengen"` (bevorzuge die prägnante Form)
-  - Wenn der hint-Kontext bereits im Übersetzungstext enthalten ist, ist das redundant:
-    - Gut: `{"text": "hinterziehen", "hint": "Steuern"}`
-    - Vermeide: zusätzlich `{"text": "Steuern hinterziehen"}`
-  - Der hint dient zur Kontextklärung, nicht zur Erzeugung zusätzlicher Varianten
+  **f) Vermeidung von Redundanz**
+  - Gib keine semantisch identischen Varianten an. Bevorzuge die prägnante Form (z. B. "verengen" statt zusätzlich "enger machen").
+  - Wenn eine Information bereits im Text steht, darf sie nicht im Hint wiederholt werden:
+    - Gut: {"text": "hinterziehen", "hint": "Steuern"} ODER {"text": "Steuern hinterziehen"} (je nach Regel a).
+    - Vermeide: {"text": "Steuern hinterziehen", "hint": "Steuern"} (redundant).
 
-  **f) Keine unterschiedlichen Bedeutungen mit Schrägstrich kombinieren**
-  - Der Schrägstrich soll NUR für gleichwertige Synonyme verwendet werden
-  - Vermeide: `"text": "ausbluten / ausnehmen"` (zwei verschiedene Bedeutungen)
-  - Gut: Erstelle separate Übersetzungseinträge oder separate meanings, wenn die Bedeutungen unterschiedlich sind
+  **g) Keine unterschiedlichen Bedeutungen mit Schrägstrich kombinieren**
+  - Der Schrägstrich "/" darf nur für echte, gleichwertige Synonyme verwendet werden.
+  - Unterschiedliche Konzepte müssen als separate Übersetzungsobjekte oder separate "meanings" geführt werden.
+    - Vermeide: {"text": "ausbluten / ausnehmen"} (zu verschieden).
+    - Gut: Erstelle getrennte Einträge für verschiedene Nuancen.
 
-- Bei mehreren Hints verwende das Format: `"hint": "Kontext1 / Kontext2"` (z.B. "Wetter / Front" oder "med. / Technik")
+  **h) Format bei mehreren Hints**
+  - Wenn mehrere Informationen nötig sind, verwende das Format: "hint": "Kontext1 / Kontext2" (z. B. "Wetter / Front" oder "med. / Technik").
 
 ### 6. Qualitätsstandards
 - Genauigkeit über Vollständigkeit
