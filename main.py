@@ -129,8 +129,8 @@ if __name__ == "__main__":
     counter = multi_processor.process()
 
     # Optional: LLM-based correction
-    llm_config = config.get("llm_correction", {})
-    if llm_config.get("enabled", False):
+    correction_config = config.get("llm_correction", {})
+    if correction_config.get("enabled", False):
         logger.info("LLM correction enabled - applying corrections...")
 
         # Load API key from environment
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
         try:
             # Load system prompt from file
-            prompt_file = llm_config.get(
+            prompt_file = correction_config.get(
                 "system_prompt_file", "config/llm_system_prompt.txt"
             )
             with open(prompt_file, "r", encoding="utf-8") as f:
@@ -147,8 +147,8 @@ if __name__ == "__main__":
 
             if system_prompt:
                 # Get provider config
-                provider_type = llm_config["llm"]["type"]
-                provider_config = llm_config["llm"].get(provider_type, {})
+                provider_type = correction_config["llm"]["type"]
+                provider_config = correction_config["llm"].get(provider_type, {})
                 provider_config["api_key"] = api_key
 
                 # Create provider
@@ -156,12 +156,12 @@ if __name__ == "__main__":
 
                 # Create corrector
                 corrector_config = {
-                    "batch_size": llm_config.get("batch_size", 50),
+                    "batch_size": correction_config.get("batch_size", 50),
                     "system_prompt": system_prompt,
                     "output_dir": output_dir,
-                    "cache_config": llm_config.get("cache", {}),
+                    "cache_config": correction_config.get("cache", {}),
                     "llm_model": provider_config.get("model", "gpt-5-mini"),
-                    "slice": llm_config.get("slice", None),
+                    "slice": correction_config.get("slice", None),
                 }
                 corrector = LemmaCorrector(provider, corrector_config)
 
@@ -193,14 +193,13 @@ if __name__ == "__main__":
         logger.info("LLM translation enabled - translating lemmas...")
 
         try:
-            # Reuse provider if available, otherwise create new one
-            if not llm_config.get("enabled", False) or "provider" not in locals():
-                load_dotenv()
-                api_key = os.getenv("OPENAI_API_KEY")
-                provider_type = translation_config["llm"]["type"]
-                provider_config = translation_config["llm"].get(provider_type, {})
-                provider_config["api_key"] = api_key
-                provider = create_provider(provider_type, provider_config)
+            # Create new provider
+            load_dotenv()
+            api_key = os.getenv("OPENAI_API_KEY")
+            provider_type = translation_config["llm"]["type"]
+            provider_config = translation_config["llm"].get(provider_type, {})
+            provider_config["api_key"] = api_key
+            provider = create_provider(provider_type, provider_config)
 
             translator_config = {
                 "batch_size": translation_config.get("batch_size", 25),
