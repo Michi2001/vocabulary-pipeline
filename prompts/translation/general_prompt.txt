@@ -90,6 +90,14 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   **c) Kein hint bei eindeutigen Übersetzungen**
   - Beispiel ohne hint: `"text": "Instrument"` (eindeutig, kein hint nötig)
 
+  **d) Vermeide redundante Übersetzungen**
+  - Gib keine Übersetzungen an, die semantisch identisch sind
+  - Wenn der hint-Kontext bereits im Übersetzungstext enthalten ist, ist das redundant
+  - Bevorzuge in solchen Fällen die kompakte Variante mit hint:
+    - Gut: `{"text": "hinterziehen", "hint": "Steuern"}`
+    - Vermeide: zusätzlich `{"text": "Steuern hinterziehen"}`
+  - Der hint dient zur Kontextklärung, nicht zur Erzeugung zusätzlicher Varianten
+
 - Bei mehreren Hints verwende das Format: `"hint": "Kontext1 / Kontext2"` (z.B. "Wetter / Front" oder "med. / Technik")
 
 ### 6. Qualitätsstandards
