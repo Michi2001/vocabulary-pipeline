@@ -111,20 +111,62 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - Füge bei Bedarf Warnungen hinzu:
   - `"pos_warning"`: POS unrealistisch
   - `"offensive"`: Anstößige/vulgäre Bedeutung
-  - `"regionalism"`: Regionalismus (spezifisch für bestimmte Länder/Regionen)
+  - `"sensitive"`: Sensible Themen (neutral, aber heikel für Lernkontext)
+  - `"regionalism:Region"`: Regionalismus mit spezifischer Region (siehe unten)
   - `"false_friend"`: Falscher Freund (ähnlich zu Deutsch aber andere Bedeutung)
 
-**WICHTIG - Wann "offensive" verwenden:**
+**Wann "offensive" verwenden:**
 - ✅ Verwende `"offensive"` für: Vulgärsprache, Schimpfwörter, explizite/crude Slang-Begriffe
 - ❌ NICHT verwenden für: Medizinische/anatomische Begriffe, neutrale Beschreibungen, akzeptable Euphemismen
 - **Sexuelle Begriffe**: Nur vulgäre/explizite Slang-Begriffe sind offensive (z.B. "follar")
   - NICHT offensive: medizinische Begriffe ("pene", "vagina"), neutrale Beschreibungen ("relaciones sexuales"), akzeptable Euphemismen ("hacer el amor")
 - **Regel**: Tagge nur als offensive, wenn der Begriff in normaler Konversation sozial inakzeptabel wäre
 
-- Beispiele:
-  - `"flags": []` (keine Warnungen)
-  - `"flags": ["regionalism"]` (nur in bestimmten Regionen verwendet)
-  - `"flags": ["offensive", "regionalism"]` (mehrere Flags)
+**Wann "sensitive" verwenden:**
+- ✅ Verwende `"sensitive"` für: Neutrale Begriffe, die thematisch heikel für automatisch generierte Lerngeschichten sind
+- **Typische Fälle:**
+  - Anatomische/medizinische Begriffe: "pene", "vagina", "ano", "testículo", "útero"
+  - Körperfunktionen: "defecar", "orinar", "eyacular", "menstruar"
+  - Körperausscheidungen: "orina", "heces", "semen"
+  - Intimitäten (neutral): "desnudo", "masturbarse" (wenn nicht vulgär)
+  - Möglicherweise: Begriffe rund um Tod, schwere Krankheiten, Gewalt (Kontext abhängig)
+- **Unterschied zu "offensive":**
+  - `"offensive"`: Vulgär, sozial inakzeptabel (joder, mierda, coño)
+  - `"sensitive"`: Neutral/korrekt, aber thematisch heikel (pene, defecar)
+- **Regel**: Tagge als sensitive, wenn der Begriff zwar korrekt ist, aber in Alltagsgeschichten unpassend wäre
+
+**Regionalismen taggen:**
+- **Spanien ist der Standard**: Für in Spanien übliche Wörter/Bedeutungen KEIN regionalism-Flag setzen
+- **Nur für lateinamerikanische Varianten**: Verwende `regionalism:Region` für Wörter, die spezifisch für bestimmte Länder/Regionen außerhalb Spaniens sind
+- **Format**: `"regionalism:Region"` mit Doppelpunkt zwischen Flag und Region
+- **Mehrere Länder**: Verwende Schrägstrich zur Trennung: `"regionalism:Mexiko/Kolumbien/Venezuela"`
+- **Nur ein regionalism-Flag**: Pro meaning nur einen regionalism-Flag verwenden, auch bei mehreren Ländern
+- **Bevorzuge übergeordnete Regionen**: Wenn möglich, nutze vordefinierte Regionen statt lange Länderlisten
+  - ✅ Gut: `"regionalism:Andenregion"`
+  - ❌ Vermeide: `"regionalism:Peru/Bolivien/Ecuador"` (wenn Andenregion passt)
+
+**Verfügbare Regionen:**
+- `regionalism:Lateinamerika` - Allgemein in Lateinamerika (wenn nicht spezifischer bekannt)
+- `regionalism:Südamerika` - Südamerikanisch (grob)
+- `regionalism:Zentralamerika` - Zentralamerikanisch (grob)
+- `regionalism:Mexiko` - Spezifisch für Mexiko
+- `regionalism:Argentinien` - Spezifisch für Argentinien
+- `regionalism:Chile` - Spezifisch für Chile
+- `regionalism:Kolumbien` - Spezifisch für Kolumbien
+- `regionalism:Río_de_la_Plata` - Argentinien + Uruguay
+- `regionalism:Andenregion` - Peru, Bolivien, Ecuador
+- `regionalism:Karibik` - Kuba, Puerto Rico, Dominikanische Republik
+- Weitere Länder nach Bedarf: `regionalism:Peru`, `regionalism:Venezuela`, etc.
+
+**Beispiele für Flags:**
+- `"flags": []` - Standard (Spanien oder allgemein spanisch)
+- `"flags": ["sensitive"]` - Sensibles Thema (z.B. "pene", "defecar")
+- `"flags": ["offensive"]` - Vulgär (z.B. "joder", "mierda")
+- `"flags": ["regionalism:Mexiko"]` - Nur in Mexiko gebräuchlich
+- `"flags": ["regionalism:Mexiko/Kolumbien"]` - In mehreren Ländern gebräuchlich
+- `"flags": ["regionalism:Andenregion"]` - Bevorzuge Regionen statt lange Listen
+- `"flags": ["offensive", "regionalism:Argentinien"]` - Vulgär und argentinisch
+- `"flags": ["regionalism:Lateinamerika"]` - Allgemein lateinamerikanisch (wenn Land unbekannt)
 
 ### 5. Übersetzungen (translations)
 - Gib nur so viele deutsche Übersetzungen an, wie wirklich nötig und gleichwertig sind

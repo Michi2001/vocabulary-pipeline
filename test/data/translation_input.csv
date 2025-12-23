@@ -9,6 +9,7 @@ id,lemma,frequency,pos
 008,moderno,3079,ADJ
 009,absurdo,535,ADJ
 010,erróneo,427,ADJ
+072,chévere,420,ADJ // sensitive
 011,de,2122658,ADP
 012,a,647326,ADP
 013,con,261413,ADP
@@ -64,3 +65,20 @@ id,lemma,frequency,pos
 063,anular,475,VERB
 064,evacuar,369,VERB
 065,joder,305,VERB
+079,coger,8500,VERB  // ggf. sensitive
+066,próstata,450,NOUN  // sensitive content
+067,pezón,380,NOUN
+068,nalga,320,NOUN
+069,vomitar,850,VERB
+070,abortar,280,VERB
+071,güey,850,NOUN
+073,plata,3200,NOUN
+074,carro,5800,NOUN
+075,boludo,380,NOUN
+076,camión,4500,NOUN
+077,computadora,2800,NOUN
+078,polla,340,NOUN
+080,verga,290,NOUN
+081,suicidio,580,NOUN
+082,aborto,620,NOUN
+083,violación,750,NOUN
