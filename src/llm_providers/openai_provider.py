@@ -33,7 +33,7 @@ class OpenAIProvider(BaseLLMProvider):
         self.model = config.get("model", "gpt-5-mini")
         self.max_retries = config.get("max_retries", 3)
         self.retry_delay = config.get("retry_delay", 2)
-        self.timeout = config.get("timeout", 180)
+        self.timeout = config.get("timeout", 360)
 
     def correct_lemmas(
         self, batch: List[Dict[str, Any]], system_prompt: str

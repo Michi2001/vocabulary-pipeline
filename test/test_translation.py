@@ -43,11 +43,11 @@ def load_translation_input(csv_path):
 
 
 # Configuration
-INPUT_CSV = Path("test/data/translation_input.csv")
+INPUT_CSV = Path("test/data/translation_input_100_nouns.csv")
 PROMPT_FOLDER = Path("prompts/translation")
 PROVIDER_TYPE = "openai"
 PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5"}
-BATCH_SIZE = 30  # Number of items to process per batch
+BATCH_SIZE = 25  # Number of items to process per batch
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_DIR = Path(f"test/outputs/test_translation/{TIMESTAMP}")
 OUTPUT_LOG_PATH = OUTPUT_DIR / "translation.log"
@@ -79,7 +79,7 @@ class TestLemmaTranslation(unittest.TestCase):
             "prompts_dir": str(PROMPT_FOLDER),
             "output_dir": str(OUTPUT_DIR),
             "cache_config": {
-                "enabled": True,
+                "enabled": False,
                 "directory": "cache/test_llm_translations",
             },
             "llm_model": PROVIDER_CONFIG["model"],

@@ -50,13 +50,24 @@ class LemmaTranslator:
         self.cache_config = config.get("cache_config", {})
         self.llm_model = config.get("llm_model", "gpt-5-mini")
 
-    def translate(self, counter: FrequencyCounter, min_frequency: int = 1) -> None:
+    def translate(
+        self, counter: FrequencyCounter, min_frequency: int = 1
+    ) -> Dict[str, Any]:
         """
         Translate lemmas and write to JSON file.
 
         Args:
             counter: Input FrequencyCounter with Spanish lemmas (potentially already corrected)
             min_frequency: Minimum frequency threshold
+
+        Returns:
+            Dict with token usage statistics: {
+                'total_prompt_tokens': int,
+                'total_completion_tokens': int,
+                'total_tokens': int,
+                'api_calls': int,
+                'cache_hits': int
+            }
         """
         logger.info("Starting LLM-based lemma translation...")
 
@@ -73,6 +84,15 @@ class LemmaTranslator:
         all_translations = []
         id_mapping = {}
         id_counter = 1
+
+        # Token usage tracking
+        total_usage = {
+            "total_prompt_tokens": 0,
+            "total_completion_tokens": 0,
+            "total_tokens": 0,
+            "api_calls": 0,
+            "cache_hits": 0,
+        }
 
         # Process each POS sequentially
         for pos in ["VERB", "NOUN", "ADJ", "ADV", "ADP", "CONJ"]:
@@ -127,10 +147,23 @@ class LemmaTranslator:
                     response = self.provider.translate_lemmas(batch, system_prompt)
                     batch_translations = response["all_lemma_translations"]
 
+                    # Track token usage from API call
+                    if "_token_usage" in response:
+                        usage = response["_token_usage"]
+                        total_usage["total_prompt_tokens"] += usage.get(
+                            "prompt_tokens", 0
+                        )
+                        total_usage["total_completion_tokens"] += usage.get(
+                            "completion_tokens", 0
+                        )
+                        total_usage["total_tokens"] += usage.get("total_tokens", 0)
+                        total_usage["api_calls"] += 1
+
                     if self.cache_config.get("enabled", True):
                         self._save_to_cache(batch_cache_key, batch_translations)
                 else:
                     logger.info(f"    Cache hit - loaded batch {i+1} from cache")
+                    total_usage["cache_hits"] += 1
 
                 all_translations.extend(batch_translations)
 
@@ -148,6 +181,19 @@ class LemmaTranslator:
             f"Translation complete. Translated {len(enriched_translations)} lemmas"
         )
         logger.info(f"Output saved to: {output_path}")
+
+        # Log token usage summary
+        logger.info("\n" + "=" * 60)
+        logger.info("TOKEN USAGE SUMMARY")
+        logger.info("=" * 60)
+        logger.info(f"API Calls:          {total_usage['api_calls']}")
+        logger.info(f"Cache Hits:         {total_usage['cache_hits']}")
+        logger.info(f"Prompt Tokens:      {total_usage['total_prompt_tokens']:,}")
+        logger.info(f"Completion Tokens:  {total_usage['total_completion_tokens']:,}")
+        logger.info(f"Total Tokens:       {total_usage['total_tokens']:,}")
+        logger.info("=" * 60 + "\n")
+
+        return total_usage
 
     def _group_by_pos(
         self, frequencies: List[Dict[str, Any]]
