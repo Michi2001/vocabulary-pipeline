@@ -63,18 +63,22 @@ class BaseLLMProvider(ABC):
         """
         pass
 
-    @abstractmethod
-    def validate_correction_response(self, response: Dict[str, Any]) -> bool:
+    def _format_batch(self, batch: List[Dict[str, Any]]) -> str:
         """
-        Validate LLM response structure.
+        Format batch as string for LLM input (shared across providers).
 
         Args:
-            response: Raw response from LLM
+            batch: List of dicts with 'id', 'lemma', 'frequency', 'pos' keys
 
         Returns:
-            True if valid, False otherwise
+            Formatted string (one line per entry: "ID | Lemma | Frequency | POS")
         """
-        pass
+        lines = []
+        for item in batch:
+            lines.append(
+                f"{item['id']} | {item['lemma']} | {item['frequency']} | {item['pos']}"
+            )
+        return "\n".join(lines)
 
 
 class LLMProviderError(Exception):

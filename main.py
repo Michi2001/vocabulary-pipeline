@@ -11,7 +11,6 @@ import os
 import shutil
 from pathlib import Path
 from datetime import datetime
-from dotenv import load_dotenv
 
 from src.lemmatizer import Lemmatizer
 from src.output_writer import OutputWriter
@@ -133,10 +132,6 @@ if __name__ == "__main__":
     if correction_config.get("enabled", False):
         logger.info("LLM correction enabled - applying corrections...")
 
-        # Load API key from environment
-        load_dotenv()
-        api_key = os.getenv("OPENAI_API_KEY")
-
         try:
             # Load system prompt from file
             prompt_file = correction_config.get(
@@ -149,7 +144,6 @@ if __name__ == "__main__":
                 # Get provider config
                 provider_type = correction_config["llm"]["type"]
                 provider_config = correction_config["llm"].get(provider_type, {})
-                provider_config["api_key"] = api_key
 
                 # Create provider
                 provider = create_provider(provider_type, provider_config)
@@ -193,12 +187,8 @@ if __name__ == "__main__":
         logger.info("LLM translation enabled - translating lemmas...")
 
         try:
-            # Create new provider
-            load_dotenv()
-            api_key = os.getenv("OPENAI_API_KEY")
             provider_type = translation_config["llm"]["type"]
             provider_config = translation_config["llm"].get(provider_type, {})
-            provider_config["api_key"] = api_key
             provider = create_provider(provider_type, provider_config)
 
             translator_config = {

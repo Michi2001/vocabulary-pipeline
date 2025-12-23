@@ -4,6 +4,7 @@ import logging
 from typing import Dict, Any
 from src.llm_providers.base_provider import BaseLLMProvider
 from src.llm_providers.openai_provider import OpenAIProvider
+from src.llm_providers.google_genai_provider import GoogleGenAIProvider
 
 logger = logging.getLogger(__name__)
 
@@ -24,12 +25,19 @@ def create_provider(provider_type: str, config: Dict[str, Any]) -> BaseLLMProvid
     """
     providers = {
         "openai": OpenAIProvider,
+        "google": GoogleGenAIProvider,
         # Future providers can be added here:
         # 'anthropic': AnthropicProvider,
         # 'local': LocalLLMProvider,
     }
 
     provider_class = providers.get(provider_type.lower())
+
+    if provider_class is None:
+        raise ValueError(
+            f"Unknown provider type: {provider_type}. "
+            f"Available providers: {', '.join(providers.keys())}"
+        )
 
     logger.info(f"Creating {provider_type} provider")
     return provider_class(config)
