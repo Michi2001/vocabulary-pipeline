@@ -30,7 +30,9 @@ class GoogleGenAIProvider(BaseLLMProvider):
                 'model': str (default: 'gemini-3-flash-preview'),
                 'max_retries': int (default: 3),
                 'retry_delay': int (default: 2),
-                'timeout': int (default: 360)
+                'timeout': int (default: 360),
+                'temperature': float (default: 1.0),
+                'thinking_level': str (default: 'minimal', options: minimal, low, medium, high)
             }
         """
         super().__init__(config)
@@ -42,6 +44,8 @@ class GoogleGenAIProvider(BaseLLMProvider):
         self.max_retries = config.get("max_retries", 3)
         self.retry_delay = config.get("retry_delay", 2)
         self.timeout = config.get("timeout", 360)
+        self.temperature = config.get("temperature", 1.0)
+        self.thinking_level = config.get("thinking_level", "minimal")
 
     def correct_lemmas(
         self, batch: List[Dict[str, Any]], system_prompt: str
@@ -65,7 +69,9 @@ class GoogleGenAIProvider(BaseLLMProvider):
         config = types.GenerateContentConfig(
             system_instruction=system_prompt,
             response_mime_type="application/json",
-            temperature=0.0,
+            thinking_config=types.ThinkingConfig(thinking_level=self.thinking_level),
+            temperature=self.temperature,
+            seed=42,
         )
 
         def api_call():
@@ -122,7 +128,8 @@ class GoogleGenAIProvider(BaseLLMProvider):
         config = types.GenerateContentConfig(
             system_instruction=system_prompt,
             response_mime_type="application/json",
-            temperature=0.0,
+            thinking_config=types.ThinkingConfig(thinking_level=self.thinking_level),
+            temperature=self.temperature,
         )
 
         def api_call():

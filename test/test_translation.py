@@ -43,11 +43,11 @@ def load_translation_input(csv_path):
 
 
 # Configuration
-INPUT_CSV = Path("test/data/translation_input_100_nouns.csv")
+INPUT_CSV = Path("test/data/translation_input.csv")
 PROMPT_FOLDER = Path("prompts/translation")
-PROVIDER_TYPE = "openai"
-PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5"}
-BATCH_SIZE = 25  # Number of items to process per batch
+PROVIDER_TYPE = "google"
+PROVIDER_CONFIG = {"model": "gemini-3-flash-preview"}
+BATCH_SIZE = 10  # Number of items to process per batch
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_DIR = Path(f"test/outputs/test_translation/{TIMESTAMP}")
 OUTPUT_LOG_PATH = OUTPUT_DIR / "translation.log"

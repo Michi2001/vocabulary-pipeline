@@ -12,6 +12,7 @@ import unittest
 import os
 import csv
 import sys
+import logging
 from pathlib import Path
 from src.llm_providers import create_provider
 from datetime import datetime
@@ -55,9 +56,9 @@ def load_expected_output(csv_path):
 # Load test data from CSV files
 TEST_INPUT = load_test_input(Path("test/data/corrector_input.csv"))
 EXPECTED_OUTPUT = load_expected_output(Path("test/data/corrector_exp_output.csv"))
-PROMPT_FILE = "config/llm_system_prompt.txt"
-PROVIDER_TYPE = "openai"
-PROVIDER_CONFIG = {"api_key": os.getenv("OPENAI_API_KEY"), "model": "gpt-5-mini"}
+PROMPT_FILE = "prompts/corrector.txt"
+PROVIDER_TYPE = "google"
+PROVIDER_CONFIG = {"model": "gemini-3-flash-preview"}
 BATCH_SIZE = 26  # Number of items to process per batch
 # add current timestamp to output path to avoid overwriting
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -223,9 +224,17 @@ class TestProviderCorrections(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # Create output directory and redirect stdout/stderr
+    # Create output directory
     Path(OUTPUT_LOG_PATH).parent.mkdir(parents=True, exist_ok=True)
 
-    with open(OUTPUT_LOG_PATH, "w", encoding="utf-8") as f:
-        sys.stdout = sys.stderr = f
-        unittest.main(verbosity=2)
+    # Configure logging to show INFO messages in both console and file
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(OUTPUT_LOG_PATH, mode="w", encoding="utf-8"),
+            logging.StreamHandler(sys.stdout),
+        ],
+    )
+
+    unittest.main(verbosity=2)

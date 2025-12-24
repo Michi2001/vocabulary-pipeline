@@ -29,7 +29,7 @@ class OpenAIProvider(BaseLLMProvider):
                 'model': str (default: 'gpt-5-mini'),
                 'max_retries': int (default: 3),
                 'retry_delay': int (default: 2),
-                'timeout': int (default: 60)
+                'timeout': int (default: 360)
             }
         """
         super().__init__(config)
