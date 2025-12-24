@@ -130,8 +130,8 @@ class FrequencyPostProcessor:
         skipped_count = 0
 
         for raw_key, count in raw_counter.lemma_counts.items():
-            # Parse raw key: "lemma|POS"
-            parts = raw_key.split("|")
+            # Parse raw key: "lemma|POS" (split from right to handle pipes in lemma)
+            parts = raw_key.rsplit("|", 1)
             if len(parts) != 2:
                 logger.warning(f"Invalid key format: {raw_key}")
                 continue

@@ -74,7 +74,7 @@ class FrequencyCounter:
         results = []
         for key, count in self.lemma_counts.items():
             if count >= min_frequency:
-                lemma, normalized_pos = key.split("|", 1)
+                lemma, normalized_pos = key.rsplit("|", 1)
                 pos_details = sorted(self.lemma_pos_details[key])
 
                 # Build POS string: normalized POS first, then additional POS (excluding normalized)

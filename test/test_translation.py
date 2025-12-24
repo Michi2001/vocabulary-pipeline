@@ -122,18 +122,42 @@ class TestLemmaTranslation(unittest.TestCase):
                 )
 
 
+class Tee:
+    """Write to multiple output streams simultaneously."""
+
+    def __init__(self, *files):
+        self.files = files
+
+    def write(self, data):
+        for f in self.files:
+            f.write(data)
+            f.flush()
+
+    def flush(self):
+        for f in self.files:
+            f.flush()
+
+
 if __name__ == "__main__":
     # Create output directory
     OUTPUT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    # Open log file and redirect stdout to both console and file
+    log_file = open(OUTPUT_LOG_PATH, "w", encoding="utf-8")
+    original_stdout = sys.stdout
+    sys.stdout = Tee(original_stdout, log_file)
 
     # Configure logging to show INFO messages in both console and file
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[
-            logging.FileHandler(OUTPUT_LOG_PATH, mode="w", encoding="utf-8"),
             logging.StreamHandler(sys.stdout),
         ],
     )
 
-    unittest.main(verbosity=2)
+    try:
+        unittest.main(verbosity=2)
+    finally:
+        sys.stdout = original_stdout
+        log_file.close()
