@@ -40,7 +40,8 @@ class OpusCorpusReader(BaseCorpusReader):
         Read sentences from OPUS corpus in batches.
 
         Yields batches of sentences for memory-efficient processing.
-        If max_sentences is set, a random selection of sentences will be returned.
+        If max_sentences is set, a random selection of sentences will be returned using
+        reservoir sampling (avoids loading entire file into memory).
 
         Args:
             batch_size: Number of sentences per batch
@@ -48,24 +49,48 @@ class OpusCorpusReader(BaseCorpusReader):
         Yields:
             List of sentences (strings) for each batch
         """
-        all_sentences = []
-        with open(self.file_path, "r", encoding=self.encoding) as f:
-            for line in f:
-                sentence = line.strip()
-                if not sentence:
-                    continue
+        if self.max_sentences is None:
+            # Stream sentences without keeping all in memory
+            batch = []
+            with open(self.file_path, "r", encoding=self.encoding) as f:
+                for line in f:
+                    sentence = line.strip()
+                    if not sentence:
+                        continue
 
-                all_sentences.append(sentence)
+                    batch.append(sentence)
 
-                if self.max_sentences is None and len(all_sentences) >= batch_size:
-                    yield all_sentences
-                    all_sentences = []
+                    if len(batch) >= batch_size:
+                        yield batch
+                        batch = []
 
-        if self.max_sentences is not None and len(all_sentences) > self.max_sentences:
-            all_sentences = random.sample(all_sentences, self.max_sentences)
+            if batch:
+                yield batch
+        else:
+            # Use reservoir sampling to avoid loading entire file into memory
+            reservoir_size = self.max_sentences
+            reservoir = []
+            n = 0
 
-        for i in range(0, len(all_sentences), batch_size):
-            yield all_sentences[i : i + batch_size]
+            with open(self.file_path, "r", encoding=self.encoding) as f:
+                for line in f:
+                    sentence = line.strip()
+                    if not sentence:
+                        continue
+
+                    n += 1
+
+                    if len(reservoir) < reservoir_size:
+                        reservoir.append(sentence)
+                    else:
+                        # Reservoir sampling: randomly replace element
+                        j = random.randint(0, n - 1)
+                        if j < reservoir_size:
+                            reservoir[j] = sentence
+
+            # Yield reservoir in batches
+            for i in range(0, len(reservoir), batch_size):
+                yield reservoir[i:i + batch_size]
 
     def get_metadata(self) -> Dict[str, Any]:
         """
