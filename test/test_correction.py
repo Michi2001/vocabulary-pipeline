@@ -58,7 +58,11 @@ TEST_INPUT = load_test_input(Path("test/data/corrector_input.csv"))
 EXPECTED_OUTPUT = load_expected_output(Path("test/data/corrector_exp_output.csv"))
 PROMPT_FILE = "prompts/corrector.txt"
 PROVIDER_TYPE = "google"
-PROVIDER_CONFIG = {"model": "gemini-3-flash-preview"}
+PROVIDER_CONFIG = {
+    "model": "gemini-3-flash-preview",
+    "thinking_level": "minimal",
+    "temperature": 0.0,
+}
 BATCH_SIZE = 26  # Number of items to process per batch
 # add current timestamp to output path to avoid overwriting
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")

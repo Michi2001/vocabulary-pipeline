@@ -77,6 +77,30 @@ Map words back to their canonical dictionary form if the lemmatizer failed.
      2. Adverbs with **distinct meanings** significantly different from the adjective (semantic drift)
         (e.g., 'prácticamente' [almost] vs. 'práctico' [handy]; 'seguramente' [probably] vs. 'seguro' [safe])
 
+  8. **Gendered Nouns (People & Animals)**:
+   Generally, MERGE standard feminine forms to their masculine canonical form (e.g., 'profesora' → 'profesor').
+
+   **EXCEPTIONS (KEEP as separate entries):**
+   
+   A. **Foundational Social Vocabulary (A1/A2 level)**: 
+      KEEP these specific high-frequency feminine forms because they are pedagogically treated as distinct core vocabulary:
+      - 'chica' (do NOT merge to 'chico')
+      - 'niña' (do NOT merge to 'niño')
+      - 'hija' (do NOT merge to 'hijo')
+      - 'hermana' (do NOT merge to 'hermano')
+      - 'abuela' (do NOT merge to 'abuelo')
+      - 'amiga' (do NOT merge to 'amigo')
+      - 'tía' (do NOT merge to 'tío')
+
+   B. **Irregular Suffixes & Heteronyms**:
+      KEEP if the change is not a simple -o/-a or consonant/+a swap:
+      - 'actriz' (actor), 'reina' (rey), 'princesa' (príncipe), 'heroína' (héroe)
+      - 'mujer' (hombre), 'madre' (padre), 'vaca' (toro)
+
+   C. **Semantic Difference**:
+      KEEP if the feminine form has a different meaning:
+      - 'cartera' (wallet) vs. 'cartero' (mailman)
+      - 'pala' (shovel) vs. 'palo' (stick)
 
 **VALID LEMMAS (→ KEEP)**
 Keep words that are already correct canonical Spanish forms.
