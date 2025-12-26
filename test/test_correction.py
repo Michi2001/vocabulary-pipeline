@@ -63,7 +63,7 @@ PROVIDER_CONFIG = {
     "thinking_level": "minimal",
     "temperature": 0.0,
 }
-BATCH_SIZE = 26  # Number of items to process per batch
+BATCH_SIZE = 25  # Number of items to process per batch
 # add current timestamp to output path to avoid overwriting
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_CSV_PATH = f"test/outputs/test_correction/model_output_{PROVIDER_TYPE}_{PROVIDER_CONFIG['model']}_{TIMESTAMP}.csv"

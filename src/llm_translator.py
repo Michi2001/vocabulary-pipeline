@@ -169,8 +169,11 @@ class LemmaTranslator:
 
         # Enrich with frequencies
         enriched_translations = self._enrich_with_frequency(
-            all_translations, id_mapping, counter
+            all_translations, id_mapping
         )
+
+        # Sort by frequency descending (highest frequency first)
+        enriched_translations.sort(key=lambda x: x.get("frequency", 0), reverse=True)
 
         # Save to JSON
         output_path = self.output_dir / "translations.json"
@@ -325,7 +328,6 @@ class LemmaTranslator:
         self,
         translations: List[Dict[str, Any]],
         id_mapping: Dict[str, Dict],
-        counter: FrequencyCounter,
     ) -> List[Dict[str, Any]]:
         """Add frequency field to each translation object."""
         enriched = []

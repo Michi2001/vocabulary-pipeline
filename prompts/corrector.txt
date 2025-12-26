@@ -26,8 +26,10 @@ Remove entries that are clearly NOT valid Spanish words, e.g.
 - Numbers (standalone digits or numeric strings: '1', '2024', '3.14', etc.)
 - OCR errors, isolated punctuation, fragments, URLs, emojis
 - Single letters (except valid words: 'y', 'o', 'a', 'e')
-- **Incorrect POS tags**: If the POS tag does not match the actual word class, DELETE the entry
-  (e.g., a noun tagged as VERB, an adjective tagged as NOUN, etc.)
+- **Incorrect POS tags**: If the POS tag does not match the actual word class, you have two options:
+  (a) If you are confident about the correct POS, MERGE to the same lemma with the correct POS tag
+      (e.g., 'malo|NOUN' → MERGE to "malo|ADJ" if it's clearly an adjective)
+  (b) If uncertain, DELETE the entry
 - English loanwords (anglicismos): DELETE unless VERY well-established in everyday Spanish
   **IMPORTANT**: Do NOT merge English words to their Spanish equivalents (e.g., 'tweet' → DELETE, NOT merge to 'tuit')
   **KEEP exceptions**: Only widely established loanwords like 'internet', 'web', 'wifi', 'email' (if extremely common)
@@ -62,12 +64,26 @@ Map words back to their canonical dictionary form if the lemmatizer failed.
    - Plural nouns → MERGE to singular (e.g., 'casas' → MERGE to "casa|NOUN")
    - Feminine-only adjectives → MERGE to masculine if applicable (e.g., 'buena' → MERGE to "bueno|ADJ")
 
-6. **Past Participles as Adjectives**: MERGE to base verb infinitive, e.g.
-   - 'condicionado' (ADJ) → MERGE to "condicionar|VERB"
-   - 'completado' (ADJ) → MERGE to "completar|VERB"
-   - 'bordado' (ADJ) → MERGE to "bordar|VERB"
-   - **EXCEPTION (KEEP as ADJ)**: If the adjective is lexicalized and the verb form is uncommon/rare in modern Spanish, KEEP the adjective
-     (e.g., 'descabellado' [absurd/crazy] → KEEP, because 'descabellar' is rarely used as a verb)
+6. **Past Participles as Adjectives**: Carefully distinguish between compositional and lexicalized meanings
+
+   **MERGE to base verb** ONLY if the adjective has the **same meaning** as the past participle of the verb:
+   - 'condicionado' [conditioned] (ADJ) → MERGE to "condicionar|VERB" ✓ (same meaning: "has been conditioned")
+   - 'completado' [completed] (ADJ) → MERGE to "completar|VERB" ✓ (same meaning: "has been completed")
+   - 'bordado' [embroidered] (ADJ) → MERGE to "bordar|VERB" ✓ (same meaning: "has been embroidered")
+
+   **KEEP as ADJ** in these cases:
+   - The adjective has a **distinct, lexicalized meaning** different from the participial meaning:
+     * 'aplicado' [diligent/studious] → KEEP ✓ (NOT same as "aplicar" [to apply])
+     * 'atrevido' [daring/bold] → KEEP ✓ (distinct from "atreverse" [to dare])
+     * 'callado' [quiet person] → KEEP ✓ (distinct from "callar" [to silence])
+     * 'educado' [polite] → KEEP ✓ (distinct from "educar" [to educate])
+     * 'parado' [standing/unemployed] → KEEP ✓ (distinct from "parar" [to stop])
+   - The verb form is uncommon/rare in modern Spanish:
+     * 'descabellado' [absurd/crazy] → KEEP ✓ ('descabellar' is rarely used)
+
+   **How to decide:** Ask yourself: "Does this adjective mean 'that has been [verb]ed'?"
+   - If YES → MERGE to verb
+   - If NO (it has a different meaning) → KEEP as adjective
 
 7. **Adverbs with -mente**: MERGE to corresponding adjective, e.g.
    - 'rápidamente' → MERGE to "rápido|ADJ"
@@ -82,15 +98,19 @@ Map words back to their canonical dictionary form if the lemmatizer failed.
 
    **EXCEPTIONS (KEEP as separate entries):**
    
-   A. **Foundational Social Vocabulary (A1/A2 level)**: 
-      KEEP these specific high-frequency feminine forms because they are pedagogically treated as distinct core vocabulary:
+   A. **Foundational Social Vocabulary (A1/A2 level)**:
+      KEEP high-frequency feminine forms of basic family/social terms because they are pedagogically treated as distinct core vocabulary.
+      **Examples include (but are not limited to):**
       - 'chica' (do NOT merge to 'chico')
       - 'niña' (do NOT merge to 'niño')
       - 'hija' (do NOT merge to 'hijo')
       - 'hermana' (do NOT merge to 'hermano')
       - 'abuela' (do NOT merge to 'abuelo')
+      - 'madre' (do NOT merge to 'padre')
       - 'amiga' (do NOT merge to 'amigo')
       - 'tía' (do NOT merge to 'tío')
+
+      Use your judgment for similar foundational A1/A2 social vocabulary.
 
    B. **Irregular Suffixes & Heteronyms**:
       KEEP if the change is not a simple -o/-a or consonant/+a swap:

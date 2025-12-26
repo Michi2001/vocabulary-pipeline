@@ -309,9 +309,6 @@ class LemmaCorrector:
         for item_id, item_data in id_mapping.items():
             # Skip deleted and merged items
             if item_id in deleted_ids or item_id in merge_sources:
-                logger.warning(
-                    f"Skipping item ID {item_id} during KEEP pass (deleted or merged)"
-                )
                 continue
 
             original_key = item_data["key"]

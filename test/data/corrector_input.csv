@@ -101,3 +101,15 @@ id,lemma,frequency,pos
 100,mhz,89,NOUN
 101,1838,89,NOUN
 102,bautismo,89,NOUN
+103,cansado,250,ADJ
+104,aburrido,220,ADJ
+105,agradecido,195,ADJ
+106,ocupado,180,ADJ
+107,enamorado,165,ADJ
+108,desesperado,140,ADJ
+109,pintado,135,ADJ
+110,asustado,125,ADJ
+111,preparado,115,ADJ
+112,congelado,105,ADJ
+113,organizado,95,ADJ
+114,cerrado,90,ADJ
