@@ -1,7 +1,9 @@
-"""Centralized cache for LLM corrections and translations."""
+"""Centralized cache for LLM corrections and translations using SQLite."""
 
-import pickle
+import sqlite3
+import json
 import logging
+import atexit
 from pathlib import Path
 from typing import Dict, Any, Optional
 
@@ -10,25 +12,11 @@ logger = logging.getLogger(__name__)
 
 class LemmaCache:
     """
-    Centralized cache using nested dictionary structure.
+    Centralized cache using SQLite for persistence.
 
-    Structure:
-    {
-        "corrections": {
-            "model_config": {  # e.g., "gpt-4o-mini" or "gemini-2.0-flash|1.0|minimal"
-                "prompt_hash": {  # 8-char hash of system prompt
-                    "lemma|POS": {...}  # correction data
-                }
-            }
-        },
-        "translations": {
-            "model_config": {
-                "prompt_hash": {
-                    "lemma|POS": {...}  # translation data
-                }
-            }
-        }
-    }
+    Tables:
+    - corrections: (model_config, prompt_hash, lemma, pos, data)
+    - translations: (model_config, prompt_hash, lemma, pos, data)
     """
 
     def __init__(self, config: Dict[str, Any]):
@@ -45,35 +33,70 @@ class LemmaCache:
         self.cache_dir = Path(config.get("directory", "cache"))
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        # Separate files for corrections and translations
-        self.corrections_file = self.cache_dir / "corrections.pkl"
-        self.translations_file = self.cache_dir / "translations.pkl"
+        # SQLite database file
+        db_file = self.cache_dir / "lemma_cache.db"
+        self.conn = sqlite3.connect(str(db_file))
+        self._init_db()
 
-        # Load caches into memory
-        self.corrections = self._load_cache(self.corrections_file)
-        self.translations = self._load_cache(self.translations_file)
+        # Track uncommitted changes
+        self.has_uncommitted_changes = False
 
-        logger.info(f"Cache initialized: enabled={self.enabled}, directory={self.cache_dir}")
+        # Register cleanup on exit
+        atexit.register(self._cleanup)
 
-    def _load_cache(self, cache_file: Path) -> Dict:
-        """Load cache from pickle file."""
-        if cache_file.exists():
-            try:
-                with open(cache_file, "rb") as f:
-                    cache_data = pickle.load(f)
-                logger.info(f"Loaded cache from {cache_file}")
-                return cache_data
-            except Exception as e:
-                logger.warning(f"Failed to load cache from {cache_file}: {e}")
-        return {}
+        logger.info(f"Cache initialized: enabled={self.enabled}, db={db_file}")
 
-    def _save_cache(self, cache_dict: Dict, cache_file: Path):
-        """Save cache to pickle file."""
-        try:
-            with open(cache_file, "wb") as f:
-                pickle.dump(cache_dict, f)
-        except Exception as e:
-            logger.warning(f"Failed to save cache to {cache_file}: {e}")
+    def _init_db(self):
+        """Create tables if not exist."""
+        self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS corrections (
+                model_config TEXT NOT NULL,
+                prompt_hash TEXT NOT NULL,
+                lemma TEXT NOT NULL,
+                pos TEXT NOT NULL,
+                data TEXT NOT NULL,
+                PRIMARY KEY (model_config, prompt_hash, lemma, pos)
+            )
+        """
+        )
+
+        self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS translations (
+                model_config TEXT NOT NULL,
+                prompt_hash TEXT NOT NULL,
+                lemma TEXT NOT NULL,
+                pos TEXT NOT NULL,
+                data TEXT NOT NULL,
+                PRIMARY KEY (model_config, prompt_hash, lemma, pos)
+            )
+        """
+        )
+
+        # Create indices for faster lookups
+        self.conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_corrections_lookup
+            ON corrections(model_config, prompt_hash)
+        """
+        )
+
+        self.conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_translations_lookup
+            ON translations(model_config, prompt_hash)
+        """
+        )
+
+        self.conn.commit()
+
+    def _cleanup(self):
+        """Called on program exit - commit any pending changes."""
+        if self.enabled and self.has_uncommitted_changes:
+            logger.info("Committing pending cache changes on exit...")
+            self.conn.commit()
+            self.has_uncommitted_changes = False
 
     def get_correction(
         self, lemma: str, pos: str, model_config: str, prompt_hash: str
@@ -93,21 +116,28 @@ class LemmaCache:
         if not self.enabled:
             return None
 
-        lemma_key = f"{lemma}|{pos}"
+        try:
+            result = self.conn.execute(
+                "SELECT data FROM corrections WHERE model_config=? AND prompt_hash=? AND lemma=? AND pos=?",
+                (model_config, prompt_hash, lemma, pos),
+            ).fetchone()
 
-        return (
-            self.corrections.get(model_config, {})
-            .get(prompt_hash, {})
-            .get(lemma_key)
-        )
+            return json.loads(result[0]) if result else None
+        except Exception as e:
+            return None
 
     def set_correction(
-        self, lemma: str, pos: str, model_config: str, prompt_hash: str, correction: Dict[str, Any]
+        self,
+        lemma: str,
+        pos: str,
+        model_config: str,
+        prompt_hash: str,
+        correction: Dict[str, Any],
     ):
         """
         Cache a correction for a lemma.
 
-        Note: Does not immediately save to disk. Call save_all() to persist.
+        Note: Changes are not committed until save_all() is called.
 
         Args:
             lemma: Lemma string
@@ -119,16 +149,20 @@ class LemmaCache:
         if not self.enabled:
             return
 
-        lemma_key = f"{lemma}|{pos}"
-
-        # Ensure nested structure exists
-        if model_config not in self.corrections:
-            self.corrections[model_config] = {}
-        if prompt_hash not in self.corrections[model_config]:
-            self.corrections[model_config][prompt_hash] = {}
-
-        # Set value
-        self.corrections[model_config][prompt_hash][lemma_key] = correction
+        try:
+            self.conn.execute(
+                "INSERT OR REPLACE INTO corrections (model_config, prompt_hash, lemma, pos, data) VALUES (?, ?, ?, ?, ?)",
+                (
+                    model_config,
+                    prompt_hash,
+                    lemma,
+                    pos,
+                    json.dumps(correction, ensure_ascii=False),
+                ),
+            )
+            self.has_uncommitted_changes = True
+        except Exception as e:
+            logger.warning(f"Failed to set correction in cache: {e}")
 
     def get_translation(
         self, lemma: str, pos: str, model_config: str, prompt_hash: str
@@ -148,21 +182,28 @@ class LemmaCache:
         if not self.enabled:
             return None
 
-        lemma_key = f"{lemma}|{pos}"
+        try:
+            result = self.conn.execute(
+                "SELECT data FROM translations WHERE model_config=? AND prompt_hash=? AND lemma=? AND pos=?",
+                (model_config, prompt_hash, lemma, pos),
+            ).fetchone()
 
-        return (
-            self.translations.get(model_config, {})
-            .get(prompt_hash, {})
-            .get(lemma_key)
-        )
+            return json.loads(result[0]) if result else None
+        except Exception as e:
+            return None
 
     def set_translation(
-        self, lemma: str, pos: str, model_config: str, prompt_hash: str, translation: Dict[str, Any]
+        self,
+        lemma: str,
+        pos: str,
+        model_config: str,
+        prompt_hash: str,
+        translation: Dict[str, Any],
     ):
         """
         Cache a translation for a lemma.
 
-        Note: Does not immediately save to disk. Call save_all() to persist.
+        Note: Changes are not committed until save_all() is called.
 
         Args:
             lemma: Lemma string
@@ -174,24 +215,27 @@ class LemmaCache:
         if not self.enabled:
             return
 
-        lemma_key = f"{lemma}|{pos}"
-
-        # Ensure nested structure exists
-        if model_config not in self.translations:
-            self.translations[model_config] = {}
-        if prompt_hash not in self.translations[model_config]:
-            self.translations[model_config][prompt_hash] = {}
-
-        # Set value
-        self.translations[model_config][prompt_hash][lemma_key] = translation
+        try:
+            self.conn.execute(
+                "INSERT OR REPLACE INTO translations (model_config, prompt_hash, lemma, pos, data) VALUES (?, ?, ?, ?, ?)",
+                (
+                    model_config,
+                    prompt_hash,
+                    lemma,
+                    pos,
+                    json.dumps(translation, ensure_ascii=False),
+                ),
+            )
+            self.has_uncommitted_changes = True
+        except Exception as e:
+            logger.warning(f"Failed to set translation in cache: {e}")
 
     def save_all(self):
-        """Save all caches to disk. Call at end of processing."""
+        """Commit any pending changes. Called after batch processing."""
         if not self.enabled:
             return
 
-        self._save_cache(self.corrections, self.corrections_file)
-        logger.info(f"Saved corrections cache to {self.corrections_file}")
-
-        self._save_cache(self.translations, self.translations_file)
-        logger.info(f"Saved translations cache to {self.translations_file}")
+        if self.has_uncommitted_changes:
+            self.conn.commit()
+            logger.debug("Cache changes committed")
+            self.has_uncommitted_changes = False

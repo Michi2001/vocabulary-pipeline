@@ -130,7 +130,9 @@ if __name__ == "__main__":
 
     # Initialize shared LLM cache once (used by both correction and translation)
     llm_cache_config = config.get("llm_cache", {"enabled": True, "directory": "cache"})
-    llm_cache = LemmaCache(llm_cache_config) if llm_cache_config.get("enabled", True) else None
+    llm_cache = (
+        LemmaCache(llm_cache_config) if llm_cache_config.get("enabled", True) else None
+    )
 
     # Optional: LLM-based correction
     correction_config = config.get("llm_correction", {})
@@ -160,7 +162,9 @@ if __name__ == "__main__":
                     "output_dir": output_dir,
                     "slice": correction_config.get("slice", None),
                 }
-                corrector = LemmaCorrector(correction_provider, llm_cache, corrector_config)
+                corrector = LemmaCorrector(
+                    correction_provider, llm_cache, corrector_config
+                )
 
                 # Apply corrections
                 min_freq = processing_config.get("min_frequency", 1)
@@ -202,7 +206,9 @@ if __name__ == "__main__":
                 "output_dir": output_dir,
             }
 
-            translator = LemmaTranslator(translation_provider, llm_cache, translator_config)
+            translator = LemmaTranslator(
+                translation_provider, llm_cache, translator_config
+            )
             min_freq = processing_config.get("min_frequency", 1)
             translator.translate(counter, min_frequency=min_freq)
 

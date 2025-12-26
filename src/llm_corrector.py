@@ -262,6 +262,9 @@ class LemmaCorrector:
                             correction,
                         )
 
+                # Commit cache after each batch
+                self.cache.save_all()
+
             all_corrections.extend(batch_corrections)
 
         # Combine with cached corrections

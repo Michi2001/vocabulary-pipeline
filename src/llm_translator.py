@@ -372,6 +372,9 @@ class LemmaTranslator:
                             translation,
                         )
 
+                # Commit cache after each batch
+                self.cache.save_all()
+
             batch_translations_all.extend(batch_translations)
 
         return batch_translations_all
