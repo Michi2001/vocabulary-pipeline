@@ -4,11 +4,12 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Optional
 from collections import defaultdict
 
 from src.frequency_counter import FrequencyCounter
 from src.llm_providers.base_provider import BaseLLMProvider
+from src.lemma_cache import LemmaCache
 
 logger = logging.getLogger(__name__)
 
@@ -30,25 +31,27 @@ class LemmaTranslator:
     outputs JSON file with full translation data enriched with frequencies.
     """
 
-    def __init__(self, provider: BaseLLMProvider, config: Dict[str, Any]):
+    def __init__(
+        self, provider: BaseLLMProvider, cache: Optional[LemmaCache], config: Dict[str, Any]
+    ):
         """
         Initialize translator.
 
         Args:
+            provider: LLM provider instance
+            cache: Shared LemmaCache instance (None to disable caching)
             config: {
                 'batch_size': int,
                 'prompts_dir': str,
-                'output_dir': str,
-                'cache_config': dict,
-                'llm_model': str
+                'output_dir': str
             }
         """
         self.provider = provider
+        self.cache = cache
+        self.model_config = provider.get_cache_key_components()
         self.batch_size = config.get("batch_size", 25)
         self.prompts_dir = Path(config.get("prompts_dir", "prompts/translation"))
         self.output_dir = Path(config["output_dir"])
-        self.cache_config = config.get("cache_config", {})
-        self.llm_model = config.get("llm_model", "gpt-5-mini")
 
     def translate(
         self, counter: FrequencyCounter, min_frequency: int = 1
@@ -119,53 +122,40 @@ class LemmaTranslator:
             pos_hash = hashlib.sha256(pos_prompt.encode()).hexdigest()[:8]
             system_prompt = f"{general_prompt}\n\n{pos_prompt}"
 
-            # Create batches for this POS
-            pos_id_mapping, batches = self._create_batches_for_pos(
-                pos_items, id_counter
+            # Compute combined prompt hash for cache key
+            combined_prompt_hash = hashlib.sha256(
+                f"{general_hash}|{pos_hash}".encode()
+            ).hexdigest()[:8]
+
+            # Pre-load cache and create ID mapping for this POS
+            pos_id_mapping, cached_translations, uncached_items = (
+                self._preload_cache_for_pos(
+                    pos_items, pos, id_counter, combined_prompt_hash
+                )
             )
+
+            # Track cache hits in total usage
+            total_usage["cache_hits"] += len(cached_translations)
+
+            # Update global id_mapping and counter
             id_mapping.update(pos_id_mapping)
             id_counter += len(pos_items)
 
-            logger.info(f"Created {len(batches)} batches for {pos}")
-
-            # Process batches with caching
-            for i, batch in enumerate(batches):
+            # Create batches only for uncached items
+            batches = self._create_batches_from_items(uncached_items)
+            if uncached_items:
                 logger.info(
-                    f"  Processing {pos} batch {i+1}/{len(batches)} ({len(batch)} lemmas)"
+                    f"  Created {len(batches)} batches for {len(uncached_items)} uncached {pos} items"
                 )
+            else:
+                logger.info(f"  All {pos} items loaded from cache - no batches needed")
 
-                batch_cache_key = self._generate_batch_cache_key(
-                    batch, pos, general_hash, pos_hash
-                )
-
-                # Try cache
-                batch_translations = None
-                if self.cache_config.get("enabled", True):
-                    batch_translations = self._load_from_cache(batch_cache_key)
-
-                if batch_translations is None:
-                    response = self.provider.translate_lemmas(batch, system_prompt)
-                    batch_translations = response["all_lemma_translations"]
-
-                    # Track token usage from API call
-                    if "_token_usage" in response:
-                        usage = response["_token_usage"]
-                        total_usage["total_prompt_tokens"] += usage.get(
-                            "prompt_tokens", 0
-                        )
-                        total_usage["total_completion_tokens"] += usage.get(
-                            "completion_tokens", 0
-                        )
-                        total_usage["total_tokens"] += usage.get("total_tokens", 0)
-                        total_usage["api_calls"] += 1
-
-                    if self.cache_config.get("enabled", True):
-                        self._save_to_cache(batch_cache_key, batch_translations)
-                else:
-                    logger.info(f"    Cache hit - loaded batch {i+1} from cache")
-                    total_usage["cache_hits"] += 1
-
-                all_translations.extend(batch_translations)
+            # Process uncached batches and combine with cached translations
+            batch_translations = self._process_batches_for_pos(
+                batches, pos, system_prompt, combined_prompt_hash, total_usage
+            )
+            all_translations.extend(batch_translations)
+            all_translations.extend(cached_translations)
 
         # Enrich with frequencies
         enriched_translations = self._enrich_with_frequency(
@@ -179,6 +169,10 @@ class LemmaTranslator:
         output_path = self.output_dir / "translations.json"
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(enriched_translations, f, ensure_ascii=False, indent=2)
+
+        # Save cache to disk (if cache is enabled)
+        if self.cache is not None:
+            self.cache.save_all()
 
         logger.info(
             f"Translation complete. Translated {len(enriched_translations)} lemmas"
@@ -221,108 +215,166 @@ class LemmaTranslator:
 
         return general_file.read_text(encoding="utf-8")
 
-    def _create_batches_for_pos(
-        self, pos_items: List[Dict[str, Any]], start_id: int
-    ) -> Tuple[Dict[str, Dict], List[List[Dict]]]:
+    def _create_batches_from_items(
+        self, items: List[Dict[str, Any]]
+    ) -> List[List[Dict]]:
         """
-        Create ID mapping and batches for one POS category.
+        Create batches from items that already have IDs assigned.
 
         Args:
-            pos_items: List of frequency items for this POS
-            start_id: Starting ID number
+            items: List of items with 'id', 'lemma', 'frequency', 'pos' fields
 
         Returns:
-            (id_mapping, batches)
-            id_mapping: Dict mapping item IDs to their data
-            batches: List of batches (each batch is a list of dicts)
+            List of batches, where each batch is a list of items
         """
-        id_mapping = {}
-        batch_items = []
         batches = []
+        batch_items = []
+
+        for item in items:
+            batch_items.append(item)
+
+            # Create batch when size reached
+            if len(batch_items) >= self.batch_size:
+                batches.append(batch_items)
+                batch_items = []
+
+        # Add remaining items as final batch
+        if batch_items:
+            batches.append(batch_items)
+
+        return batches
+
+    def _preload_cache_for_pos(
+        self,
+        pos_items: List[Dict[str, Any]],
+        pos: str,
+        id_counter: int,
+        combined_prompt_hash: str,
+    ) -> tuple[Dict[str, Dict], List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """
+        Pre-load cache and create ID mapping for one POS category.
+
+        Args:
+            pos_items: Items for this POS
+            pos: POS category name
+            id_counter: Starting ID counter
+            combined_prompt_hash: Combined prompt hash for cache key
+
+        Returns:
+            Tuple of (pos_id_mapping, cached_translations, uncached_items)
+        """
+        pos_id_mapping = {}
+        cached_translations = []
+        uncached_items = []
+
+        logger.info(f"  Pre-loading cache for {pos} lemmas...")
 
         for idx, item in enumerate(pos_items):
-            item_id = f"{start_id + idx:06d}"
+            # Generate ID (continuing from id_counter)
+            item_id = f"{id_counter + idx:06d}"
 
             # Normalize POS
             pos_parts = item["pos"].split("/")
             normalized_pos = pos_parts[0]
             key = f"{item['lemma']}|{normalized_pos}"
 
-            id_mapping[item_id] = {
+            # Store in id_mapping
+            pos_id_mapping[item_id] = {
                 "lemma": item["lemma"],
                 "frequency": item["frequency"],
                 "pos": item["pos"],
                 "key": key,
             }
 
-            batch_items.append(
-                {
+            # Try to load from cache (if cache is enabled)
+            cached_translation = None
+            if self.cache is not None:
+                cached_translation = self.cache.get_translation(
+                    item["lemma"], normalized_pos, self.model_config, combined_prompt_hash
+                )
+
+            if cached_translation is not None:
+                cached_translations.append(cached_translation)
+            else:
+                # Add to uncached with ID and normalized POS
+                uncached_items.append({
                     "id": item_id,
                     "lemma": item["lemma"],
                     "frequency": item["frequency"],
                     "pos": normalized_pos,
-                }
+                })
+
+        # Log statistics
+        cache_hits = len(cached_translations)
+        cache_misses = len(uncached_items)
+        logger.info(
+            f"  Pre-cache check for {pos}: {cache_hits} hits, {cache_misses} misses"
+        )
+
+        return pos_id_mapping, cached_translations, uncached_items
+
+    def _process_batches_for_pos(
+        self,
+        batches: List[List[Dict[str, Any]]],
+        pos: str,
+        system_prompt: str,
+        combined_prompt_hash: str,
+        total_usage: Dict[str, int],
+    ) -> List[Dict[str, Any]]:
+        """
+        Process uncached batches for one POS category.
+
+        Args:
+            batches: Batches to process
+            pos: POS category name
+            system_prompt: System prompt for API call
+            combined_prompt_hash: Combined prompt hash for cache key
+            total_usage: Token usage tracking dict (modified in-place)
+
+        Returns:
+            List of translations from API calls
+        """
+        batch_translations_all = []
+
+        for i, batch in enumerate(batches):
+            logger.info(
+                f"  Processing {pos} batch {i+1}/{len(batches)} ({len(batch)} uncached lemmas)"
             )
 
-            if len(batch_items) >= self.batch_size:
-                batches.append(batch_items)
-                batch_items = []
+            # All items in batch are uncached by definition
+            response = self.provider.translate_lemmas(batch, system_prompt)
+            batch_translations = response["all_lemma_translations"]
 
-        if batch_items:
-            batches.append(batch_items)
+            # Track token usage from API call
+            if "_token_usage" in response:
+                usage = response["_token_usage"]
+                total_usage["total_prompt_tokens"] += usage.get("prompt_tokens", 0)
+                total_usage["total_completion_tokens"] += usage.get(
+                    "completion_tokens", 0
+                )
+                total_usage["total_tokens"] += usage.get("total_tokens", 0)
+                total_usage["api_calls"] += 1
 
-        return id_mapping, batches
+            # Cache individual translations (if cache is enabled)
+            if self.cache is not None:
+                for translation in batch_translations:
+                    # Find corresponding item to get lemma and pos
+                    item_id = translation["id"]
+                    matching_item = next(
+                        (item for item in batch if item["id"] == item_id), None
+                    )
+                    if matching_item:
+                        self.cache.set_translation(
+                            matching_item["lemma"],
+                            matching_item["pos"],
+                            self.model_config,
+                            combined_prompt_hash,
+                            translation,
+                        )
 
-    def _generate_batch_cache_key(
-        self, batch: List[Dict[str, Any]], pos: str, general_hash: str, pos_hash: str
-    ) -> str:
-        """Generate cache key for batch."""
-        batch_strings = [
-            f"{item['id']}|{item['lemma']}|{item['frequency']}|{item['pos']}"
-            for item in batch
-        ]
+            batch_translations_all.extend(batch_translations)
 
-        key_components = [
-            "|".join(batch_strings),
-            self.llm_model,
-            general_hash,
-            pos_hash,
-            pos,
-        ]
-
-        key_string = "|".join(key_components)
-        return hashlib.sha256(key_string.encode()).hexdigest()
-
-    def _load_from_cache(self, cache_key: str) -> List[Dict[str, Any]]:
-        """Load translations from cache."""
-        cache_dir = Path(self.cache_config.get("directory", "cache/llm_translations"))
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        cache_path = cache_dir / f"{cache_key}.json"
-
-        if not cache_path.exists():
-            return None
-
-        try:
-            with open(cache_path, "r", encoding="utf-8") as f:
-                translations = json.load(f)
-            return translations
-        except Exception as e:
-            logger.warning(f"Failed to load cache: {e}")
-            return None
-
-    def _save_to_cache(
-        self, cache_key: str, translations: List[Dict[str, Any]]
-    ) -> None:
-        """Save translations to cache."""
-        cache_dir = Path(self.cache_config.get("directory", "cache/llm_translations"))
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        cache_path = cache_dir / f"{cache_key}.json"
-
-        try:
-            with open(cache_path, "w", encoding="utf-8") as f:
-                json.dump(translations, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            logger.warning(f"Failed to save cache: {e}")
+        return batch_translations_all
 
     def _enrich_with_frequency(
         self,
@@ -362,8 +414,7 @@ class LemmaTranslator:
 
         # Calculate sum of estimated_share values
         total_share = sum(
-            meaning.get("estimated_share", 0.0)
-            for meaning in translation["meanings"]
+            meaning.get("estimated_share", 0.0) for meaning in translation["meanings"]
         )
 
         # If sum is very close to 1.0, no normalization needed

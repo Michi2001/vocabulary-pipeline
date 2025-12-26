@@ -20,6 +20,7 @@ from src.corpus_readers import LeipzigCorpusReader, OpusCorpusReader
 from src.llm_providers import create_provider
 from src.llm_corrector import LemmaCorrector
 from src.llm_translator import LemmaTranslator
+from src.lemma_cache import LemmaCache
 
 
 logger = logging.getLogger(__name__)
@@ -127,6 +128,10 @@ if __name__ == "__main__":
     multi_processor = MultiCorpusProcessor(processors=processors)
     counter = multi_processor.process()
 
+    # Initialize shared LLM cache once (used by both correction and translation)
+    llm_cache_config = config.get("llm_cache", {"enabled": True, "directory": "cache"})
+    llm_cache = LemmaCache(llm_cache_config) if llm_cache_config.get("enabled", True) else None
+
     # Optional: LLM-based correction
     correction_config = config.get("llm_correction", {})
     if correction_config.get("enabled", False):
@@ -146,18 +151,16 @@ if __name__ == "__main__":
                 provider_config = correction_config["llm"].get(provider_type, {})
 
                 # Create provider
-                provider = create_provider(provider_type, provider_config)
+                correction_provider = create_provider(provider_type, provider_config)
 
                 # Create corrector
                 corrector_config = {
                     "batch_size": correction_config.get("batch_size", 50),
                     "system_prompt": system_prompt,
                     "output_dir": output_dir,
-                    "cache_config": correction_config.get("cache", {}),
-                    "llm_model": provider_config.get("model", None),
                     "slice": correction_config.get("slice", None),
                 }
-                corrector = LemmaCorrector(provider, corrector_config)
+                corrector = LemmaCorrector(correction_provider, llm_cache, corrector_config)
 
                 # Apply corrections
                 min_freq = processing_config.get("min_frequency", 1)
@@ -189,7 +192,7 @@ if __name__ == "__main__":
         try:
             provider_type = translation_config["llm"]["type"]
             provider_config = translation_config["llm"].get(provider_type, {})
-            provider = create_provider(provider_type, provider_config)
+            translation_provider = create_provider(provider_type, provider_config)
 
             translator_config = {
                 "batch_size": translation_config.get("batch_size", 25),
@@ -197,11 +200,9 @@ if __name__ == "__main__":
                     "prompt_directory", "prompts/translation"
                 ),
                 "output_dir": output_dir,
-                "cache_config": translation_config.get("cache", {}),
-                "llm_model": provider_config.get("model", None),
             }
 
-            translator = LemmaTranslator(provider, translator_config)
+            translator = LemmaTranslator(translation_provider, llm_cache, translator_config)
             min_freq = processing_config.get("min_frequency", 1)
             translator.translate(counter, min_frequency=min_freq)
 

@@ -63,6 +63,23 @@ class BaseLLMProvider(ABC):
         """
         pass
 
+    @abstractmethod
+    def get_cache_key_components(self) -> str:
+        """
+        Get provider-specific cache key components.
+
+        Returns a string that represents the configuration-dependent aspects
+        of this provider that should affect caching. Different configurations
+        should produce different cache keys.
+
+        Returns:
+            String with provider-specific cache key components.
+            Examples:
+            - OpenAI: "gpt-4o-mini"
+            - Google: "gemini-2.0-flash|1.0|minimal"
+        """
+        pass
+
     def _format_batch(self, batch: List[Dict[str, Any]]) -> str:
         """
         Format batch as string for LLM input (shared across providers).

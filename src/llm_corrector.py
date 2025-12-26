@@ -1,15 +1,14 @@
 """LLM-based lemma corrector with caching support."""
 
 import hashlib
-import json
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
-from collections import defaultdict
+from typing import List, Dict, Any, Optional
 import csv
 
 from src.frequency_counter import FrequencyCounter
 from src.llm_providers.base_provider import BaseLLMProvider
+from src.lemma_cache import LemmaCache
 
 logger = logging.getLogger(__name__)
 
@@ -22,26 +21,31 @@ class LemmaCorrector:
     applies corrections, and generates audit outputs.
     """
 
-    def __init__(self, provider: BaseLLMProvider, config: Dict[str, Any]):
+    def __init__(
+        self,
+        provider: BaseLLMProvider,
+        cache: Optional[LemmaCache],
+        config: Dict[str, Any],
+    ):
         """
         Initialize corrector.
 
         Args:
+            provider: LLM provider instance
+            cache: Shared LemmaCache instance (None to disable caching)
             config: {
                 'batch_size': int (default: 50),
                 'system_prompt': str,
                 'output_dir': str (for audit files),
-                'cache_config': dict (enabled, directory),
-                'llm_model': str (for cache key),
                 'slice': [start_rank, end_rank] or None (1-indexed, inclusive)
             }
         """
         self.provider = provider
+        self.cache = cache
+        self.model_config = provider.get_cache_key_components()
         self.batch_size = config.get("batch_size", 50)
         self.system_prompt = config["system_prompt"]
         self.output_dir = Path(config["output_dir"])
-        self.cache_config = config.get("cache_config", {})
-        self.llm_model = config.get("llm_model", "gpt-5-mini")
         self.slice = config.get("slice", None)
 
     def correct(
@@ -82,45 +86,43 @@ class LemmaCorrector:
                 f"Processing {len(frequencies)} lemmas for LLM correction (all)"
             )
 
-        # Step 3: Assign IDs and create batches
-        id_mapping, batches = self._create_batches(frequencies_to_correct)
-        logger.info(f"Created {len(batches)} batches of size {self.batch_size}")
+        # Step 3: Pre-load cache and create ID mapping
+        prompt_hash = hashlib.sha256(self.system_prompt.encode()).hexdigest()[:8]
+        id_mapping, cached_corrections, uncached_items = (
+            self._preload_cache_and_create_mapping(frequencies_to_correct, prompt_hash)
+        )
 
-        # Step 4: Process batches with per-batch caching
-        all_corrections = []
-        for i, batch in enumerate(batches):
-            logger.info(f"Processing batch {i+1}/{len(batches)} ({len(batch)} lemmas)")
+        # Step 4: Create batches only for uncached items
+        batches = self._create_batches_from_items(uncached_items)
+        if uncached_items:
+            logger.info(
+                f"Created {len(batches)} batches for {len(uncached_items)} uncached items "
+                f"(batch size: {self.batch_size})"
+            )
+        else:
+            logger.info("All items loaded from cache - no batches needed")
 
-            batch_cache_key = self._generate_batch_cache_key(batch)
+        # Step 5: Process uncached batches and combine with cached
+        all_corrections = self._process_batches_and_cache(
+            batches, prompt_hash, cached_corrections
+        )
 
-            # Try to load from cache
-            batch_corrections = None
-            if self.cache_config.get("enabled", True):
-                batch_corrections = self._load_corrections_from_cache(batch_cache_key)
-
-            if batch_corrections is None:
-                response = self.provider.correct_lemmas(batch, self.system_prompt)
-                batch_corrections = response["corrections"]
-
-                if self.cache_config.get("enabled", True):
-                    self._save_corrections_to_cache(batch_cache_key, batch_corrections)
-            else:
-                logger.info(f"  Cache hit - loaded batch {i+1} from cache")
-
-            all_corrections.extend(batch_corrections)
-
-        # Step 5: Save original list with IDs
+        # Step 6: Save original list with IDs
         original_path = self.output_dir / "original_with_ids.csv"
         self._save_original(id_mapping, original_path)
 
-        # Step 6: Save correction mapping
+        # Step 7: Save correction mapping
         mapping_path = self.output_dir / "llm_corrections.csv"
         self._save_corrections(all_corrections, mapping_path)
 
-        # Step 7: Apply corrections to counter
+        # Step 8: Apply corrections to counter
         corrected_counter = self._apply_corrections(
             counter, id_mapping, all_corrections
         )
+
+        # Step 9: Save cache to disk (if cache is enabled)
+        if self.cache is not None:
+            self.cache.save_all()
 
         logger.info(
             f"LLM correction complete. Applied {len(all_corrections)} operations."
@@ -128,131 +130,23 @@ class LemmaCorrector:
 
         return corrected_counter
 
-    def _generate_batch_cache_key(self, batch: List[Dict[str, Any]]) -> str:
+    def _create_batches_from_items(
+        self, items: List[Dict[str, Any]]
+    ) -> List[List[Dict]]:
         """
-        Generate SHA256 hash for a single batch cache key.
-
-        Key components:
-        - Batch items (id, lemma, frequency, pos)
-        - LLM model name
-        - System prompt hash
+        Create batches from items that already have IDs assigned.
 
         Args:
-            batch: Single batch with items containing 'id', 'lemma', 'frequency', 'pos'
+            items: List of items with 'id', 'lemma', 'frequency', 'pos' fields
 
         Returns:
-            SHA256 hash string
+            List of batches, where each batch is a list of items
         """
-        # Serialize batch items (order matters since IDs are sequential)
-        batch_strings = [
-            f"{item['id']}|{item['lemma']}|{item['frequency']}|{item['pos']}"
-            for item in batch
-        ]
-
-        # Hash system prompt to detect prompt changes
-        prompt_hash = hashlib.sha256(self.system_prompt.encode()).hexdigest()[:8]
-
-        key_components = ["|".join(batch_strings), self.llm_model, prompt_hash]
-
-        key_string = "|".join(key_components)
-        return hashlib.sha256(key_string.encode()).hexdigest()
-
-    def _load_corrections_from_cache(self, cache_key: str) -> List[Dict[str, Any]]:
-        """
-        Load cached LLM corrections.
-
-        Args:
-            cache_key: Cache key hash
-
-        Returns:
-            List of corrections or None if cache miss
-        """
-        cache_dir = Path(self.cache_config.get("directory", "cache/llm_corrections"))
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        cache_path = cache_dir / f"{cache_key}.json"
-
-        if not cache_path.exists():
-            return None
-
-        try:
-            with open(cache_path, "r", encoding="utf-8") as f:
-                corrections = json.load(f)
-
-            logger.info(f"Loaded corrections from cache (key: {cache_key[:8]}...)")
-            return corrections
-
-        except Exception as e:
-            logger.warning(f"Failed to load cache: {e}")
-            return None
-
-    def _save_corrections_to_cache(
-        self, cache_key: str, corrections: List[Dict[str, Any]]
-    ) -> None:
-        """
-        Save LLM corrections to cache.
-
-        Args:
-            cache_key: Cache key hash
-            corrections: List of correction operations
-        """
-        cache_dir = Path(self.cache_config.get("directory", "cache/llm_corrections"))
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        cache_path = cache_dir / f"{cache_key}.json"
-
-        try:
-            with open(cache_path, "w", encoding="utf-8") as f:
-                json.dump(corrections, f, ensure_ascii=False, indent=2)
-
-            logger.info(f"Saved corrections to cache (key: {cache_key[:8]}...)")
-
-        except Exception as e:
-            logger.warning(f"Failed to save cache: {e}")
-
-    def _create_batches(
-        self, frequencies: List[Dict[str, Any]]
-    ) -> Tuple[Dict[str, Dict], List[List[Dict]]]:
-        """
-        Assign IDs and create batches.
-
-        Args:
-            frequencies: List from get_sorted_frequencies()
-
-        Returns:
-            (id_mapping, batches)
-            id_mapping: {"001": {"lemma": "...", "frequency": ..., "pos": "...", "key": "lemma|POS"}, ...}
-            batches: [[{"id": "001", "lemma": "...", "frequency": ..., "pos": "..."}, ...], ...]
-        """
-        id_mapping = {}
-        batch_items = []
         batches = []
+        batch_items = []
 
-        for idx, item in enumerate(frequencies):
-            # Generate ID (zero-padded to 6 digits for up to 999,999 lemmas)
-            item_id = f"{idx+1:06d}"
-
-            # Create key for FrequencyCounter lookup
-            # First POS is always the normalized main category (e.g., "VERB/AUX" -> "VERB")
-            pos_parts = item["pos"].split("/")
-            normalized_pos = pos_parts[0]
-            key = f"{item['lemma']}|{normalized_pos}"
-
-            # Store in mapping
-            id_mapping[item_id] = {
-                "lemma": item["lemma"],
-                "frequency": item["frequency"],
-                "pos": item["pos"],
-                "key": key,
-            }
-
-            # Add to batch
-            batch_items.append(
-                {
-                    "id": item_id,
-                    "lemma": item["lemma"],
-                    "frequency": item["frequency"],
-                    "pos": normalized_pos,  # Only main POS, not "VERB/AUX"
-                }
-            )
+        for item in items:
+            batch_items.append(item)
 
             # Create batch when size reached
             if len(batch_items) >= self.batch_size:
@@ -263,7 +157,117 @@ class LemmaCorrector:
         if batch_items:
             batches.append(batch_items)
 
-        return id_mapping, batches
+        return batches
+
+    def _preload_cache_and_create_mapping(
+        self, frequencies_to_correct: List[Dict[str, Any]], prompt_hash: str
+    ) -> tuple[Dict[str, Dict], List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """
+        Pre-load cache and create ID mapping for all items.
+
+        Args:
+            frequencies_to_correct: List of frequency items to process
+            prompt_hash: Hash of system prompt
+
+        Returns:
+            Tuple of (id_mapping, cached_corrections, uncached_items)
+        """
+        id_mapping = {}
+        cached_corrections = []
+        uncached_items = []
+
+        for idx, item in enumerate(frequencies_to_correct):
+            # Generate sequential ID
+            item_id = f"{idx + 1:06d}"
+
+            # Store in id_mapping
+            key = f"{item['lemma']}|{item['pos']}"
+            id_mapping[item_id] = {
+                "lemma": item["lemma"],
+                "frequency": item["frequency"],
+                "pos": item["pos"],
+                "key": key,
+            }
+
+            # Try to load from cache (if cache is enabled)
+            cached_correction = None
+            if self.cache is not None:
+                cached_correction = self.cache.get_correction(
+                    item["lemma"], item["pos"], self.model_config, prompt_hash
+                )
+
+            if cached_correction is not None:
+                cached_corrections.append(cached_correction)
+            else:
+                # Add to uncached with ID
+                uncached_items.append(
+                    {
+                        "id": item_id,
+                        "lemma": item["lemma"],
+                        "frequency": item["frequency"],
+                        "pos": item["pos"],
+                    }
+                )
+
+        # Log statistics
+        cache_hits = len(cached_corrections)
+        cache_misses = len(uncached_items)
+        logger.info(f"Pre-cache check: {cache_hits} hits, {cache_misses} misses")
+
+        return id_mapping, cached_corrections, uncached_items
+
+    def _process_batches_and_cache(
+        self,
+        batches: List[List[Dict[str, Any]]],
+        prompt_hash: str,
+        cached_corrections: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        """
+        Process uncached batches and combine with cached corrections.
+
+        Args:
+            batches: List of batches to process (all items are uncached)
+            prompt_hash: Hash of system prompt
+            cached_corrections: Already cached corrections
+
+        Returns:
+            Combined list of all corrections (cached + newly processed)
+        """
+        all_corrections = []
+
+        # Process uncached batches
+        for i, batch in enumerate(batches):
+            logger.info(
+                f"Processing batch {i+1}/{len(batches)} ({len(batch)} uncached lemmas)"
+            )
+
+            # All items in batch are uncached by definition
+            response = self.provider.correct_lemmas(batch, self.system_prompt)
+            batch_corrections = response["corrections"]
+
+            # Cache individual corrections (if cache is enabled)
+            if self.cache is not None:
+                for correction in batch_corrections:
+                    # Find corresponding item to get lemma and pos
+                    item_id = correction["id"]
+                    matching_item = next(
+                        (item for item in batch if item["id"] == item_id), None
+                    )
+                    if matching_item:
+                        self.cache.set_correction(
+                            matching_item["lemma"],
+                            matching_item["pos"],
+                            self.model_config,
+                            prompt_hash,
+                            correction,
+                        )
+
+            all_corrections.extend(batch_corrections)
+
+        # Combine with cached corrections
+        all_corrections.extend(cached_corrections)
+
+        return all_corrections
 
     def _apply_corrections(
         self,

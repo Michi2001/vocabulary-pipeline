@@ -42,6 +42,18 @@ class OpenAIProvider(BaseLLMProvider):
         self.retry_delay = config.get("retry_delay", 2)
         self.timeout = config.get("timeout", 360)
 
+    def get_cache_key_components(self) -> str:
+        """
+        Get cache key components for OpenAI provider.
+
+        For OpenAI, only the model affects the output, so we only include
+        the model name in the cache key.
+
+        Returns:
+            Model name as cache key component
+        """
+        return self.model
+
     def correct_lemmas(
         self, batch: List[Dict[str, Any]], system_prompt: str
     ) -> Dict[str, Any]:

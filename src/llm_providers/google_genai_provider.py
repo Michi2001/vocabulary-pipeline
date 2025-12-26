@@ -47,6 +47,18 @@ class GoogleGenAIProvider(BaseLLMProvider):
         self.temperature = config.get("temperature", 1.0)
         self.thinking_level = config.get("thinking_level", "minimal")
 
+    def get_cache_key_components(self) -> str:
+        """
+        Get cache key components for Google GenAI provider.
+
+        For Google GenAI, model, temperature, and thinking_level all affect
+        the output, so we include all three in the cache key.
+
+        Returns:
+            Cache key components as "model|temperature|thinking_level"
+        """
+        return f"{self.model}|{self.temperature}|{self.thinking_level}"
+
     def correct_lemmas(
         self, batch: List[Dict[str, Any]], system_prompt: str
     ) -> Dict[str, Any]:
