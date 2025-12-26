@@ -154,7 +154,7 @@ if __name__ == "__main__":
                     "system_prompt": system_prompt,
                     "output_dir": output_dir,
                     "cache_config": correction_config.get("cache", {}),
-                    "llm_model": provider_config.get("model", "gpt-5-mini"),
+                    "llm_model": provider_config.get("model", None),
                     "slice": correction_config.get("slice", None),
                 }
                 corrector = LemmaCorrector(provider, corrector_config)
@@ -198,7 +198,7 @@ if __name__ == "__main__":
                 ),
                 "output_dir": output_dir,
                 "cache_config": translation_config.get("cache", {}),
-                "llm_model": provider_config.get("model", "gpt-5-mini"),
+                "llm_model": provider_config.get("model", None),
             }
 
             translator = LemmaTranslator(provider, translator_config)
