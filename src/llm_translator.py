@@ -329,7 +329,7 @@ class LemmaTranslator:
         translations: List[Dict[str, Any]],
         id_mapping: Dict[str, Dict],
     ) -> List[Dict[str, Any]]:
-        """Add frequency field to each translation object."""
+        """Add frequency field to each translation object and normalize estimated_share values."""
         enriched = []
 
         for translation in translations:
@@ -338,6 +338,56 @@ class LemmaTranslator:
                 # Add frequency from id_mapping
                 translation["frequency"] = id_mapping[item_id]["frequency"]
 
+            # Normalize estimated_share values
+            self._normalize_estimated_shares(translation)
+
             enriched.append(translation)
 
         return enriched
+
+    def _normalize_estimated_shares(self, translation: Dict[str, Any]) -> None:
+        """
+        Normalize estimated_share values so they sum to 1.0.
+
+        Issues warning if normalization is needed.
+        If sum is 0, distributes shares equally across all meanings.
+        Modifies the translation dict in-place.
+        """
+        if "meanings" not in translation or not translation["meanings"]:
+            return
+
+        num_meanings = len(translation["meanings"])
+        if num_meanings == 0:
+            return
+
+        # Calculate sum of estimated_share values
+        total_share = sum(
+            meaning.get("estimated_share", 0.0)
+            for meaning in translation["meanings"]
+        )
+
+        # If sum is very close to 1.0, no normalization needed
+        if abs(total_share - 1.0) < 0.001:
+            return
+
+        # If sum is 0, distribute equally
+        if total_share == 0:
+            logger.warning(
+                f"Lemma {translation.get('lemma')} (ID: {translation.get('id')}): "
+                f"All estimated_share values are 0 - distributing equally across {num_meanings} meanings"
+            )
+            equal_share = 1.0 / num_meanings
+            for meaning in translation["meanings"]:
+                meaning["estimated_share"] = equal_share
+            return
+
+        # Log warning and normalize proportionally
+        logger.warning(
+            f"Lemma {translation.get('lemma')} (ID: {translation.get('id')}): "
+            f"estimated_share values sum to {total_share:.4f} instead of 1.0 - normalizing"
+        )
+
+        # Normalize each meaning's estimated_share proportionally
+        for meaning in translation["meanings"]:
+            if "estimated_share" in meaning:
+                meaning["estimated_share"] = meaning["estimated_share"] / total_share

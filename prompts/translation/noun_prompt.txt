@@ -71,7 +71,7 @@
       {
         "gender": "f",
         "example_es": "Madrid es la capital de España.",
-        "estimated_share": 0.5,
+        "estimated_share": 0.67,
         "flags": [],
         "translations": [
           {
@@ -83,7 +83,7 @@
       {
         "gender": "m",
         "example_es": "La empresa necesita más capital extranjero.",
-        "estimated_share": 0.5,
+        "estimated_share": 0.33,
         "flags": [],
         "translations": [
           {
@@ -105,20 +105,8 @@
     "meanings": [
       {
         "gender": "f",
-        "example_es": "Ayer escribí una carta a mi abuela.",
-        "estimated_share": 0.2,
-        "flags": [],
-        "translations": [
-          {
-            "text": "Brief",
-            "gender_target": "m"
-          }
-        ]
-      },
-      {
-        "gender": "f",
         "example_es": "¿Me puede traer la carta, por favor?",
-        "estimated_share": 0.6,
+        "estimated_share": 0.58,
         "flags": [],
         "translations": [
           {
@@ -129,8 +117,20 @@
       },
       {
         "gender": "f",
+        "example_es": "Ayer escribí una carta a mi abuela.",
+        "estimated_share": 0.29,
+        "flags": [],
+        "translations": [
+          {
+            "text": "Brief",
+            "gender_target": "m"
+          }
+        ]
+      },
+      {
+        "gender": "f",
         "example_es": "Mis tíos juegan a las cartas todos los domingos.",
-        "estimated_share": 0.2,
+        "estimated_share": 0.13,
         "flags": [],
         "translations": [
           {
@@ -149,7 +149,7 @@
       {
         "gender": "f",
         "example_es": "El niño tiene fiebre, tócale la frente.",
-        "estimated_share": 0.6,
+        "estimated_share": 0.72,
         "flags": [],
         "translations": [
           {
@@ -161,7 +161,7 @@
       {
         "gender": "m",
         "example_es": "Un frente frío llegará mañana por el norte.",
-        "estimated_share": 0.4,
+        "estimated_share": 0.28,
         "flags": [],
         "translations": [
           {

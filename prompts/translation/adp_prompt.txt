@@ -173,7 +173,7 @@ Beispiel für `en [lugar]`:
       {
         "structure": "en [lugar]",
         "example_es": "Las llaves están en la mesa de la cocina.",
-        "estimated_share": 0.7,
+        "estimated_share": 0.82,
         "flags": [],
         "translations": [
           {
@@ -188,20 +188,9 @@ Beispiel für `en [lugar]`:
         ]
       },
       {
-        "structure": "ir en [transporte]",
-        "example_es": "Prefiero ir al trabajo en bicicleta para hacer deporte.",
-        "estimated_share": 0.15,
-        "flags": [],
-        "translations": [
-          {
-            "text": "mit"
-          }
-        ]
-      },
-      {
         "structure": "en [tiempo]",
         "example_es": "Nací en 1990, en el mes de agosto.",
-        "estimated_share": 0.15,
+        "estimated_share": 0.13,
         "flags": [],
         "translations": [
           {
@@ -209,6 +198,17 @@ Beispiel für `en [lugar]`:
           },
           {
             "text": "in"
+          }
+        ]
+      },
+      {
+        "structure": "ir en [transporte]",
+        "example_es": "Prefiero ir al trabajo en bicicleta para hacer deporte.",
+        "estimated_share": 0.05,
+        "flags": [],
+        "translations": [
+          {
+            "text": "mit"
           }
         ]
       }

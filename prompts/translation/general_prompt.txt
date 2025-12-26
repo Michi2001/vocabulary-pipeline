@@ -19,6 +19,51 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - Nutze `estimated_share` um die relative Häufigkeit anzugeben (Werte zwischen 0 und 1, Summe = 1.0)
 - Sei realistisch: Häufige Alltagsbedeutungen haben höhere Werte als seltene/fachsprachliche Bedeutungen
 
+**estimated_share - Korpusbasierte Häufigkeitsschätzung:**
+
+**DENKE WIE EIN KORPUSLINGUIST:**
+Stelle dir vor: Du analysierst 100 zufällige Korpussätze mit diesem Wort.
+Wie viele davon nutzen DIESE spezifische Bedeutung?
+
+**Häufigkeitskategorien:**
+- **Extrem dominant** (0.85-0.98): Fast die einzige relevante Bedeutung
+  - Beispiel: "casa" als Gebäude ~0.95 (Schach-Bedeutung nur ~0.02-0.03)
+  - Beispiel: "esperma" als Sperma ~0.98 (Kerzenwachs ist archaisch, ~0.01-0.02)
+- **Klar dominant** (0.60-0.85): Die Hauptbedeutung, aber andere sind auch präsent
+  - Beispiel: "tener" als besitzen ~0.65, "tener que" ~0.30, Alter ~0.05
+- **Primärbedeutung** (0.45-0.60): Häufigste, aber andere sind ähnlich wichtig
+  - Beispiel: "banco" als Finanzinstitut ~0.55, Sitzbank ~0.45
+- **Sekundärbedeutung** (0.15-0.40): Wichtig, aber nicht die häufigste
+- **Tertiärbedeutung** (0.05-0.15): Bekannt, aber spezifisch für bestimmte Kontexte
+- **Sehr selten** (0.01-0.05): Archaisch, hochfachsprachlich oder regional sehr begrenzt
+  - Verwende Werte wie 0.01, 0.02, 0.03 für wirklich seltene Bedeutungen!
+  - Nicht automatisch 0.05 für "selten" verwenden
+
+**KRITISCHE SELBSTREFLEXION vor Finalisierung:**
+1. **Gleichverteilungs-Falle vermeiden:**
+   - Habe ich reflexartig 0.5/0.5 oder 0.3/0.3/0.3 vergeben?
+   - Fast immer ist eine Bedeutung dominanter! Überdenke die Verteilung.
+   - Echte 50/50-Verteilungen sind sehr selten (z.B. "banco")
+
+2. **Seltenheits-Realismus:**
+   - Ist diese "seltene" Bedeutung wirklich 5-10% aller Vorkommen?
+   - Archaische/regionale/fachsprachliche Bedeutungen sind oft <0.03, nicht 0.05-0.10!
+   - Nutze Werte wie 0.01, 0.02, 0.03 für wirklich seltene Fälle
+
+3. **Alltags-Test:**
+   - Würde ein Muttersprachler sofort an diese Bedeutung denken?
+   - Wenn NEIN → wahrscheinlich <0.30
+   - Wenn "nur in speziellen Kontexten" → wahrscheinlich <0.10
+
+4. **Fachsprachlichkeits-Check:**
+   - Medizinisch/technisch/juristisch → meist <0.15
+   - Regionalismen vs. Standardsprache → Regional meist <0.25
+
+**Summen-Check:** Addiere alle Shares. Ergeben sie genau 1.0?
+
+**Denke in echter Korpus-Frequenz, nicht in runden Zahlen!**
+Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0.05
+
 **Wann separate meanings erstellen:**
 - **Unterschiedliche deutsche Übersetzungen**: Wenn die Grundbedeutung im Deutschen anders ist
   - Beispiel: `muñeca` → "Handgelenk" vs. "Puppe" (zwei komplett verschiedene Konzepte)

@@ -45,7 +45,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "structure": "cuando [pasado]",
         "example_es": "Cuando llegué a casa, vi que la puerta estaba abierta.",
-        "estimated_share": 0.4,
+        "estimated_share": 0.46,
         "flags": [],
         "translations": [
           {
@@ -56,7 +56,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "structure": "cuando [presente]",
         "example_es": "Cuando voy al supermercado, siempre compro chocolate.",
-        "estimated_share": 0.35,
+        "estimated_share": 0.32,
         "flags": [],
         "translations": [
           {
@@ -70,7 +70,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "structure": "cuando [subjuntivo]",
         "example_es": "Cuando tengas tiempo, llámame.",
-        "estimated_share": 0.25,
+        "estimated_share": 0.22,
         "flags": [],
         "translations": [
           {
@@ -91,7 +91,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "structure": "si [condición]",
         "example_es": "Si llueve mañana, cancelaremos la barbacoa.",
-        "estimated_share": 0.7,
+        "estimated_share": 0.71,
         "flags": [],
         "translations": [
           {
@@ -105,7 +105,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "structure": "si [pregunta indirecta]",
         "example_es": "No sé si Juan vendrá a la fiesta o se quedará en casa.",
-        "estimated_share": 0.3,
+        "estimated_share": 0.29,
         "flags": [],
         "translations": [
           {
@@ -123,7 +123,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "structure": "aunque [indicativo]",
         "example_es": "Voy a salir a correr aunque hace mucho frío.",
-        "estimated_share": 0.6,
+        "estimated_share": 0.63,
         "flags": [],
         "translations": [
           {
@@ -137,7 +137,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "structure": "aunque [subjuntivo]",
         "example_es": "No compraría ese coche aunque fuera rico.",
-        "estimated_share": 0.4,
+        "estimated_share": 0.37,
         "flags": [],
         "translations": [
           {
