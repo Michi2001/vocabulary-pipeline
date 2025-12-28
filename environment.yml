@@ -1,0 +1,19 @@
+name: LanguageApp-new
+channels:
+  - defaults
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+dependencies:
+  - python=3.10.19
+  - babel
+  - google-genai
+  - openai
+  - python-dotenv
+  - pyyaml
+  - spacy
+  - pip
+    - torch
+    - transformers
+    - scikit-learn
+    - pandas
+prefix: /Users/michael/anaconda3/envs/LanguageApp-new
