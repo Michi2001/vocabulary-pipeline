@@ -88,6 +88,21 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
         "translations": [{"text": "selbst wenn"}, {"text": "auch wenn"}]
       }
     ]
+  },
+  {
+    "id": "00804",
+    "lemma": "pero",
+    "pos": "CONJ",
+    "meanings": [
+      {
+        "definition_es": "introduce una idea que contrasta con la anterior",
+        "structure": "pero",
+        "example_es": "Me gustaría ir a la fiesta, pero tengo que trabajar.",
+        "estimated_share": 1.0,
+        "flags": [],
+        "translations": [{"text": "aber"}]
+      }
+    ]
   }
 ]
 ```

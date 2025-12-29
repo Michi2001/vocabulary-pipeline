@@ -32,7 +32,10 @@ class LemmaTranslator:
     """
 
     def __init__(
-        self, provider: BaseLLMProvider, cache: Optional[LemmaCache], config: Dict[str, Any]
+        self,
+        provider: BaseLLMProvider,
+        cache: Optional[LemmaCache],
+        config: Dict[str, Any],
     ):
         """
         Initialize translator.
@@ -55,22 +58,18 @@ class LemmaTranslator:
 
     def translate(
         self, counter: FrequencyCounter, min_frequency: int = 1
-    ) -> Dict[str, Any]:
+    ) -> tuple[list[dict], dict]:
         """
-        Translate lemmas and write to JSON file.
+        Translate lemmas and return translations.
 
         Args:
             counter: Input FrequencyCounter with Spanish lemmas (potentially already corrected)
             min_frequency: Minimum frequency threshold
 
         Returns:
-            Dict with token usage statistics: {
-                'total_prompt_tokens': int,
-                'total_completion_tokens': int,
-                'total_tokens': int,
-                'api_calls': int,
-                'cache_hits': int
-            }
+            Tuple of (translations, usage_stats):
+                - translations: List of translated lemma entries
+                - usage_stats: Dict with token usage statistics
         """
         logger.info("Starting LLM-based lemma translation...")
 
@@ -165,11 +164,6 @@ class LemmaTranslator:
         # Sort by frequency descending (highest frequency first)
         enriched_translations.sort(key=lambda x: x.get("frequency", 0), reverse=True)
 
-        # Save to JSON
-        output_path = self.output_dir / "translations.json"
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(enriched_translations, f, ensure_ascii=False, indent=2)
-
         # Save cache to disk (if cache is enabled)
         if self.cache is not None:
             self.cache.save_all()
@@ -177,7 +171,6 @@ class LemmaTranslator:
         logger.info(
             f"Translation complete. Translated {len(enriched_translations)} lemmas"
         )
-        logger.info(f"Output saved to: {output_path}")
 
         # Log token usage summary
         logger.info("\n" + "=" * 60)
@@ -190,7 +183,7 @@ class LemmaTranslator:
         logger.info(f"Total Tokens:       {total_usage['total_tokens']:,}")
         logger.info("=" * 60 + "\n")
 
-        return total_usage
+        return enriched_translations, total_usage
 
     def _group_by_pos(
         self, frequencies: List[Dict[str, Any]]
@@ -290,19 +283,24 @@ class LemmaTranslator:
             cached_translation = None
             if self.cache is not None:
                 cached_translation = self.cache.get_translation(
-                    item["lemma"], normalized_pos, self.model_config, combined_prompt_hash
+                    item["lemma"],
+                    normalized_pos,
+                    self.model_config,
+                    combined_prompt_hash,
                 )
 
             if cached_translation is not None:
                 cached_translations.append(cached_translation)
             else:
                 # Add to uncached with ID and normalized POS
-                uncached_items.append({
-                    "id": item_id,
-                    "lemma": item["lemma"],
-                    "frequency": item["frequency"],
-                    "pos": normalized_pos,
-                })
+                uncached_items.append(
+                    {
+                        "id": item_id,
+                        "lemma": item["lemma"],
+                        "frequency": item["frequency"],
+                        "pos": normalized_pos,
+                    }
+                )
 
         # Log statistics
         cache_hits = len(cached_translations)

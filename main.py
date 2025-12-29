@@ -6,6 +6,7 @@ Analyzes text corpora, lemmatizes words in context, and generates frequency list
 """
 
 import yaml
+import json
 import logging
 import os
 import shutil
@@ -21,6 +22,7 @@ from src.llm_providers import create_provider
 from src.llm_corrector import LemmaCorrector
 from src.llm_translator import LemmaTranslator
 from src.lemma_cache import LemmaCache
+from src.embedding_generator import EmbeddingGenerator
 
 
 logger = logging.getLogger(__name__)
@@ -189,33 +191,62 @@ if __name__ == "__main__":
     OutputWriter.write_csv(frequencies, output_path)
 
     # Optional: LLM-based translation
+    translations = None
     translation_config = config.get("llm_translation", {})
     if translation_config.get("enabled", False):
         logger.info("LLM translation enabled - translating lemmas...")
 
-        try:
-            provider_type = translation_config["llm"]["type"]
-            provider_config = translation_config["llm"].get(provider_type, {})
-            translation_provider = create_provider(provider_type, provider_config)
+        provider_type = translation_config["llm"]["type"]
+        provider_config = translation_config["llm"].get(provider_type, {})
+        translation_provider = create_provider(provider_type, provider_config)
 
-            translator_config = {
-                "batch_size": translation_config.get("batch_size", 25),
-                "prompts_dir": translation_config.get(
-                    "prompt_directory", "prompts/translation"
-                ),
-                "output_dir": output_dir,
-            }
+        translator_config = {
+            "batch_size": translation_config.get("batch_size", 25),
+            "prompts_dir": translation_config.get(
+                "prompt_directory", "prompts/translation"
+            ),
+            "output_dir": output_dir,
+        }
 
-            translator = LemmaTranslator(
-                translation_provider, llm_cache, translator_config
+        translator = LemmaTranslator(translation_provider, llm_cache, translator_config)
+        min_freq = processing_config.get("min_frequency", 1)
+        translations, usage_stats = translator.translate(
+            counter, min_frequency=min_freq
+        )
+
+        logger.info("LLM translation completed")
+
+    # Optional: Embedding generation (runs after translation)
+    embedding_config = config.get("embeddings", {})
+    if embedding_config.get("enabled", False):
+        if translations is not None:
+            logger.info("Embedding generation enabled - generating embeddings...")
+
+            try:
+                generator = EmbeddingGenerator(
+                    model_name=embedding_config.get(
+                        "model", "sentence-transformers/LaBSE"
+                    ),
+                    batch_size=embedding_config.get("batch_size", 32),
+                )
+                translations = generator.generate(translations)
+
+                logger.info("Embedding generation completed")
+
+            except Exception as e:
+                logger.error(f"Embedding generation failed: {e}")
+                logger.warning("Continuing without embeddings")
+        else:
+            logger.warning(
+                "Embeddings enabled but no translations available. "
+                "Enable llm_translation first."
             )
-            min_freq = processing_config.get("min_frequency", 1)
-            translator.translate(counter, min_frequency=min_freq)
 
-            logger.info("LLM translation completed - output: translations.json")
-
-        except Exception as e:
-            logger.error(f"LLM translation failed: {e}")
-            logger.warning("Continuing without translation")
+    # Save translations to JSON (if available)
+    if translations is not None:
+        translations_path = os.path.join(output_dir, "translations.json")
+        with open(translations_path, "w", encoding="utf-8") as f:
+            json.dump(translations, f, ensure_ascii=False, indent=2)
+        logger.info(f"Translations saved to: {translations_path}")
 
     logger.info("Pipeline completed!")
