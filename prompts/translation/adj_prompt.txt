@@ -37,6 +37,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "pos": "ADJ",
     "meanings": [
       {
+        "definition_es": "preparado para hacer algo o partir",
         "structure": "estar listo",
         "example_es": "Date prisa, el taxi está esperando y nosotros todavía no estamos listos.",
         "estimated_share": 0.62,
@@ -44,6 +45,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
         "translations": [{"text": "fertig"}, {"text": "bereit"}]
       },
       {
+        "definition_es": "que tiene inteligencia y aprende rápido",
         "structure": "ser listo",
         "example_es": "Ese chico es muy listo, siempre saca las mejores notas en matemáticas.",
         "estimated_share": 0.38,
@@ -58,6 +60,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "pos": "ADJ",
     "meanings": [
       {
+        "definition_es": "que tiene muchos años de edad",
         "structure": "viejo",
         "example_es": "Mi abuelo es un hombre viejo, tiene ya noventa años.",
         "estimated_share": 0.81,
@@ -65,6 +68,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
         "translations": [{"text": "alt"}]
       },
       {
+        "definition_es": "que se conoce desde hace mucho tiempo",
         "structure": "viejo [sustantivo]",
         "example_es": "Juan es un viejo amigo mío, nos conocemos desde la infancia.",
         "estimated_share": 0.19,
@@ -79,6 +83,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "pos": "ADJ",
     "meanings": [
       {
+        "definition_es": "que tiene buen sabor, sabroso",
         "structure": "estar rico",
         "example_es": "Este pastel de chocolate está muy rico, ¿me das la receta?",
         "estimated_share": 0.68,
@@ -86,6 +91,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
         "translations": [{"text": "lecker"}, {"text": "köstlich"}]
       },
       {
+        "definition_es": "que tiene mucho dinero o bienes",
         "structure": "ser rico",
         "example_es": "Se hizo rico invirtiendo en bolsa y ahora tiene tres casas.",
         "estimated_share": 0.32,
@@ -100,6 +106,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "pos": "ADJ",
     "meanings": [
       {
+        "definition_es": "de tamaño superior al normal",
         "structure": "grande",
         "example_es": "Viven en una casa muy grande con jardín y piscina.",
         "estimated_share": 0.73,
@@ -107,6 +114,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
         "translations": [{"text": "groß"}]
       },
       {
+        "definition_es": "importante, destacado o admirable",
         "structure": "gran [sustantivo]",
         "example_es": "Einstein fue un gran científico que cambió la física.",
         "estimated_share": 0.27,
@@ -121,6 +129,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "pos": "ADJ",
     "meanings": [
       {
+        "definition_es": "que tiene mala intención o hace daño",
         "structure": "ser malo",
         "example_es": "En los cuentos infantiles, el lobo siempre es malo.",
         "estimated_share": 0.54,
@@ -128,6 +137,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
         "translations": [{"text": "böse"}, {"text": "gemein"}]
       },
       {
+        "definition_es": "en mal estado, estropeado o podrido",
         "structure": "estar malo",
         "example_es": "No bebas esa leche, lleva mucho tiempo fuera y está mala.",
         "estimated_share": 0.31,
@@ -135,6 +145,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
         "translations": [{"text": "schlecht"}, {"text": "verdorben"}]
       },
       {
+        "definition_es": "enfermo, que no se siente bien de salud",
         "structure": "estar malo",
         "example_es": "No puedo ir a trabajar hoy porque estoy malo, tengo fiebre.",
         "estimated_share": 0.15,

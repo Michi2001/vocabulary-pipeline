@@ -18,6 +18,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
     "pos": "CONJ",
     "meanings": [
       {
+        "definition_es": "introduce un momento específico en el pasado",
         "structure": "cuando [pasado]",
         "example_es": "Cuando llegué a casa, vi que la puerta estaba abierta.",
         "estimated_share": 0.46,
@@ -25,6 +26,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
         "translations": [{"text": "als"}]
       },
       {
+        "definition_es": "introduce una acción habitual o repetida",
         "structure": "cuando [presente]",
         "example_es": "Cuando voy al supermercado, siempre compro chocolate.",
         "estimated_share": 0.32,
@@ -32,6 +34,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
         "translations": [{"text": "immer wenn"}, {"text": "wenn"}]
       },
       {
+        "definition_es": "introduce una acción futura o hipotética",
         "structure": "cuando [subjuntivo]",
         "example_es": "Cuando tengas tiempo, llámame.",
         "estimated_share": 0.22,
@@ -46,6 +49,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
     "pos": "CONJ",
     "meanings": [
       {
+        "definition_es": "introduce una condición o hipótesis",
         "structure": "si [condición]",
         "example_es": "Si llueve mañana, cancelaremos la barbacoa.",
         "estimated_share": 0.71,
@@ -53,6 +57,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
         "translations": [{"text": "wenn"}, {"text": "falls"}]
       },
       {
+        "definition_es": "introduce una pregunta indirecta sobre alternativas",
         "structure": "si [pregunta indirecta]",
         "example_es": "No sé si Juan vendrá a la fiesta o se quedará en casa.",
         "estimated_share": 0.29,
@@ -67,6 +72,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
     "pos": "CONJ",
     "meanings": [
       {
+        "definition_es": "introduce un hecho real que no impide la acción principal",
         "structure": "aunque [indicativo]",
         "example_es": "Voy a salir a correr aunque hace mucho frío.",
         "estimated_share": 0.63,
@@ -74,6 +80,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
         "translations": [{"text": "obwohl"}, {"text": "obgleich"}]
       },
       {
+        "definition_es": "introduce una situación hipotética que no impediría la acción",
         "structure": "aunque [subjuntivo]",
         "example_es": "No compraría ese coche aunque fuera rico.",
         "estimated_share": 0.37,

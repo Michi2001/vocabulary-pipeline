@@ -22,6 +22,7 @@
     "pos": "ADV",
     "meanings": [
       {
+        "definition_es": "indica que algo ha ocurrido antes del momento presente",
         "structure": "ya",
         "example_es": "No tengo hambre, ya he comido en casa.",
         "estimated_share": 0.78,
@@ -29,6 +30,7 @@
         "translations": [{"text": "schon"}, {"text": "bereits"}]
       },
       {
+        "definition_es": "indica que algo ha dejado de ocurrir",
         "structure": "ya no",
         "example_es": "Antes fumaba un paquete al día, pero ya no fumo.",
         "estimated_share": 0.17,
@@ -36,6 +38,7 @@
         "translations": [{"text": "nicht mehr"}]
       },
       {
+        "definition_es": "expresa urgencia o inmediatez",
         "structure": "ya",
         "example_es": "¡Limpia tu habitación ya, no quiero esperar más!",
         "estimated_share": 0.05,
@@ -50,6 +53,7 @@
     "pos": "ADV",
     "meanings": [
       {
+        "definition_es": "de manera correcta, adecuada o satisfactoria",
         "structure": "bien",
         "example_es": "Tu hijo dibuja muy bien para su edad.",
         "estimated_share": 0.52,
@@ -57,6 +61,7 @@
         "translations": [{"text": "gut"}]
       },
       {
+        "definition_es": "en buen estado de salud o ánimo",
         "structure": "estar bien",
         "example_es": "No te preocupes por mí, estoy bien.",
         "estimated_share": 0.38,
@@ -64,6 +69,7 @@
         "translations": [{"text": "gut"}, {"text": "wohlauf"}]
       },
       {
+        "definition_es": "intensifica un adjetivo, bastante o muy",
         "structure": "bien [adjetivo]",
         "example_es": "El agua de la piscina está bien fría hoy.",
         "estimated_share": 0.10,
@@ -78,6 +84,7 @@
     "pos": "ADV",
     "meanings": [
       {
+        "definition_es": "a poca distancia en el espacio",
         "structure": "cerca de [algo]",
         "example_es": "Me gusta vivir cerca de la playa para ver el mar.",
         "estimated_share": 1.0,

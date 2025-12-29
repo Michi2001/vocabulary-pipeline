@@ -78,13 +78,31 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
   - Das deutsche Wort deckt beide Verwendungen ab, genau wie im Spanischen
 - **Nur stilistische oder graduelle Unterschiede**: Wenn es nur um Nuancen oder Register geht, nicht um grundsätzlich verschiedene Bedeutungen
 
-### 2. Beispielsätze (example_es)
+### 2. Definition (definition_es)
+- **Pflichtfeld**: Jede Bedeutung muss eine kurze spanische Definition enthalten
+- Die Definition beschreibt das Kernkonzept dieser spezifischen Bedeutung auf Spanisch
+- **Länge**: 5-15 Wörter, prägnant und klar
+- **Zweck**: Dient zur semantischen Unterscheidung der Bedeutungen
+- **Regel**: Wenn du keine unterschiedliche Definition schreiben kannst, gehören die Verwendungen in dieselbe Meaning
+
+**Gute Definitionen:**
+- Beschreiben das Konzept, nicht die Übersetzung
+- Sind spezifisch genug, um diese Bedeutung von anderen zu unterscheiden
+- Verwenden einfaches, klares Spanisch
+
+**Beispiele:**
+- `banco` (Finanzinstitut): `"institución financiera donde se guarda y presta dinero"`
+- `banco` (Sitzbank): `"asiento largo para varias personas"`
+- `tocar` (berühren): `"poner la mano sobre algo o alguien"`
+- `tocar` (Instrument): `"producir música con un instrumento"`
+
+### 3. Beispielsätze (example_es)
 - Verwende natürliche, alltägliche spanische Sätze
 - Der Beispielsatz muss die spezifische Bedeutung klar demonstrieren
 - Vermeide zu einfache oder zu komplexe Sätze
 - Der Kontext sollte eindeutig sein
 
-### 3. Structure-Feld
+### 4. Structure-Feld
 - **WICHTIG: Sei sehr sparsam mit Platzhaltern!** Verwende sie nur wenn unbedingt notwendig zum Verständnis
 - Die meisten Wörter brauchen KEINE Platzhalter - nur das Lemma reicht
 - Verwende Platzhalter NUR wenn sie grammatisch wichtig oder bedeutungsunterscheidend sind
@@ -150,7 +168,7 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
 
 **Kombination:** Mit Schrägstrich: `[algo / alguien]`
 
-### 4. Flags-Feld
+### 5. Flags-Feld
 - **Pflichtfeld**: Jede Bedeutung muss ein `flags` Array enthalten
 - Das flags-Array kann leer sein: `"flags": []`
 - Füge bei Bedarf Warnungen hinzu:
@@ -213,7 +231,7 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
 - `"flags": ["offensive", "regionalism:Argentinien"]` - Vulgär und argentinisch
 - `"flags": ["regionalism:Lateinamerika"]` - Allgemein lateinamerikanisch (wenn Land unbekannt)
 
-### 5. Übersetzungen (translations)
+### 6. Übersetzungen (translations)
 - Gib nur so viele deutsche Übersetzungen an, wie wirklich nötig und gleichwertig sind
 - Sortiere nach Häufigkeit und Natürlichkeit
 - **WICHTIG: Verwende hints sehr sparsam!** Integriere Informationen direkt in den Text, wann immer möglich
@@ -303,7 +321,7 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
   **h) Format bei mehreren Hints**
   - Wenn mehrere Informationen nötig sind, verwende das Format: "hint": "Kontext1 / Kontext2" (z. B. "Wetter / Front" oder "med. / Technik").
 
-### 6. Qualitätsstandards
+### 7. Qualitätsstandards
 - **Qualität über Quantität**: Weniger, präzise Übersetzungen sind besser als viele ähnliche
 - **Genauigkeit über Vollständigkeit**: Fokussiere auf die wichtigsten Bedeutungen
 - **Sparsamkeit bei hints**: Maximal 20-30% der Übersetzungen sollten hints haben
@@ -324,6 +342,7 @@ Gib ein JSON-Objekt mit folgendem Format zurück:
       "pos": "...",
       "meanings": [
         {
+          "definition_es": "...",
           "structure": "...",
           "example_es": "...",
           "estimated_share": 0.4,
