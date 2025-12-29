@@ -1,63 +1,15 @@
-# POS-spezifischer Prompt: NOUN (Substantiv)
+# POS-spezifischer Prompt: NOUN
 
-## JSON-Struktur für Substantive
-
-```json
-{
-  "id": "00XXX",
-  "lemma": "palabra",
-  "pos": "NOUN",
-  "meanings": [
-    {
-      "gender": "f",  // oder "m"
-      "example_es": "Ejemplo en español.",
-      "estimated_share": 0.6,
-      "flags": [],
-      "translations": [
-        {
-          "text": "deutsche Übersetzung",
-          "gender_target": "f"  // oder "m", "n"
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Besonderheiten für Substantive
+## Zusätzliche Felder für Substantive
 
 ### Gender (Geschlecht)
-- **Pflichtfeld `gender`**: Gib das spanische Geschlecht an ("f" oder "m")
-- **Pflichtfeld `gender_target`**: Gib das deutsche Geschlecht an ("f", "m", oder "n")
-- Bei unterschiedlichen Bedeutungen mit unterschiedlichen Geschlechtern: erstelle separate meaning-Einträge
+- **Pflichtfeld `gender`** im meaning: Spanisches Geschlecht ("f" oder "m")
+- **Pflichtfeld `gender_target`** in translation: Deutsches Geschlecht ("f", "m", oder "n")
+- Bei unterschiedlichen Geschlechtern je nach Bedeutung: separate meaning-Einträge
 
-### Beispiel: Wort mit verschiedenen Geschlechtern und Bedeutungen
-```json
-{
-  "lemma": "capital",
-  "meanings": [
-    {
-      "gender": "f",
-      "example_es": "Madrid es la capital de España.",
-      "estimated_share": 0.5,
-      "flags": [],
-      "translations": [{"text": "Hauptstadt", "gender_target": "f"}]
-    },
-    {
-      "gender": "m",
-      "example_es": "La empresa necesita más capital.",
-      "estimated_share": 0.5,
-      "flags": [],
-      "translations": [{"text": "Kapital", "gender_target": "n"}]
-    }
-  ]
-}
-```
-
-### Structure-Feld bei Substantiven
+### Structure-Feld
 - Normalerweise **kein** structure-Feld nötig
-- Nur bei speziellen Konstruktionen oder wenn die Position wichtig ist
-- Beispiel: Wenn das Substantiv in einer festen Wendung vorkommt
+- Nur bei festen Wendungen oder wenn Position wichtig ist
 
 # Examples
 
@@ -73,28 +25,14 @@
         "example_es": "Madrid es la capital de España.",
         "estimated_share": 0.67,
         "flags": [],
-        "translations": [
-          {
-            "text": "Hauptstadt",
-            "gender_target": "f"
-          }
-        ]
+        "translations": [{"text": "Hauptstadt", "gender_target": "f"}]
       },
       {
         "gender": "m",
         "example_es": "La empresa necesita más capital extranjero.",
         "estimated_share": 0.33,
         "flags": [],
-        "translations": [
-          {
-            "text": "Kapital",
-            "gender_target": "n"
-          },
-          {
-            "text": "Vermögen",
-            "gender_target": "n"
-          }
-        ]
+        "translations": [{"text": "Kapital", "gender_target": "n"}, {"text": "Vermögen", "gender_target": "n"}]
       }
     ]
   },
@@ -108,36 +46,21 @@
         "example_es": "¿Me puede traer la carta, por favor?",
         "estimated_share": 0.58,
         "flags": [],
-        "translations": [
-          {
-            "text": "Speisekarte",
-            "gender_target": "f"
-          }
-        ]
+        "translations": [{"text": "Speisekarte", "gender_target": "f"}]
       },
       {
         "gender": "f",
         "example_es": "Ayer escribí una carta a mi abuela.",
         "estimated_share": 0.29,
         "flags": [],
-        "translations": [
-          {
-            "text": "Brief",
-            "gender_target": "m"
-          }
-        ]
+        "translations": [{"text": "Brief", "gender_target": "m"}]
       },
       {
         "gender": "f",
         "example_es": "Mis tíos juegan a las cartas todos los domingos.",
         "estimated_share": 0.13,
         "flags": [],
-        "translations": [
-          {
-            "text": "Spielkarte",
-            "gender_target": "f"
-          }
-        ]
+        "translations": [{"text": "Spielkarte", "gender_target": "f"}]
       }
     ]
   },
@@ -151,25 +74,14 @@
         "example_es": "El niño tiene fiebre, tócale la frente.",
         "estimated_share": 0.72,
         "flags": [],
-        "translations": [
-          {
-            "text": "Stirn",
-            "gender_target": "f"
-          }
-        ]
+        "translations": [{"text": "Stirn", "gender_target": "f"}]
       },
       {
         "gender": "m",
         "example_es": "Un frente frío llegará mañana por el norte.",
         "estimated_share": 0.28,
         "flags": [],
-        "translations": [
-          {
-            "text": "Front",
-            "gender_target": "f",
-            "hint": "Wetter / Militär"
-          }
-        ]
+        "translations": [{"text": "Front", "gender_target": "f", "hint": "Wetter / Militär"}]
       }
     ]
   }

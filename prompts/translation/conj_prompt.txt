@@ -1,37 +1,12 @@
 # POS-spezifischer Prompt: CONJ (Konjunktion)
 
-## JSON-Struktur für Konjunktionen
+## Structure-Feld (wichtig für Tempus/Modus!)
 
-```json
-{
-  "id": "00XXX",
-  "lemma": "cuando",
-  "pos": "CONJ",
-  "meanings": [
-    {
-      "structure": "cuando [pasado]",
-      "example_es": "Ejemplo en español.",
-      "estimated_share": 0.4,
-      "flags": [], 
-      "translations": [
-        {
-          "text": "als"
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Besonderheiten für Konjunktionen
-
-### Structure-Feld (wichtig für Tempus/Modus!)
 Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des folgenden Verbs, da dies die Bedeutung beeinflussen kann.
 
 **Beispiele:**
 - `cuando [pasado]` = als vs. `cuando [presente]` = wenn (Tempus ändert Bedeutung)
 - `aunque [indicativo]` = obwohl vs. `aunque [subjuntivo]` = selbst wenn (Modus ändert Bedeutung)
-
 
 # Examples
 
@@ -47,39 +22,21 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
         "example_es": "Cuando llegué a casa, vi que la puerta estaba abierta.",
         "estimated_share": 0.46,
         "flags": [],
-        "translations": [
-          {
-            "text": "als"
-          }
-        ]
+        "translations": [{"text": "als"}]
       },
       {
         "structure": "cuando [presente]",
         "example_es": "Cuando voy al supermercado, siempre compro chocolate.",
         "estimated_share": 0.32,
         "flags": [],
-        "translations": [
-          {
-            "text": "immer wenn"
-          },
-          {
-            "text": "wenn"
-          }
-        ]
+        "translations": [{"text": "immer wenn"}, {"text": "wenn"}]
       },
       {
         "structure": "cuando [subjuntivo]",
         "example_es": "Cuando tengas tiempo, llámame.",
         "estimated_share": 0.22,
         "flags": [],
-        "translations": [
-          {
-            "text": "sobald"
-          },
-          {
-            "text": "wenn"
-          }
-        ]
+        "translations": [{"text": "sobald"}, {"text": "wenn"}]
       }
     ]
   },
@@ -93,25 +50,14 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
         "example_es": "Si llueve mañana, cancelaremos la barbacoa.",
         "estimated_share": 0.71,
         "flags": [],
-        "translations": [
-          {
-            "text": "wenn"
-          },
-          {
-            "text": "falls"
-          }
-        ]
+        "translations": [{"text": "wenn"}, {"text": "falls"}]
       },
       {
         "structure": "si [pregunta indirecta]",
         "example_es": "No sé si Juan vendrá a la fiesta o se quedará en casa.",
         "estimated_share": 0.29,
         "flags": [],
-        "translations": [
-          {
-            "text": "ob"
-          }
-        ]
+        "translations": [{"text": "ob"}]
       }
     ]
   },
@@ -125,29 +71,16 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
         "example_es": "Voy a salir a correr aunque hace mucho frío.",
         "estimated_share": 0.63,
         "flags": [],
-        "translations": [
-          {
-            "text": "obwohl"
-          },
-          {
-            "text": "obgleich"
-          }
-        ]
+        "translations": [{"text": "obwohl"}, {"text": "obgleich"}]
       },
       {
         "structure": "aunque [subjuntivo]",
         "example_es": "No compraría ese coche aunque fuera rico.",
         "estimated_share": 0.37,
         "flags": [],
-        "translations": [
-          {
-            "text": "selbst wenn"
-          },
-          {
-            "text": "auch wenn"
-          }
-        ]
+        "translations": [{"text": "selbst wenn"}, {"text": "auch wenn"}]
       }
     ]
   }
 ]
+```

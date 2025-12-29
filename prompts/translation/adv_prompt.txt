@@ -1,46 +1,16 @@
-# POS-spezifischer Prompt: ADV (Adverb)
+# POS-spezifischer Prompt: ADV
 
-## JSON-Struktur für Adverbien
+## Structure-Feld
 
-```json
-{
-  "id": "00XXX",
-  "lemma": "bien",
-  "pos": "ADV",
-  "meanings": [
-    {
-      "structure": "bien",
-      "example_es": "Ejemplo en español.",
-      "estimated_share": 0.5,
-      "flags": [], 
-      "translations": [
-        {
-          "text": "gut"
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Besonderheiten für Adverbien
-
-### Structure-Feld
-Bei Adverbien ist das structure-Feld wichtig, wenn:
-
-#### WICHTIG: Sei sparsam mit Platzhaltern!
-
-✅ **MIT Platzhalter (nur wenn notwendig):**
+### MIT Platzhalter (nur wenn notwendig):
 - `bien [adjetivo]` = sehr/ziemlich (zeigt, dass Adjektiv modifiziert wird, nicht Verb)
 - `cerca de [algo]` = in der Nähe von (Präposition gehört zur Struktur)
 
-❌ **OHNE Platzhalter (Standard):**
-- `ya` = schon (NICHT `ya [verbo]` - selbstverständlich)
-- `ya no` = nicht mehr (NICHT `ya no [verbo]`)
-- `bien` = gut (wenn es Verb modifiziert - das ist Standard)
-- `cerca` = in der Nähe (ohne Präposition)
-- `lejos` = weit
-- `aquí` = hier
+### OHNE Platzhalter (Standard):
+- `ya` = schon (NICHT `ya [verbo]`)
+- `ya no` = nicht mehr
+- `bien` = gut (wenn es Verb modifiziert)
+- `cerca`, `lejos`, `aquí` = ohne Platzhalter
 
 # Examples
 
@@ -56,39 +26,21 @@ Bei Adverbien ist das structure-Feld wichtig, wenn:
         "example_es": "No tengo hambre, ya he comido en casa.",
         "estimated_share": 0.78,
         "flags": [],
-        "translations": [
-          {
-            "text": "schon"
-          },
-          {
-            "text": "bereits"
-          }
-        ]
+        "translations": [{"text": "schon"}, {"text": "bereits"}]
       },
       {
         "structure": "ya no",
         "example_es": "Antes fumaba un paquete al día, pero ya no fumo.",
         "estimated_share": 0.17,
         "flags": [],
-        "translations": [
-          {
-            "text": "nicht mehr"
-          }
-        ]
+        "translations": [{"text": "nicht mehr"}]
       },
       {
         "structure": "ya",
         "example_es": "¡Limpia tu habitación ya, no quiero esperar más!",
         "estimated_share": 0.05,
         "flags": [],
-        "translations": [
-          {
-            "text": "sofort"
-          },
-          {
-            "text": "jetzt gleich"
-          }
-        ]
+        "translations": [{"text": "sofort"}, {"text": "jetzt gleich"}]
       }
     ]
   },
@@ -102,42 +54,21 @@ Bei Adverbien ist das structure-Feld wichtig, wenn:
         "example_es": "Tu hijo dibuja muy bien para su edad.",
         "estimated_share": 0.52,
         "flags": [],
-        "translations": [
-          {
-            "text": "gut"
-          }
-        ]
+        "translations": [{"text": "gut"}]
       },
       {
         "structure": "estar bien",
         "example_es": "No te preocupes por mí, estoy bien.",
         "estimated_share": 0.38,
         "flags": [],
-        "translations": [
-          {
-            "text": "gut"
-          },
-          {
-            "text": "wohlauf"
-          }
-        ]
+        "translations": [{"text": "gut"}, {"text": "wohlauf"}]
       },
       {
         "structure": "bien [adjetivo]",
         "example_es": "El agua de la piscina está bien fría hoy.",
         "estimated_share": 0.10,
         "flags": [],
-        "translations": [
-          {
-            "text": "sehr"
-          },
-          {
-            "text": "ziemlich"
-          },
-          {
-            "text": "echt"
-          }
-        ]
+        "translations": [{"text": "sehr"}, {"text": "ziemlich"}, {"text": "echt"}]
       }
     ]
   },
@@ -151,20 +82,7 @@ Bei Adverbien ist das structure-Feld wichtig, wenn:
         "example_es": "Me gusta vivir cerca de la playa para ver el mar.",
         "estimated_share": 1.0,
         "flags": [],
-        "translations": [
-          {
-            "text": "in der Nähe von"
-          },
-          {
-            "text": "nahe bei"
-          },
-          {
-            "text": "in der Nähe"
-          },
-          {
-            "text": "nah"
-          }
-        ]
+        "translations": [{"text": "in der Nähe von"}, {"text": "nahe bei"}, {"text": "in der Nähe"}, {"text": "nah"}]
       }
     ]
   }

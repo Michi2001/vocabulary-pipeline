@@ -1,38 +1,10 @@
-# POS-spezifischer Prompt: ADP (Adposition/Präposition)
+# POS-spezifischer Prompt: ADP (Präposition)
 
-## JSON-Struktur für Präpositionen
+## Structure-Feld (SEHR wichtig!)
 
-```json
-{
-  "id": "00XXX",
-  "lemma": "por",
-  "pos": "ADP",
-  "meanings": [
-    {
-      "structure": "por [motivo]",
-      "example_es": "Ejemplo en español.",
-      "estimated_share": 0.4,
-      "flags": [], 
-      "translations": [
-        {
-          "text": "wegen"
-        },
-        {
-          "text": "aufgrund"
-        }
-      ]
-    }
-  ]
-}
-```
+Bei Präpositionen ist das structure-Feld **essentiell**, da es die **Funktion** der Präposition anzeigt.
 
-## Besonderheiten für Präpositionen
-
-### Structure-Feld (SEHR wichtig!)
-Bei Präpositionen ist das structure-Feld **essentiell**, da es die **Funktion** der Präposition anzeigt:
-
-#### Zeige die semantische Funktion:
-✅ **IMMER mit Platzhalter:**
+### IMMER mit Platzhalter:
 - `por [motivo]` = wegen (kausale Bedeutung)
 - `por [lugar]` = durch (lokale Bedeutung)
 - `por [precio / intercambio]` = für/gegen (Austausch)
@@ -44,19 +16,9 @@ Bei Präpositionen ist das structure-Feld **essentiell**, da es die **Funktion**
 - `en [tiempo]` = im/in (temporale Bedeutung)
 - `en [transporte]` = mit (Transportmittel)
 
-### Mehrere Übersetzungen
-Präpositionen haben oft mehrere deutsche Entsprechungen:
-- Sortiere nach Häufigkeit
-- Die erste Übersetzung sollte die natürlichste sein
+## Mehrere Übersetzungen
 
-Beispiel für `en [lugar]`:
-```json
-"translations": [
-  {"text": "in"},
-  {"text": "auf"},
-  {"text": "bei"}
-]
-```
+Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufigkeit.
 
 # Examples
 
@@ -72,50 +34,28 @@ Beispiel für `en [lugar]`:
         "example_es": "No pudimos salir a pasear por la lluvia.",
         "estimated_share": 0.4,
         "flags": [],
-        "translations": [
-          {
-            "text": "wegen"
-          },
-          {
-            "text": "aufgrund"
-          }
-        ]
+        "translations": [{"text": "wegen"}, {"text": "aufgrund"}]
       },
       {
         "structure": "por [lugar]",
         "example_es": "El ladrón entró en la casa por la ventana.",
         "estimated_share": 0.3,
         "flags": [],
-        "translations": [
-          {
-            "text": "durch"
-          }
-        ]
+        "translations": [{"text": "durch"}]
       },
       {
         "structure": "por [precio / intercambio]",
         "example_es": "Te cambio mi bocadillo por tu manzana.",
         "estimated_share": 0.1,
         "flags": [],
-        "translations": [
-          {
-            "text": "gegen"
-          },
-          {
-            "text": "für"
-          }
-        ]
+        "translations": [{"text": "gegen"}, {"text": "für"}]
       },
       {
         "structure": "[participio] por [alguien]",
         "example_es": "Este libro fue escrito por García Márquez.",
         "estimated_share": 0.2,
         "flags": [],
-        "translations": [
-          {
-            "text": "von"
-          }
-        ]
+        "translations": [{"text": "von"}]
       }
     ]
   },
@@ -129,39 +69,21 @@ Beispiel für `en [lugar]`:
         "example_es": "Necesito gafas nuevas para ver mejor de lejos.",
         "estimated_share": 0.4,
         "flags": [],
-        "translations": [
-          {
-            "text": "um ... zu"
-          },
-          {
-            "text": "zum"
-          }
-        ]
+        "translations": [{"text": "um ... zu"}, {"text": "zum"}]
       },
       {
         "structure": "para [alguien]",
         "example_es": "He comprado un regalo para mi madre.",
         "estimated_share": 0.45,
         "flags": [],
-        "translations": [
-          {
-            "text": "für"
-          }
-        ]
+        "translations": [{"text": "für"}]
       },
       {
         "structure": "para [lugar]",
         "example_es": "El tren sale para Madrid en cinco minutos.",
         "estimated_share": 0.15,
         "flags": [],
-        "translations": [
-          {
-            "text": "nach"
-          },
-          {
-            "text": "in Richtung"
-          }
-        ]
+        "translations": [{"text": "nach"}, {"text": "in Richtung"}]
       }
     ]
   },
@@ -175,42 +97,21 @@ Beispiel für `en [lugar]`:
         "example_es": "Las llaves están en la mesa de la cocina.",
         "estimated_share": 0.82,
         "flags": [],
-        "translations": [
-          {
-            "text": "auf"
-          },
-          {
-            "text": "in"
-          },
-          {
-            "text": "bei"
-          }
-        ]
+        "translations": [{"text": "auf"}, {"text": "in"}, {"text": "bei"}]
       },
       {
         "structure": "en [tiempo]",
         "example_es": "Nací en 1990, en el mes de agosto.",
         "estimated_share": 0.13,
         "flags": [],
-        "translations": [
-          {
-            "text": "im"
-          },
-          {
-            "text": "in"
-          }
-        ]
+        "translations": [{"text": "im"}, {"text": "in"}]
       },
       {
         "structure": "ir en [transporte]",
         "example_es": "Prefiero ir al trabajo en bicicleta para hacer deporte.",
         "estimated_share": 0.05,
         "flags": [],
-        "translations": [
-          {
-            "text": "mit"
-          }
-        ]
+        "translations": [{"text": "mit"}]
       }
     ]
   }

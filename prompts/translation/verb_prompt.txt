@@ -1,77 +1,35 @@
-# POS-spezifischer Prompt: VERB (Verb)
+# POS-spezifischer Prompt: VERB
 
-## JSON-Struktur für Verben
+## Structure-Feld
 
-```json
-{
-  "id": "00XXX",
-  "lemma": "hacer",
-  "pos": "VERB",
-  "meanings": [
-    {
-      "structure": "hacer [algo]",
-      "example_es": "Ejemplo en español.",
-      "estimated_share": 0.4,
-      "flags": [],
-      "translations": [
-        {
-          "text": "machen"
-        },
-        {
-          "text": "tun"
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Besonderheiten für Verben
-
-### Structure-Feld (wichtig!)
-Das structure-Feld ist bei Verben besonders wichtig:
-
-#### Wann Platzhalter verwenden:
+### Wann Platzhalter verwenden:
 - **Präpositionen, die zur Struktur gehören**: `quedar con [alguien]`, `quedarse con [algo]`
 - **Feste Konstruktionen**: `volver a [infinitivo]`, `tocar a [alguien]`
 - **Nach dem Verb folgende Wortart**: `volverse [adjetivo / sustantivo]`
 
-#### Wann KEINE Platzhalter:
-- **Einfache transitive Verben**: Schreibe nur `tocar` statt `tocar [algo]`
-- **Wenn das Objekt selbstverständlich ist**: Schreibe nur `comer` statt `comer [algo]`
+### Wann KEINE Platzhalter:
+- **Einfache transitive Verben**: nur `tocar` statt `tocar [algo]`
+- **Wenn das Objekt selbstverständlich ist**: nur `comer` statt `comer [algo]`
 
-#### Beispiele:
-✅ Richtig:
-- `tocar` (nicht `tocar [algo]` - das Objekt ist selbstverständlich)
-- `tocar a [alguien]` (die Präposition "a" ist wichtig)
-- `quedar con [alguien]` (die Präposition "con" ist wichtig)
-- `volver a [infinitivo]` (feste Konstruktion)
+## Reflexive Verben
 
-❌ Falsch:
-- `comer [algo]` → nur `comer`
-- `escribir [algo]` → nur `escribir`
+Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
 
-### Reflexive Verben
-- Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
-- Keine Pronomen in Klammern
-
-**WICHTIG - Wann reflexive Formen als separate meaning hinzufügen:**
+**Wann reflexive Formen als separate meaning:**
 - ✅ **NUR wenn die reflexive Form eine eigenständige Bedeutung hat**:
-  - `encontrar` → "finden" vs. `encontrarse` → "sich treffen" (UNTERSCHIEDLICHE Bedeutung)
-  - `ir` → "gehen" vs. `irse` → "weggehen/abreisen" (UNTERSCHIEDLICHE Bedeutung)
-  - `dormir` → "schlafen" vs. `dormirse` → "einschlafen" (UNTERSCHIEDLICHE Bedeutung)
+  - `encontrar` → "finden" vs. `encontrarse` → "sich treffen"
+  - `ir` → "gehen" vs. `irse` → "weggehen/abreisen"
+  - `dormir` → "schlafen" vs. `dormirse` → "einschlafen"
 
 - ❌ **NICHT wenn die reflexive Form nur "sich + Grundform" bedeutet**:
-  - `vender` → "verkaufen" vs. `venderse` → "sich verkaufen" (GLEICHE Bedeutung, nur reflexiv)
-  - `lavar` → "waschen" vs. `lavarse` → "sich waschen" (GLEICHE Bedeutung, nur reflexiv)
-  - In diesen Fällen: Erstelle KEINE separate meaning für die reflexive Form
+  - `vender` → "verkaufen" vs. `venderse` → "sich verkaufen" (keine separate meaning)
+  - `lavar` → "waschen" vs. `lavarse` → "sich waschen" (keine separate meaning)
 
-### Typische Verb-Strukturen im Spanischen
+## Typische Verb-Strukturen
 - Verb + Präposition + Objekt: `hablar de [algo]`, `pensar en [alguien]`
 - Verb + Reflexivpronomen: `quedarse`, `irse`
 - Verb + a + Infinitiv: `volver a [infinitivo]`, `empezar a [infinitivo]`
 - Verb + que + Subjunktiv/Indikativ: meist im Beispiel zeigen, nicht in structure
-
 
 # Examples
 
@@ -87,48 +45,28 @@ Das structure-Feld ist bei Verben besonders wichtig:
         "example_es": "Por favor, no toques las pinturas del museo.",
         "estimated_share": 0.48,
         "flags": [],
-        "translations": [
-          {
-            "text": "anfassen"
-          },
-          {
-            "text": "berühren"
-          }
-        ]
+        "translations": [{"text": "anfassen"}, {"text": "berühren"}]
       },
       {
         "structure": "tocar",
         "example_es": "Mi hermano toca la guitarra en una banda.",
         "estimated_share": 0.27,
         "flags": [],
-        "translations": [
-          {
-            "text": "Instrument spielen"
-          }
-        ]
+        "translations": [{"text": "Instrument spielen"}]
       },
       {
         "structure": "tocar a [alguien]",
         "example_es": "A cada uno le toca hacer su parte del trabajo.",
         "estimated_share": 0.23,
         "flags": [],
-        "translations": [
-          {
-            "text": "an der Reihe sein"
-          }
-        ]
+        "translations": [{"text": "an der Reihe sein"}]
       },
       {
         "structure": "tocar a [alguien]",
         "example_es": "¡Me ha tocado la lotería!",
         "estimated_share": 0.02,
         "flags": [],
-        "translations": [
-          {
-            "text": "gewinnen",
-            "hint": "Lotterie / Zufall"
-          }
-        ]
+        "translations": [{"text": "gewinnen", "hint": "Lotterie / Zufall"}]
       }
     ]
   },
@@ -142,66 +80,35 @@ Das structure-Feld ist bei Verben besonders wichtig:
         "example_es": "Hoy me quedo en casa porque estoy enfermo.",
         "estimated_share": 0.42,
         "flags": [],
-        "translations": [
-          {
-            "text": "bleiben"
-          }
-        ]
+        "translations": [{"text": "bleiben"}]
       },
       {
         "structure": "quedar con [alguien]",
         "example_es": "He quedado con María a las ocho en el cine.",
         "estimated_share": 0.28,
         "flags": [],
-        "translations": [
-          {
-            "text": "sich verabreden"
-          },
-          {
-            "text": "sich treffen"
-          }
-        ]
+        "translations": [{"text": "sich verabreden"}, {"text": "sich treffen"}]
       },
       {
         "structure": "quedar",
         "example_es": "Date prisa, solo quedan cinco minutos para que salga el tren.",
         "estimated_share": 0.18,
         "flags": [],
-        "translations": [
-          {
-            "text": "übrig bleiben"
-          }
-        ]
+        "translations": [{"text": "übrig bleiben"}]
       },
       {
         "structure": "quedar [adverbio / adjetivo] a [alguien]",
         "example_es": "Esa camisa te queda muy bien.",
         "estimated_share": 0.09,
         "flags": [],
-        "translations": [
-          {
-            "text": "stehen",
-            "hint": "Kleidung"
-          },
-          {
-            "text": "passen",
-            "hint": "Kleidung / Größe"
-          }
-        ]
+        "translations": [{"text": "stehen", "hint": "Kleidung"}, {"text": "passen", "hint": "Kleidung / Größe"}]
       },
       {
         "structure": "quedarse con [algo]",
         "example_es": "Me quedo con este libro, me ha gustado mucho.",
         "estimated_share": 0.03,
         "flags": [],
-        "translations": [
-          {
-            "text": "behalten"
-          },
-          {
-            "text": "nehmen"
-          }
-        ]
+        "translations": [{"text": "behalten"}, {"text": "nehmen"}]
       }
     ]
   },
@@ -215,36 +122,21 @@ Das structure-Feld ist bei Verben besonders wichtig:
         "example_es": "Espero no volver a cometer el mismo error.",
         "estimated_share": 0.58,
         "flags": [],
-        "translations": [
-          {
-            "text": "etwas wieder tun"
-          }
-        ]
+        "translations": [{"text": "etwas wieder tun"}]
       },
       {
         "structure": "volver",
         "example_es": "Vuelvo a casa después del trabajo.",
         "estimated_share": 0.35,
         "flags": [],
-        "translations": [
-          {
-            "text": "zurückkommen"
-          },
-          {
-            "text": "zurückkehren"
-          }
-        ]
+        "translations": [{"text": "zurückkommen"}, {"text": "zurückkehren"}]
       },
       {
         "structure": "volverse [adjetivo / sustantivo]",
         "example_es": "Con el tiempo se volvió muy desconfiado.",
         "estimated_share": 0.07,
         "flags": [],
-        "translations": [
-          {
-            "text": "werden"
-          }
-        ]
+        "translations": [{"text": "werden"}]
       }
     ]
   }

@@ -1,35 +1,10 @@
-# POS-spezifischer Prompt: ADJ (Adjektiv)
+# POS-spezifischer Prompt: ADJ
 
-## JSON-Struktur für Adjektive
+## Ser vs. Estar (sehr wichtig!)
 
-```json
-{
-  "id": "00XXX",
-  "lemma": "bueno",
-  "pos": "ADJ",
-  "meanings": [
-    {
-      "structure": "ser bueno",
-      "example_es": "Ejemplo en español.",
-      "estimated_share": 0.7,
-      "flags": [], 
-      "translations": [
-        {
-          "text": "gut"
-        }
-      ]
-    }
-  ]
-}
-```
+Viele spanische Adjektive haben **unterschiedliche Bedeutungen** mit ser und estar.
 
-## Besonderheiten für Adjektive
-
-### Ser vs. Estar (sehr wichtig!)
-Viele spanische Adjektive haben **unterschiedliche Bedeutungen** mit ser und estar:
-> ser und estar nur dann verwenden, wenn das Wort mit ser und estar unterschiedliche Bedeutung hat
-
-#### Wann ser/estar in structure verwenden:
+### Wann ser/estar in structure verwenden:
 ✅ **JA** - Wenn Bedeutung unterschiedlich:
 - `ser listo` = schlau / `estar listo` = fertig
 - `ser rico` = reich / `estar rico` = lecker
@@ -38,33 +13,19 @@ Viele spanische Adjektive haben **unterschiedliche Bedeutungen** mit ser und est
 - `ser bueno` = gut (Charakter) / `estar bueno` = lecker/gut aussehen
 
 ❌ **NEIN** - Wenn Bedeutung gleich:
-- `ser/estar feliz` = glücklich (gleiche Bedeutung) → nur `feliz`
+- `ser/estar feliz` = glücklich → nur `feliz`
 - `ser/estar importante` = wichtig → nur `importante`
-- `ser celoso` / `estar celoso` = eifersüchtig (Unterschied nur dauerhaft vs. momentan, aber gleiche Bedeutung) → nur `celoso`
-- **WICHTIG**: Wenn ser/estar nur den Unterschied zwischen "charakterliche Eigenschaft" vs. "momentanes Gefühl" markiert, aber die deutsche Übersetzung identisch bleibt, KEINE separaten meanings erstellen!
+- Wenn ser/estar nur "dauerhaft vs. momentan" markiert, aber die deutsche Übersetzung identisch bleibt: KEINE separaten meanings!
 
-### Position des Adjektivs
+## Position des Adjektivs
+
 Manche Adjektive ändern die Bedeutung je nach Position:
-
-**Wenn Position wichtig ist:**
 - `viejo [sustantivo]` = langjährig (viejo amigo)
 - `viejo` (nach Substantiv) = alt (hombre viejo)
 - `gran [sustantivo]` = großartig (gran científico)
 - `grande` (nach Substantiv) = groß (casa grande)
 
-**Wenn Position nicht wichtig:**
-- nur das Adjektiv ohne Platzhalter
-
-### Structure-Feld Beispiele
-✅ Richtig:
-- `ser listo` / `estar listo` (unterschiedliche Bedeutung)
-- `gran [sustantivo]` / `grande` (Positionsunterschied)
-- `ser seguro` / `estar seguro` (unterschiedliche Bedeutung)
-
-❌ Falsch:
-- `[sustantivo] grande` → nur `grande`
-- `bonito [sustantivo]` → nur `bonito` (Position ändert nichts)
-
+Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
 
 # Examples
 
@@ -80,28 +41,14 @@ Manche Adjektive ändern die Bedeutung je nach Position:
         "example_es": "Date prisa, el taxi está esperando y nosotros todavía no estamos listos.",
         "estimated_share": 0.62,
         "flags": [],
-        "translations": [
-          {
-            "text": "fertig"
-          },
-          {
-            "text": "bereit"
-          }
-        ]
+        "translations": [{"text": "fertig"}, {"text": "bereit"}]
       },
       {
         "structure": "ser listo",
         "example_es": "Ese chico es muy listo, siempre saca las mejores notas en matemáticas.",
         "estimated_share": 0.38,
         "flags": [],
-        "translations": [
-          {
-            "text": "schlau"
-          },
-          {
-            "text": "klug"
-          }
-        ]
+        "translations": [{"text": "schlau"}, {"text": "klug"}]
       }
     ]
   },
@@ -115,25 +62,14 @@ Manche Adjektive ändern die Bedeutung je nach Position:
         "example_es": "Mi abuelo es un hombre viejo, tiene ya noventa años.",
         "estimated_share": 0.81,
         "flags": [],
-        "translations": [
-          {
-            "text": "alt"
-          }
-        ]
+        "translations": [{"text": "alt"}]
       },
       {
         "structure": "viejo [sustantivo]",
         "example_es": "Juan es un viejo amigo mío, nos conocemos desde la infancia.",
         "estimated_share": 0.19,
         "flags": [],
-        "translations": [
-          {
-            "text": "langjährig"
-          },
-          {
-            "text": "alt"
-          }
-        ]
+        "translations": [{"text": "langjährig"}, {"text": "alt"}]
       }
     ]
   },
@@ -147,25 +83,14 @@ Manche Adjektive ändern die Bedeutung je nach Position:
         "example_es": "Este pastel de chocolate está muy rico, ¿me das la receta?",
         "estimated_share": 0.68,
         "flags": [],
-        "translations": [
-          {
-            "text": "lecker"
-          },
-          {
-            "text": "köstlich"
-          }
-        ]
+        "translations": [{"text": "lecker"}, {"text": "köstlich"}]
       },
       {
         "structure": "ser rico",
         "example_es": "Se hizo rico invirtiendo en bolsa y ahora tiene tres casas.",
         "estimated_share": 0.32,
         "flags": [],
-        "translations": [
-          {
-            "text": "reich"
-          }
-        ]
+        "translations": [{"text": "reich"}]
       }
     ]
   },
@@ -179,25 +104,14 @@ Manche Adjektive ändern die Bedeutung je nach Position:
         "example_es": "Viven en una casa muy grande con jardín y piscina.",
         "estimated_share": 0.73,
         "flags": [],
-        "translations": [
-          {
-            "text": "groß"
-          }
-        ]
+        "translations": [{"text": "groß"}]
       },
       {
         "structure": "gran [sustantivo]",
         "example_es": "Einstein fue un gran científico que cambió la física.",
         "estimated_share": 0.27,
         "flags": [],
-        "translations": [
-          {
-            "text": "großartig"
-          },
-          {
-            "text": "bedeutend"
-          }
-        ]
+        "translations": [{"text": "großartig"}, {"text": "bedeutend"}]
       }
     ]
   },
@@ -211,74 +125,21 @@ Manche Adjektive ändern die Bedeutung je nach Position:
         "example_es": "En los cuentos infantiles, el lobo siempre es malo.",
         "estimated_share": 0.54,
         "flags": [],
-        "translations": [
-          {
-            "text": "böse"
-          },
-          {
-            "text": "gemein"
-          }
-        ]
+        "translations": [{"text": "böse"}, {"text": "gemein"}]
       },
       {
         "structure": "estar malo",
         "example_es": "No bebas esa leche, lleva mucho tiempo fuera y está mala.",
         "estimated_share": 0.31,
         "flags": [],
-        "translations": [
-          {
-            "text": "schlecht"
-          },
-          {
-            "text": "verdorben"
-          }
-        ]
+        "translations": [{"text": "schlecht"}, {"text": "verdorben"}]
       },
       {
         "structure": "estar malo",
         "example_es": "No puedo ir a trabajar hoy porque estoy malo, tengo fiebre.",
         "estimated_share": 0.15,
         "flags": [],
-        "translations": [
-          {
-            "text": "krank"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "00406",
-    "lemma": "seguro",
-    "pos": "ADJ",
-    "meanings": [
-      {
-        "structure": "estar seguro",
-        "example_es": "¿Estás seguro de que cerraste la puerta con llave?",
-        "estimated_share": 0.64,
-        "flags": [],
-        "translations": [
-          {
-            "text": "sicher"
-          },
-          {
-            "text": "gewiss"
-          }
-        ]
-      },
-      {
-        "structure": "ser seguro",
-        "example_es": "Este barrio es muy seguro, puedes caminar por la noche sin miedo.",
-        "estimated_share": 0.36,
-        "flags": [],
-        "translations": [
-          {
-            "text": "sicher"
-          },
-          {
-            "text": "ungefährlich"
-          }
-        ]
+        "translations": [{"text": "krank"}]
       }
     ]
   }
