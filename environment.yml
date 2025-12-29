@@ -16,4 +16,7 @@ dependencies:
     - transformers
     - scikit-learn
     - pandas
+    - matplotlib
+    - sentence-transformers
+    - umap-learn
 prefix: /Users/michael/anaconda3/envs/LanguageApp-new

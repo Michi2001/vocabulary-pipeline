@@ -9,3 +9,4 @@ cache/
 .env
 test/outputs/
 cfg**
+experiments/outputs/
