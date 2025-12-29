@@ -197,6 +197,8 @@ class LemmaCorrector:
                 )
 
             if cached_correction is not None:
+                # Update ID to match current id_mapping (ID can differ across runs)
+                cached_correction["id"] = item_id
                 cached_corrections.append(cached_correction)
             else:
                 # Add to uncached with ID
