@@ -42,6 +42,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
     "meanings": [
       {
         "definition_es": "poner la mano o los dedos sobre algo o alguien",
+        "topics": ["contacto", "mano", "superficie", "piel", "objeto", "sensación", "tacto", "físico", "gesto", "cuerpo", "alcanzar", "sentir", "palpar", "textura", "dedo"],
         "structure": "tocar",
         "example_es": "Por favor, no toques las pinturas del museo.",
         "estimated_share": 0.48,
@@ -50,6 +51,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "producir música con un instrumento",
+        "topics": ["música", "instrumento", "guitarra", "piano", "concierto", "banda", "melodía", "canción", "artista", "escenario", "ensayo", "orquesta", "ritmo", "nota", "músico"],
         "structure": "tocar",
         "example_es": "Mi hermano toca la guitarra en una banda.",
         "estimated_share": 0.27,
@@ -58,6 +60,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "corresponder el turno o la responsabilidad a alguien",
+        "topics": ["turno", "responsabilidad", "obligación", "tarea", "reparto", "trabajo", "equipo", "orden", "deber", "participación", "colaboración", "grupo", "contribución", "asignación", "parte"],
         "structure": "tocar a [alguien]",
         "example_es": "A cada uno le toca hacer su parte del trabajo.",
         "estimated_share": 0.23,
@@ -66,6 +69,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "resultar premiado en un sorteo o juego de azar",
+        "topics": ["lotería", "premio", "suerte", "azar", "sorteo", "dinero", "ganador", "boleto", "rifa", "fortuna", "número", "apuesta", "casino", "jackpot", "millonario"],
         "structure": "tocar a [alguien]",
         "example_es": "¡Me ha tocado la lotería!",
         "estimated_share": 0.02,
@@ -81,6 +85,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
     "meanings": [
       {
         "definition_es": "permanecer en un lugar sin moverse",
+        "topics": ["casa", "lugar", "descanso", "espera", "quietud", "permanencia", "hogar", "refugio", "comodidad", "tranquilidad", "interior", "sofá", "habitación", "estancia", "reposo"],
         "structure": "quedarse",
         "example_es": "Hoy me quedo en casa porque estoy enfermo.",
         "estimated_share": 0.42,
@@ -89,6 +94,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "acordar un encuentro con alguien",
+        "topics": ["cita", "amigo", "encuentro", "plan", "hora", "lugar", "reunión", "café", "restaurante", "tarde", "fin de semana", "mensaje", "llamada", "agenda", "confirmación"],
         "structure": "quedar con [alguien]",
         "example_es": "He quedado con María a las ocho en el cine.",
         "estimated_share": 0.28,
@@ -97,6 +103,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "restar o sobrar una cantidad",
+        "topics": ["cantidad", "resto", "tiempo", "minuto", "dinero", "provisión", "reserva", "inventario", "saldo", "disponibilidad", "escasez", "límite", "cuenta", "recurso", "existencia"],
         "structure": "quedar",
         "example_es": "Date prisa, solo quedan cinco minutos para que salga el tren.",
         "estimated_share": 0.18,
@@ -105,6 +112,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "sentar bien o mal una prenda de ropa",
+        "topics": ["ropa", "moda", "talla", "estilo", "aspecto", "probador", "tienda", "espejo", "vestido", "camisa", "pantalón", "color", "figura", "elegancia", "apariencia"],
         "structure": "quedar [adverbio / adjetivo] a [alguien]",
         "example_es": "Esa camisa te queda muy bien.",
         "estimated_share": 0.09,
@@ -113,6 +121,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "conservar algo para uno mismo",
+        "topics": ["posesión", "elección", "decisión", "preferencia", "selección", "objeto", "compra", "regalo", "herencia", "recuerdo", "colección", "favorito", "conservar", "guardar", "propiedad"],
         "structure": "quedarse con [algo]",
         "example_es": "Me quedo con este libro, me ha gustado mucho.",
         "estimated_share": 0.03,
@@ -128,6 +137,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
     "meanings": [
       {
         "definition_es": "hacer algo otra vez, repetir una acción",
+        "topics": ["repetición", "intento", "oportunidad", "práctica", "error", "corrección", "persistencia", "esfuerzo", "aprendizaje", "mejora", "segunda vez", "insistencia", "hábito", "rutina", "costumbre"],
         "structure": "volver a [infinitivo]",
         "example_es": "Espero no volver a cometer el mismo error.",
         "estimated_share": 0.58,
@@ -136,6 +146,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "regresar al lugar de origen",
+        "topics": ["regreso", "viaje", "casa", "origen", "camino", "retorno", "destino", "llegada", "vuelta", "hogar", "país", "ciudad", "familia", "nostalgia", "memoria"],
         "structure": "volver",
         "example_es": "Vuelvo a casa después del trabajo.",
         "estimated_share": 0.35,
@@ -144,6 +155,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       },
       {
         "definition_es": "transformarse o cambiar de estado",
+        "topics": ["cambio", "transformación", "carácter", "personalidad", "evolución", "tiempo", "experiencia", "madurez", "actitud", "comportamiento", "desarrollo", "proceso", "estado", "condición", "transición"],
         "structure": "volverse [adjetivo / sustantivo]",
         "example_es": "Con el tiempo se volvió muy desconfiado.",
         "estimated_share": 0.07,

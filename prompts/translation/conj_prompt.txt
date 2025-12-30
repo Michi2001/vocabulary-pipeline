@@ -19,6 +19,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
     "meanings": [
       {
         "definition_es": "introduce un momento específico en el pasado",
+        "topics": ["pasado", "momento", "recuerdo", "evento", "historia", "narración", "llegada", "descubrimiento", "sorpresa", "situación", "experiencia", "anécdota", "secuencia", "tiempo", "memoria"],
         "structure": "cuando [pasado]",
         "example_es": "Cuando llegué a casa, vi que la puerta estaba abierta.",
         "estimated_share": 0.46,
@@ -27,6 +28,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       },
       {
         "definition_es": "introduce una acción habitual o repetida",
+        "topics": ["hábito", "rutina", "costumbre", "frecuencia", "regularidad", "patrón", "comportamiento", "día a día", "siempre", "repetición", "tradición", "práctica", "tendencia", "cotidiano", "ritual"],
         "structure": "cuando [presente]",
         "example_es": "Cuando voy al supermercado, siempre compro chocolate.",
         "estimated_share": 0.32,
@@ -35,6 +37,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       },
       {
         "definition_es": "introduce una acción futura o hipotética",
+        "topics": ["futuro", "plan", "petición", "promesa", "condición", "tiempo", "oportunidad", "disponibilidad", "llamada", "contacto", "espera", "momento", "ocasión", "posibilidad", "circunstancia"],
         "structure": "cuando [subjuntivo]",
         "example_es": "Cuando tengas tiempo, llámame.",
         "estimated_share": 0.22,
@@ -50,6 +53,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
     "meanings": [
       {
         "definition_es": "introduce una condición o hipótesis",
+        "topics": ["condición", "hipótesis", "posibilidad", "plan", "alternativa", "decisión", "consecuencia", "escenario", "probabilidad", "tiempo", "clima", "cancelación", "opción", "contingencia", "previsión"],
         "structure": "si [condición]",
         "example_es": "Si llueve mañana, cancelaremos la barbacoa.",
         "estimated_share": 0.71,
@@ -58,6 +62,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       },
       {
         "definition_es": "introduce una pregunta indirecta sobre alternativas",
+        "topics": ["duda", "incertidumbre", "pregunta", "alternativa", "decisión", "espera", "información", "respuesta", "opción", "posibilidad", "saber", "conocimiento", "curiosidad", "expectativa", "resultado"],
         "structure": "si [pregunta indirecta]",
         "example_es": "No sé si Juan vendrá a la fiesta o se quedará en casa.",
         "estimated_share": 0.29,
@@ -73,6 +78,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
     "meanings": [
       {
         "definition_es": "introduce un hecho real que no impide la acción principal",
+        "topics": ["contraste", "obstáculo", "perseverancia", "determinación", "dificultad", "circunstancia", "realidad", "decisión", "voluntad", "resistencia", "adversidad", "clima", "condición", "superación", "actitud"],
         "structure": "aunque [indicativo]",
         "example_es": "Voy a salir a correr aunque hace mucho frío.",
         "estimated_share": 0.63,
@@ -81,6 +87,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       },
       {
         "definition_es": "introduce una situación hipotética que no impediría la acción",
+        "topics": ["hipótesis", "negación", "énfasis", "rechazo", "firmeza", "principio", "convicción", "decisión", "imaginación", "escenario", "extremo", "imposibilidad", "preferencia", "límite", "certeza"],
         "structure": "aunque [subjuntivo]",
         "example_es": "No compraría ese coche aunque fuera rico.",
         "estimated_share": 0.37,
@@ -96,6 +103,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
     "meanings": [
       {
         "definition_es": "introduce una idea que contrasta con la anterior",
+        "topics": ["contraste", "oposición", "limitación", "deseo", "realidad", "obligación", "trabajo", "conflicto", "restricción", "balance", "argumento", "excepción", "matiz", "contradicción", "dilema"],
         "structure": "pero",
         "example_es": "Me gustaría ir a la fiesta, pero tengo que trabajar.",
         "estimated_share": 1.0,

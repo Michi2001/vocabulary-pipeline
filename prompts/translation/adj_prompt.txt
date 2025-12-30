@@ -38,6 +38,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "meanings": [
       {
         "definition_es": "preparado para hacer algo o partir",
+        "topics": ["preparación", "tiempo", "prisa", "salida", "viaje", "espera", "puntualidad", "organización", "equipaje", "cita", "momento", "acción", "plan", "arranque", "inicio"],
         "structure": "estar listo",
         "example_es": "Date prisa, el taxi está esperando y nosotros todavía no estamos listos.",
         "estimated_share": 0.62,
@@ -46,6 +47,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
       },
       {
         "definition_es": "que tiene inteligencia y aprende rápido",
+        "topics": ["inteligencia", "escuela", "estudio", "examen", "nota", "estudiante", "aprendizaje", "talento", "capacidad", "mente", "problema", "solución", "matemáticas", "lógica", "astucia"],
         "structure": "ser listo",
         "example_es": "Ese chico es muy listo, siempre saca las mejores notas en matemáticas.",
         "estimated_share": 0.38,
@@ -61,6 +63,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "meanings": [
       {
         "definition_es": "que tiene muchos años de edad",
+        "topics": ["edad", "años", "abuelo", "jubilación", "experiencia", "sabiduría", "generación", "pasado", "memoria", "tiempo", "arrugas", "anciano", "historia", "recuerdo", "vida"],
         "structure": "viejo",
         "example_es": "Mi abuelo es un hombre viejo, tiene ya noventa años.",
         "estimated_share": 0.81,
@@ -69,6 +72,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
       },
       {
         "definition_es": "que se conoce desde hace mucho tiempo",
+        "topics": ["amistad", "relación", "confianza", "tiempo", "infancia", "lealtad", "historia", "compañero", "vínculo", "conocido", "años", "pasado", "cercanía", "familiaridad", "duración"],
         "structure": "viejo [sustantivo]",
         "example_es": "Juan es un viejo amigo mío, nos conocemos desde la infancia.",
         "estimated_share": 0.19,
@@ -84,6 +88,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "meanings": [
       {
         "definition_es": "que tiene buen sabor, sabroso",
+        "topics": ["comida", "sabor", "cocina", "receta", "restaurante", "plato", "postre", "chocolate", "dulce", "cena", "almuerzo", "ingrediente", "gusto", "disfrutar", "delicia"],
         "structure": "estar rico",
         "example_es": "Este pastel de chocolate está muy rico, ¿me das la receta?",
         "estimated_share": 0.68,
@@ -92,6 +97,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
       },
       {
         "definition_es": "que tiene mucho dinero o bienes",
+        "topics": ["dinero", "fortuna", "lujo", "inversión", "bolsa", "casa", "coche", "empresa", "herencia", "éxito", "negocio", "millonario", "patrimonio", "riqueza", "abundancia"],
         "structure": "ser rico",
         "example_es": "Se hizo rico invirtiendo en bolsa y ahora tiene tres casas.",
         "estimated_share": 0.32,
@@ -107,6 +113,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "meanings": [
       {
         "definition_es": "de tamaño superior al normal",
+        "topics": ["tamaño", "espacio", "casa", "habitación", "jardín", "edificio", "superficie", "dimensión", "metro", "amplio", "extenso", "enorme", "volumen", "capacidad", "área"],
         "structure": "grande",
         "example_es": "Viven en una casa muy grande con jardín y piscina.",
         "estimated_share": 0.73,
@@ -115,6 +122,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
       },
       {
         "definition_es": "importante, destacado o admirable",
+        "topics": ["importancia", "fama", "éxito", "historia", "ciencia", "arte", "genio", "logro", "reconocimiento", "admiración", "legado", "influencia", "talento", "contribución", "mérito"],
         "structure": "gran [sustantivo]",
         "example_es": "Einstein fue un gran científico que cambió la física.",
         "estimated_share": 0.27,
@@ -130,6 +138,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
     "meanings": [
       {
         "definition_es": "que tiene mala intención o hace daño",
+        "topics": ["maldad", "cuento", "villano", "lobo", "intención", "daño", "peligro", "mentira", "engaño", "crueldad", "enemigo", "castigo", "niño", "comportamiento", "moral"],
         "structure": "ser malo",
         "example_es": "En los cuentos infantiles, el lobo siempre es malo.",
         "estimated_share": 0.54,
@@ -138,6 +147,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
       },
       {
         "definition_es": "en mal estado, estropeado o podrido",
+        "topics": ["comida", "leche", "fruta", "nevera", "caducidad", "olor", "basura", "conservación", "frescura", "tiempo", "temperatura", "deterioro", "desperdicio", "supermercado", "fecha"],
         "structure": "estar malo",
         "example_es": "No bebas esa leche, lleva mucho tiempo fuera y está mala.",
         "estimated_share": 0.31,
@@ -146,6 +156,7 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
       },
       {
         "definition_es": "enfermo, que no se siente bien de salud",
+        "topics": ["enfermedad", "salud", "fiebre", "médico", "trabajo", "cama", "descanso", "síntoma", "gripe", "dolor", "hospital", "recuperación", "medicina", "cuidado", "contagio"],
         "structure": "estar malo",
         "example_es": "No puedo ir a trabajar hoy porque estoy malo, tengo fiebre.",
         "estimated_share": 0.15,
