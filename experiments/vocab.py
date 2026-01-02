@@ -18,6 +18,7 @@ class Meaning:
     structure: Optional[str] = None
     example_es: Optional[str] = None
     flags: Optional[List[str]] = None
+    topics: Optional[List[str]] = None
 
     @property
     def primary_translation(self) -> str:
@@ -57,6 +58,7 @@ class Translation:
                     structure=m.get("structure"),
                     example_es=m.get("example_es"),
                     flags=m.get("flags", []),
+                    topics=m.get("topics"),
                 )
             )
         return cls(
@@ -215,7 +217,7 @@ class Vocabulary:
 
 if __name__ == "__main__":
     vocab = Vocabulary.from_file(
-        "output/spanish_lemma_frequencies/20251229_043510/translations.json"
+        "output/spanish_lemma_frequencies/slice_6000_6400_with_vectors/translations.json"
     )
     print(vocab)
 
@@ -224,3 +226,11 @@ if __name__ == "__main__":
         print(f"  {v.lemma} ({v.pos}): {v.primary_translation} - freq={v.frequency}")
         if v.embedding is not None:
             print(f"    embedding dim: {len(v.embedding)}")
+
+    sampled_groups = vocab.sample_word_variants_groups([30, 30, 30], seed=123)
+    for sampled_group in sampled_groups:
+        print("\nSampled group:")
+        for v in sampled_group:
+            print(
+                f"  {v.lemma} ({v.pos}): {v.primary_translation} - freq={v.frequency}"
+            )

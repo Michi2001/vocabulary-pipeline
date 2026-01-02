@@ -17,10 +17,9 @@ from sentence_transformers import SentenceTransformer
 
 # === CONFIGURATION ===
 EMBEDDING_MODEL = "sentence-transformers/LaBSE"  # Model for generating embeddings
-TRANSLATIONS_PATH = (
-    "output/spanish_lemma_frequencies/slice_6000_6400_with_vectors/translations.json"
-)
-OUTPUT_DIR = "experiments/outputs/clustering"
+# EMBEDDING_MODEL = "BAAI/bge-m3"
+TRANSLATIONS_PATH = "output/spanish_lemma_frequencies/20251229_185353/translations.json"
+OUTPUT_DIR = f"experiments/outputs/clustering/{EMBEDDING_MODEL.replace('/', '_')}"
 
 # Clustering parameters
 MAX_GROUP_SIZE = 5  # Maximum words per group
@@ -56,6 +55,7 @@ def get_embeddings_and_variants(
     seed: int,
     model: SentenceTransformer,
     use_precomputed: bool = False,
+    embedding_source: str = "definition",
 ) -> tuple[np.ndarray, list[WordVariant]]:
     """
     Sample n variants and return embeddings matrix.
@@ -66,6 +66,7 @@ def get_embeddings_and_variants(
         seed: Random seed
         model: SentenceTransformer model for generating embeddings
         use_precomputed: If True, use embeddings from translations.json; if False, regenerate
+        embedding_source: Source for embedding generation: "definition" or "topics"
 
     Returns:
         Tuple of (embeddings matrix, list of variants)
@@ -78,22 +79,30 @@ def get_embeddings_and_variants(
         embeddings = np.array([v.embedding for v in valid])
         print(f"Using precomputed embeddings from file")
     else:
-        # Generate new embeddings from definition_es
+        # Generate new embeddings
         print(f"Generating fresh embeddings using {model}")
-        definitions = []
+        print(f"Embedding source: {embedding_source}")
+        texts = []
         valid = []
 
         for v in variants:
-            if v.meaning.definition_es:
-                definitions.append(v.meaning.definition_es)
-                valid.append(v)
+            if embedding_source == "topics":
+                # Use topics joined as a single string
+                if v.meaning.topics:
+                    texts.append(" ".join(v.meaning.topics))
+                    valid.append(v)
+            else:
+                # Use definition_es (default)
+                if v.meaning.definition_es:
+                    texts.append(v.meaning.definition_es)
+                    valid.append(v)
 
-        if not definitions:
-            raise ValueError("No definitions found to embed")
+        if not texts:
+            raise ValueError(f"No {embedding_source} found to embed")
 
-        # Encode all definitions
+        # Encode all texts
         embeddings = model.encode(
-            definitions,
+            texts,
             convert_to_numpy=True,
             show_progress_bar=True,
             batch_size=32,
@@ -451,6 +460,7 @@ def run_clustering(
     max_distance: float = MAX_DISTANCE,
     seed: int = RANDOM_SEED,
     use_precomputed_embeddings: bool = False,
+    embedding_source: str = "definition",
     visualize: bool = True,
     output_suffix: str = "",
 ) -> dict:
@@ -463,10 +473,16 @@ def run_clustering(
     print(f"POS penalty: {pos_penalty}")
     print(f"Max distance: {max_distance}")
     print(f"Use precomputed embeddings: {use_precomputed_embeddings}")
+    print(f"Embedding source: {embedding_source}")
 
     # Get embeddings
     embeddings, variants = get_embeddings_and_variants(
-        vocab, sample_size, seed, embedding_model, use_precomputed_embeddings
+        vocab,
+        sample_size,
+        seed,
+        embedding_model,
+        use_precomputed_embeddings,
+        embedding_source,
     )
     print(f"Variants with embeddings: {len(variants)}")
 
@@ -566,17 +582,35 @@ if __name__ == "__main__":
         f"Model loaded. Dimension: {embedding_model.get_sentence_embedding_dimension()}"
     )
 
-    # Single run with FRESH embeddings (regenerate from definition_es)
+    # Single run with FRESH embeddings from definition_es
     print("\n" + "=" * 70)
-    print("RUNNING WITH FRESH EMBEDDINGS")
+    print("RUNNING WITH DEFINITION EMBEDDINGS")
     print("=" * 70)
-    run_clustering(vocab, embedding_model, use_precomputed_embeddings=False)
+    run_clustering(
+        vocab,
+        embedding_model,
+        use_precomputed_embeddings=False,
+        embedding_source="definition",
+        output_suffix="_definition",
+    )
+
+    # Run with topics as embedding source
+    print("\n" + "=" * 70)
+    print("RUNNING WITH TOPICS EMBEDDINGS")
+    print("=" * 70)
+    run_clustering(
+        vocab,
+        embedding_model,
+        use_precomputed_embeddings=False,
+        embedding_source="topics",
+        output_suffix="_topics",
+    )
 
     # Optionally: Compare with precomputed embeddings
-    print("\n" + "=" * 70)
-    print("RUNNING WITH PRECOMPUTED EMBEDDINGS")
-    print("=" * 70)
-    run_clustering(vocab, embedding_model, use_precomputed_embeddings=True)
+    # print("\n" + "=" * 70)
+    # print("RUNNING WITH PRECOMPUTED EMBEDDINGS")
+    # print("=" * 70)
+    # run_clustering(vocab, embedding_model, use_precomputed_embeddings=True)
 
     # Compare different penalties
     # compare_penalties(vocab, embedding_model, [1.0, 1.5, 2.0, 2.5])
