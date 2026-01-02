@@ -6,8 +6,10 @@ nltk.download("wordnet")
 nltk.download("omw-1.4")  # Erforderlich für Spanisch
 
 if __name__ == "__main__":
-    # Suche nach spanischen Synsets für 'creer'
-    synsets = wn.synsets("creer", lang="spa")
+    synsets = wn.synsets("zorro", lang="spa")
+
+    if len(synsets) == 0:
+        print("Keine Synsets für 'zorro' gefunden.")
 
     for syn in synsets:
         print(f"ID: {syn.name()}")
