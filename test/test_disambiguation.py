@@ -19,12 +19,12 @@ from disambiguators import (
 
 # Disambiguators to test (name, instance)
 DISAMBIGUATORS_TO_TEST = [
-    ("BERT-Def-mBERT", BertDefinitionDisambiguator("bert-base-multilingual-cased")),
-    (
-        "BERT-Def-BETO",
-        BertDefinitionDisambiguator("dccuchile/bert-base-spanish-wwm-cased"),
-    ),
-    ("BERT-Ex-mBERT", BertExampleDisambiguator("bert-base-multilingual-cased")),
+    # ("BERT-Def-mBERT", BertDefinitionDisambiguator("bert-base-multilingual-cased")),
+    # (
+    #     "BERT-Def-BETO",
+    #     BertDefinitionDisambiguator("dccuchile/bert-base-spanish-wwm-cased"),
+    # ),
+    # ("BERT-Ex-mBERT", BertExampleDisambiguator("bert-base-multilingual-cased")),
     (
         "BERT-Ex-BETO",
         BertExampleDisambiguator("dccuchile/bert-base-spanish-wwm-cased"),

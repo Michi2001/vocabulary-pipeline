@@ -3259,13 +3259,309 @@
         2
       ],
       "notes": "mayor: bigger vs older vs major"
+    },
+    {
+      "id": "hard_planta_001",
+      "target": "La [planta] está bien.",
+      "meanings": [
+        {
+          "definition": "La [planta] es un ser vivo vegetal que crece en la tierra.",
+          "example": "Regué la [planta] esta mañana porque estaba seca."
+        },
+        {
+          "definition": "La [planta] es un piso o nivel de un edificio.",
+          "example": "Vivo en la segunda [planta] del edificio."
+        }
+      ],
+      "correct_meaning_indices": [
+        0,
+        1
+      ],
+      "notes": "Hard: Ambiguous context - could be plant or floor level"
+    },
+    {
+      "id": "hard_banco_002",
+      "target": "Voy al [banco].",
+      "meanings": [
+        {
+          "definition": "El [banco] es una institución financiera donde se guardan y gestionan fondos.",
+          "example": "Fui al [banco] a depositar el cheque esta mañana."
+        },
+        {
+          "definition": "El [banco] es un asiento largo de madera o piedra para varias personas.",
+          "example": "Nos sentamos en el [banco] de madera bajo la sombra."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "Hard: Very minimal context - 'ir al banco' typically means financial institution"
+    },
+    {
+      "id": "hard_copa_002",
+      "target": "Dame la [copa].",
+      "meanings": [
+        {
+          "definition": "La [copa] es un recipiente para beber líquidos.",
+          "example": "Llené la [copa] con vino tinto."
+        },
+        {
+          "definition": "La [copa] es un trofeo que se entrega al ganador de una competición deportiva.",
+          "example": "El equipo levantó la [copa] tras ganar el campeonato."
+        }
+      ],
+      "correct_meaning_indices": [
+        0,
+        1
+      ],
+      "notes": "Hard: Both meanings plausible without visual/situational context"
+    },
+    {
+      "id": "hard_orden_002",
+      "target": "Necesito más [orden].",
+      "meanings": [
+        {
+          "definition": "La [orden] es un mandato o instrucción que debe cumplirse.",
+          "example": "El soldado siguió la [orden] del capitán inmediatamente."
+        },
+        {
+          "definition": "El [orden] es la organización o secuencia lógica de las cosas.",
+          "example": "Puso los libros en [orden] alfabético en la estantería."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: 'más orden' typically means organization"
+    },
+    {
+      "id": "hard_esperar_001",
+      "target": "Voy a [esperar] un poco.",
+      "meanings": [
+        {
+          "definition": "[Esperar] es permanecer en un lugar hasta que llegue alguien o suceda algo.",
+          "example": "Tengo que [esperar] el autobús en la parada."
+        },
+        {
+          "definition": "[Esperar] es tener esperanza o deseo de que ocurra algo.",
+          "example": "[Espero] que todo salga bien en el examen."
+        }
+      ],
+      "correct_meaning_indices": [
+        0,
+        1
+      ],
+      "notes": "Hard: Could mean 'wait a bit' or 'hope for a bit' - both plausible"
+    },
+    {
+      "id": "hard_pasar_001",
+      "target": "¿Qué va a [pasar]?",
+      "meanings": [
+        {
+          "definition": "[Pasar] es ir de un lugar a otro atravesando un espacio.",
+          "example": "Hay que [pasar] por el puente para llegar al otro lado."
+        },
+        {
+          "definition": "[Pasar] es ocurrir o suceder un acontecimiento.",
+          "example": "No sé qué va a [pasar] con la economía el próximo año."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: Common question 'qué va a pasar' usually means 'happen'"
+    },
+    {
+      "id": "hard_tomar_001",
+      "target": "Vamos a [tomar] algo.",
+      "meanings": [
+        {
+          "definition": "[Tomar] es coger o agarrar una cosa con la mano.",
+          "example": "Voy a [tomar] el libro de la estantería."
+        },
+        {
+          "definition": "[Tomar] es beber o ingerir un alimento.",
+          "example": "¿Quieres [tomar] un café conmigo?"
+        },
+        {
+          "definition": "[Tomar] es hacer uso de un transporte.",
+          "example": "Tenemos que [tomar] el tren de las nueve."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: 'tomar algo' is idiomatic for drink/eat"
+    },
+    {
+      "id": "hard_derecho_001",
+      "target": "Sigue [derecho].",
+      "meanings": [
+        {
+          "definition": "[Derecho] como adverbio significa en línea recta.",
+          "example": "Camina [derecho] hasta el final de la calle."
+        },
+        {
+          "definition": "[Derecho] es el conjunto de leyes y normas.",
+          "example": "Estudia [derecho] en la universidad."
+        },
+        {
+          "definition": "[Derecho] es lo opuesto a izquierdo.",
+          "example": "Mi brazo [derecho] me duele."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "Hard: 'sigue derecho' = go straight"
+    },
+    {
+      "id": "hard_caso_001",
+      "target": "Es un [caso] difícil.",
+      "meanings": [
+        {
+          "definition": "Un [caso] es una situación o acontecimiento particular.",
+          "example": "Este es un [caso] especial que requiere atención."
+        },
+        {
+          "definition": "Un [caso] es un asunto jurídico o médico.",
+          "example": "El abogado estudió el [caso] durante semanas."
+        }
+      ],
+      "correct_meaning_indices": [
+        0,
+        1
+      ],
+      "notes": "Hard: Both medical/legal case and general situation plausible"
+    },
+    {
+      "id": "hard_correr_001",
+      "target": "Deja que [corra].",
+      "meanings": [
+        {
+          "definition": "[Correr] es moverse rápidamente con las piernas.",
+          "example": "Le gusta [correr] por el parque cada mañana."
+        },
+        {
+          "definition": "[Correr] es fluir o moverse un líquido.",
+          "example": "Deja [correr] el agua hasta que salga fría."
+        }
+      ],
+      "correct_meaning_indices": [
+        0,
+        1
+      ],
+      "notes": "Hard: Could be 'let him/her run' or 'let it flow' - both valid"
+    },
+    {
+      "id": "hard_partido_001",
+      "target": "El [partido] empezó tarde.",
+      "meanings": [
+        {
+          "definition": "Un [partido] es una competición deportiva entre dos equipos.",
+          "example": "El [partido] de fútbol terminó con empate."
+        },
+        {
+          "definition": "Un [partido] es una organización política.",
+          "example": "El [partido] socialista ganó las elecciones."
+        }
+      ],
+      "correct_meaning_indices": [
+        0,
+        1
+      ],
+      "notes": "Hard: Both political party meeting and sports match could start late"
+    },
+    {
+      "id": "hard_pata_001",
+      "target": "Se le rompió la [pata].",
+      "meanings": [
+        {
+          "definition": "La [pata] es la extremidad de un animal.",
+          "example": "El perro se fracturó una [pata] jugando."
+        },
+        {
+          "definition": "La [pata] es cada uno de los soportes de un mueble.",
+          "example": "Una [pata] de la mesa está floja."
+        }
+      ],
+      "correct_meaning_indices": [
+        0,
+        1
+      ],
+      "notes": "Hard: Could be animal leg or furniture leg without more context"
+    },
+    {
+      "id": "hard_valer_001",
+      "target": "Esto no [vale].",
+      "meanings": [
+        {
+          "definition": "[Valer] es tener un precio o valor determinado.",
+          "example": "¿Cuánto [vale] este coche usado?"
+        },
+        {
+          "definition": "[Valer] es ser útil o servir para algo.",
+          "example": "Este método ya no [vale] para resolver el problema."
+        },
+        {
+          "definition": "[Valer] es ser válido o permitido según las reglas.",
+          "example": "Esa jugada no [vale], es trampa."
+        }
+      ],
+      "correct_meaning_indices": [
+        1,
+        2
+      ],
+      "notes": "Hard: 'esto no vale' = this doesn't work/isn't valid"
+    },
+    {
+      "id": "hard_nota_001",
+      "target": "Sacó buena [nota].",
+      "meanings": [
+        {
+          "definition": "Una [nota] es una calificación académica.",
+          "example": "Obtuve una [nota] alta en el examen de matemáticas."
+        },
+        {
+          "definition": "Una [nota] es un apunte o anotación breve.",
+          "example": "Dejé una [nota] en la mesa para recordarlo."
+        },
+        {
+          "definition": "Una [nota] es un sonido musical.",
+          "example": "El pianista tocó la [nota] equivocada."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "Hard: 'sacar nota' idiomatically means get a grade"
+    },
+    {
+      "id": "hard_medio_001",
+      "target": "Está [medio] roto.",
+      "meanings": [
+        {
+          "definition": "[Medio] es la mitad de algo o una parte central.",
+          "example": "Sólo comí [medio] bocadillo porque no tenía hambre."
+        },
+        {
+          "definition": "[Medio] como adverbio significa parcialmente o a medias.",
+          "example": "Estoy [medio] cansado después del entrenamiento."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: 'medio roto' = half-broken (adverb)"
     }
   ],
   "metadata": {
     "language": "es",
     "created": "2026-01-03",
-    "source": "Generated from translations_w_embeddings_and_topics.json + manual sentences",
-    "total_cases": 139,
-    "description": "Extended WSD test set"
+    "source": "Generated from translations_w_embeddings_and_topics.json + manual sentences + hard ambiguous cases",
+    "total_cases": 191,
+    "description": "Extended WSD test set with challenging ambiguous cases (last 15 are intentionally difficult)",
+    "hard_cases_count": 15,
+    "hard_cases_notes": "Cases hard_* have minimal context, multiple plausible meanings, or idiomatic usage"
   }
 }
