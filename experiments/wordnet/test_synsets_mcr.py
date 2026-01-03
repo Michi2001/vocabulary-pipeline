@@ -89,7 +89,18 @@ if __name__ == "__main__":
     mcr_df = load_mcr_mapping(MCR_FILE)
 
     # 2. Test-Vokabeln abfragen
-    test_words = ["zorro", "laberinto", "creer", "silla", "mesa"]
+    test_words = [
+        "zorro",
+        "laberinto",
+        "creer",
+        "silla",
+        "mesa",
+        "legitimación",
+        "inclinar",
+        "jactarse",
+        "sobremesa",
+        "madrugar",
+    ]
 
     for word in test_words:
         print(f"\n{'='*50}")

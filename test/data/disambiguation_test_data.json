@@ -1,0 +1,91 @@
+{
+  "test_cases": [
+    {
+      "id": "planta_001",
+      "target": "La [planta] tiene flores rojas.",
+      "meanings": [
+        {
+          "definition": "La [planta] es un ser vivo vegetal que crece en la tierra.",
+          "example": "Regué la [planta] esta mañana porque estaba seca."
+        },
+        {
+          "definition": "La [planta] es un piso o nivel de un edificio.",
+          "example": "Vivo en la segunda [planta] del edificio."
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Plant (botanical) vs building floor"
+    },
+    {
+      "id": "copa_001",
+      "target": "El Real Madrid ganó la [copa] este año.",
+      "meanings": [
+        {
+          "definition": "La [copa] es un recipiente para beber líquidos.",
+          "example": "Llené la [copa] con vino tinto."
+        },
+        {
+          "definition": "La [copa] es un trofeo que se entrega al ganador de una competición deportiva.",
+          "example": "El equipo levantó la [copa] tras ganar el campeonato."
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "Cup/glass vs trophy"
+    },
+    {
+      "id": "orden_001",
+      "target": "El juez dictó una [orden] de arresto.",
+      "meanings": [
+        {
+          "definition": "La [orden] es un mandato o instrucción que debe cumplirse.",
+          "example": "El soldado siguió la [orden] del capitán inmediatamente."
+        },
+        {
+          "definition": "El [orden] es la organización o secuencia lógica de las cosas.",
+          "example": "Puso los libros en [orden] alfabético en la estantería."
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Command/order vs organization/sequence (also tests gender ambiguity)"
+    },
+    {
+      "id": "banco_001",
+      "target": "Me senté en el [banco] del parque a descansar.",
+      "meanings": [
+        {
+          "definition": "El [banco] es una institución financiera donde se guardan y gestionan fondos.",
+          "example": "Fui al [banco] a depositar el cheque esta mañana."
+        },
+        {
+          "definition": "El [banco] es un asiento largo de madera o piedra para varias personas.",
+          "example": "Nos sentamos en el [banco] de madera bajo la sombra."
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "Financial bank vs bench"
+    },
+    {
+      "id": "cabo_001",
+      "target": "Visitamos el [cabo] de Finisterre el verano pasado.",
+      "meanings": [
+        {
+          "definition": "El [cabo] es una punta de tierra que penetra en el mar.",
+          "example": "El [cabo] tiene un faro antiguo que guía a los barcos."
+        },
+        {
+          "definition": "El [cabo] es un rango militar inferior al sargento.",
+          "example": "El [cabo] dirige a los soldados durante el entrenamiento."
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Geographic cape vs military rank (corporal)"
+    }
+  ],
+  "metadata": {
+    "language": "es",
+    "created": "2026-01-03",
+    "source": "Created for WSD test framework (not from experiments/)",
+    "total_cases": 5,
+    "description": "Test cases with both definitions and examples for each meaning"
+  }
+}
