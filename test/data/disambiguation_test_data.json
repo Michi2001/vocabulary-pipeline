@@ -3553,15 +3553,237 @@
         1
       ],
       "notes": "Hard: 'medio roto' = half-broken (adverb)"
+    },
+    {
+      "id": "hard_salir_001",
+      "target": "¿A qué hora [sales]?",
+      "meanings": [
+        {
+          "definition": "[Salir] es ir de dentro hacia fuera de un lugar.",
+          "example": "[Salgo] de casa a las ocho de la mañana."
+        },
+        {
+          "definition": "[Salir] es tener una relación amorosa con alguien.",
+          "example": "¿Estás [saliendo] con alguien actualmente?"
+        },
+        {
+          "definition": "[Salir] es aparecer o ser publicado.",
+          "example": "El nuevo libro [sale] mañana a la venta."
+        }
+      ],
+      "correct_meaning_indices": [
+        0,
+        1
+      ],
+      "notes": "Hard: Could mean leave/exit or go out on a date - context unclear"
+    },
+    {
+      "id": "hard_mano_001",
+      "target": "Dame una [mano].",
+      "meanings": [
+        {
+          "definition": "La [mano] es la parte del cuerpo humano al final del brazo.",
+          "example": "Me lastimé la [mano] al caerme."
+        },
+        {
+          "definition": "Dar/echar una [mano] es ayudar a alguien.",
+          "example": "¿Puedes darme una [mano] con esta caja pesada?"
+        },
+        {
+          "definition": "Una [mano] es una capa de pintura o barniz.",
+          "example": "Hay que darle otra [mano] de pintura a la pared."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: Idiomatic 'dar una mano' = help, but literally could mean give a hand"
+    },
+    {
+      "id": "hard_llevar_001",
+      "target": "¿Cuánto tiempo [llevas] aquí?",
+      "meanings": [
+        {
+          "definition": "[Llevar] es transportar algo de un lugar a otro.",
+          "example": "Voy a [llevar] estas cajas al sótano."
+        },
+        {
+          "definition": "[Llevar] es estar en un lugar o situación durante cierto tiempo.",
+          "example": "[Llevo] tres años trabajando en esta empresa."
+        },
+        {
+          "definition": "[Llevar] es vestir o tener puesta una prenda.",
+          "example": "Hoy [llevo] una camisa azul."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: 'cuánto tiempo llevas' = how long have you been, not carry/wear"
+    },
+    {
+      "id": "hard_punto_001",
+      "target": "Hasta cierto [punto].",
+      "meanings": [
+        {
+          "definition": "Un [punto] es una señal pequeña y redonda.",
+          "example": "Pon un [punto] al final de la oración."
+        },
+        {
+          "definition": "Un [punto] es un lugar o momento determinado.",
+          "example": "Llegamos a un [punto] en el que debemos decidir."
+        },
+        {
+          "definition": "Un [punto] es una unidad de calificación o tanteo.",
+          "example": "El equipo ganó por tres [puntos] de diferencia."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: 'hasta cierto punto' is idiomatic for 'to some extent'"
+    },
+    {
+      "id": "hard_pie_001",
+      "target": "Lo hicieron al [pie] de la letra.",
+      "meanings": [
+        {
+          "definition": "El [pie] es la parte del cuerpo al final de la pierna.",
+          "example": "Me duele el [pie] derecho al caminar."
+        },
+        {
+          "definition": "El [pie] es la base o parte inferior de algo.",
+          "example": "La casa está al [pie] de la montaña."
+        },
+        {
+          "definition": "Al [pie] de la letra significa exactamente o literalmente.",
+          "example": "Siguió las instrucciones al [pie] de la letra."
+        }
+      ],
+      "correct_meaning_indices": [
+        2
+      ],
+      "notes": "Hard: Fixed expression 'al pie de la letra' = literally/exactly"
+    },
+    {
+      "id": "hard_cuenta_001",
+      "target": "Trae la [cuenta], por favor.",
+      "meanings": [
+        {
+          "definition": "Una [cuenta] es una operación matemática.",
+          "example": "Hice la [cuenta] de cuánto gastamos."
+        },
+        {
+          "definition": "Una [cuenta] es la factura en un restaurante.",
+          "example": "Camarero, la [cuenta] por favor."
+        },
+        {
+          "definition": "Una [cuenta] es un servicio bancario o en internet.",
+          "example": "Abrí una [cuenta] nueva en el banco."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: Restaurant context clear, but could confuse with bill calculation"
+    },
+    {
+      "id": "hard_dar_001",
+      "target": "Me [da] igual.",
+      "meanings": [
+        {
+          "definition": "[Dar] es entregar o transferir algo a alguien.",
+          "example": "¿Me [das] el libro que está en la mesa?"
+        },
+        {
+          "definition": "[Dar] es producir o causar un efecto.",
+          "example": "Esta planta [da] flores en primavera."
+        },
+        {
+          "definition": "[Dar] igual/lo mismo significa no importar.",
+          "example": "Me [da] lo mismo ir hoy o mañana."
+        }
+      ],
+      "correct_meaning_indices": [
+        2
+      ],
+      "notes": "Hard: Fixed expression 'dar igual' = doesn't matter"
+    },
+    {
+      "id": "hard_sentido_001",
+      "target": "No tiene [sentido].",
+      "meanings": [
+        {
+          "definition": "El [sentido] es la capacidad de percibir (vista, oído, tacto, etc.).",
+          "example": "Perdió el [sentido] del olfato tras el accidente."
+        },
+        {
+          "definition": "El [sentido] es el significado o interpretación de algo.",
+          "example": "¿Cuál es el [sentido] de esta frase?"
+        },
+        {
+          "definition": "Tener [sentido] es ser lógico o razonable.",
+          "example": "Lo que dices no tiene [sentido], es absurdo."
+        }
+      ],
+      "correct_meaning_indices": [
+        2,
+        1
+      ],
+      "notes": "Hard: 'no tiene sentido' = doesn't make sense (logical) or has no meaning"
+    },
+    {
+      "id": "hard_vuelta_001",
+      "target": "A la [vuelta] hablamos.",
+      "meanings": [
+        {
+          "definition": "Una [vuelta] es un giro o movimiento circular.",
+          "example": "El coche dio la [vuelta] a la esquina."
+        },
+        {
+          "definition": "Una [vuelta] es el regreso a un lugar.",
+          "example": "A la [vuelta] de las vacaciones retomamos el trabajo."
+        },
+        {
+          "definition": "La [vuelta] es el dinero que se devuelve tras pagar.",
+          "example": "Te falta darme la [vuelta] de los diez euros."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: 'a la vuelta' = upon return, not turn/change"
+    },
+    {
+      "id": "hard_hacer_001",
+      "target": "[Hace] frío.",
+      "meanings": [
+        {
+          "definition": "[Hacer] es realizar o ejecutar una acción.",
+          "example": "Voy a [hacer] la tarea ahora."
+        },
+        {
+          "definition": "[Hacer] se usa para indicar el tiempo atmosférico.",
+          "example": "Hoy [hace] mucho calor en la ciudad."
+        },
+        {
+          "definition": "[Hacer] es crear o construir algo.",
+          "example": "[Hice] un pastel para la fiesta."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "Hard: Impersonal 'hace frío' = it's cold (weather), not do/make"
     }
   ],
   "metadata": {
     "language": "es",
     "created": "2026-01-03",
     "source": "Generated from translations_w_embeddings_and_topics.json + manual sentences + hard ambiguous cases",
-    "total_cases": 191,
+    "total_cases": 201,
     "description": "Extended WSD test set with challenging ambiguous cases (last 15 are intentionally difficult)",
-    "hard_cases_count": 15,
-    "hard_cases_notes": "Cases hard_* have minimal context, multiple plausible meanings, or idiomatic usage"
+    "hard_cases_count": 25,
+    "hard_cases_notes": "Cases hard_* have minimal context, multiple plausible meanings, idiomatic expressions, or ambiguous situations"
   }
 }
