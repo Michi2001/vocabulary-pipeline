@@ -13,7 +13,9 @@
           "example": "Vivo en la segunda [planta] del edificio."
         }
       ],
-      "correct_meaning_indices": [0],
+      "correct_meaning_indices": [
+        0
+      ],
       "notes": "Plant (botanical) vs building floor"
     },
     {
@@ -29,7 +31,9 @@
           "example": "El equipo levantó la [copa] tras ganar el campeonato."
         }
       ],
-      "correct_meaning_indices": [1],
+      "correct_meaning_indices": [
+        1
+      ],
       "notes": "Cup/glass vs trophy"
     },
     {
@@ -45,7 +49,9 @@
           "example": "Puso los libros en [orden] alfabético en la estantería."
         }
       ],
-      "correct_meaning_indices": [0],
+      "correct_meaning_indices": [
+        0
+      ],
       "notes": "Command/order vs organization/sequence (also tests gender ambiguity)"
     },
     {
@@ -61,7 +67,9 @@
           "example": "Nos sentamos en el [banco] de madera bajo la sombra."
         }
       ],
-      "correct_meaning_indices": [1],
+      "correct_meaning_indices": [
+        1
+      ],
       "notes": "Financial bank vs bench"
     },
     {
@@ -77,15 +85,3187 @@
           "example": "El [cabo] dirige a los soldados durante el entrenamiento."
         }
       ],
-      "correct_meaning_indices": [0],
+      "correct_meaning_indices": [
+        0
+      ],
       "notes": "Geographic cape vs military rank (corporal)"
+    },
+    {
+      "id": "creer_000001_1",
+      "target": "Aunque todos lo niegan, sigo [creyendo] que fue un error del sistema.",
+      "meanings": [
+        {
+          "definition": "[Creer] es tener algo por cierto o aceptar como verdad sin pruebas",
+          "example": "[Creo] que tienes razón sobre ese tema."
+        },
+        {
+          "definition": "[Creer] es tener fe en una divinidad o en algo religioso",
+          "example": "Mucha gente [cree] en la vida después de la muerte."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "creer: opinion vs faith"
+    },
+    {
+      "id": "creer_000001_2",
+      "target": "Para superar este momento difícil, necesito [creer] en la justicia divina.",
+      "meanings": [
+        {
+          "definition": "[Creer] es tener algo por cierto o aceptar como verdad sin pruebas",
+          "example": "[Creo] que tienes razón sobre ese tema."
+        },
+        {
+          "definition": "[Creer] es tener fe en una divinidad o en algo religioso",
+          "example": "Mucha gente [cree] en la vida después de la muerte."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "creer: opinion vs faith"
+    },
+    {
+      "id": "laberinto_000038_1",
+      "target": "El centro histórico de la ciudad es un verdadero [laberinto] de calles estrechas.",
+      "meanings": [
+        {
+          "definition": "Un [laberinto] es un lugar formado por calles o caminos que se cruzan y de donde es difícil salir",
+          "example": "Nos perdimos en el [laberinto] del jardín real."
+        },
+        {
+          "definition": "El [laberinto] es una parte del oído interno encargada del equilibrio",
+          "example": "Tiene una inflamación en el [laberinto] del oído."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "laberinto: maze vs ear part"
+    },
+    {
+      "id": "laberinto_000038_2",
+      "target": "El médico le diagnosticó una inflamación crónica en el [laberinto].",
+      "meanings": [
+        {
+          "definition": "Un [laberinto] es un lugar formado por calles o caminos que se cruzan y de donde es difícil salir",
+          "example": "Nos perdimos en el [laberinto] del jardín real."
+        },
+        {
+          "definition": "El [laberinto] es una parte del oído interno encargada del equilibrio",
+          "example": "Tiene una inflamación en el [laberinto] del oído."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "laberinto: maze vs ear part"
+    },
+    {
+      "id": "integral_000134_1",
+      "target": "La empresa ofrece un servicio [integral] que cubre todas las necesidades del cliente.",
+      "meanings": [
+        {
+          "definition": "[Integral] significa que contiene todas las partes necesarias; global",
+          "example": "Necesitamos un plan [integral] para resolver el problema del tráfico."
+        },
+        {
+          "definition": "[Integral] significa que conserva el salvado y el germen del grano",
+          "example": "Prefiero comer pan [integral] porque tiene más fibra."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "integral: comprehensive vs whole grain"
+    },
+    {
+      "id": "integral_000134_2",
+      "target": "Para mejorar tu digestión deberías consumir arroz [integral].",
+      "meanings": [
+        {
+          "definition": "[Integral] significa que contiene todas las partes necesarias; global",
+          "example": "Necesitamos un plan [integral] para resolver el problema del tráfico."
+        },
+        {
+          "definition": "[Integral] significa que conserva el salvado y el germen del grano",
+          "example": "Prefiero comer pan [integral] porque tiene más fibra."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "integral: comprehensive vs whole grain"
+    },
+    {
+      "id": "coronar_000002_1",
+      "target": "La reina Isabel fue [coronada] en la Abadía de Westminster.",
+      "meanings": [
+        {
+          "definition": "[Coronar] es poner una corona a alguien como símbolo de poder o premio",
+          "example": "[Coronaron] al nuevo rey en una ceremonia solemne."
+        },
+        {
+          "definition": "[Coronar] es llegar a la parte más alta de algo o terminar con éxito",
+          "example": "El ciclista logró [coronar] el puerto en primera posición."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "coronar: crown monarch vs reach top"
+    },
+    {
+      "id": "coronar_000002_2",
+      "target": "Tras horas de escalada, lograron [coronar] la cima del Everest.",
+      "meanings": [
+        {
+          "definition": "[Coronar] es poner una corona a alguien como símbolo de poder o premio",
+          "example": "[Coronaron] al nuevo rey en una ceremonia solemne."
+        },
+        {
+          "definition": "[Coronar] es llegar a la parte más alta de algo o terminar con éxito",
+          "example": "El ciclista logró [coronar] el puerto en primera posición."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "coronar: crown monarch vs reach top"
+    },
+    {
+      "id": "sembrar_000003_1",
+      "target": "En primavera vamos a [sembrar] maíz en la parcela norte.",
+      "meanings": [
+        {
+          "definition": "[Sembrar] es poner semillas en la tierra para que crezcan plantas",
+          "example": "Es el momento ideal para [sembrar] los tomates."
+        },
+        {
+          "definition": "[Sembrar] es provocar o difundir sentimientos o ideas en otros",
+          "example": "Sus palabras [sembraron] la duda entre los asistentes."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "sembrar: plant seeds vs spread idea"
+    },
+    {
+      "id": "sembrar_000003_2",
+      "target": "Su discurso de odio solo sirvió para [sembrar] la discordia entre los ciudadanos.",
+      "meanings": [
+        {
+          "definition": "[Sembrar] es poner semillas en la tierra para que crezcan plantas",
+          "example": "Es el momento ideal para [sembrar] los tomates."
+        },
+        {
+          "definition": "[Sembrar] es provocar o difundir sentimientos o ideas en otros",
+          "example": "Sus palabras [sembraron] la duda entre los asistentes."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "sembrar: plant seeds vs spread idea"
+    },
+    {
+      "id": "as_000050_1",
+      "target": "Guardaba un [as] en la manga para el momento decisivo de la partida.",
+      "meanings": [
+        {
+          "definition": "El [as] es la carta de la baraja que lleva el número uno",
+          "example": "Tenía un [as] bajo la manga."
+        },
+        {
+          "definition": "Un [as] es una persona que destaca mucho en una actividad",
+          "example": "Es un [as] de la aviación."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "as: card vs expert"
+    },
+    {
+      "id": "as_000050_2",
+      "target": "Es un [as] del volante, ha ganado todas las carreras de la temporada.",
+      "meanings": [
+        {
+          "definition": "El [as] es la carta de la baraja que lleva el número uno",
+          "example": "Tenía un [as] bajo la manga."
+        },
+        {
+          "definition": "Un [as] es una persona que destaca mucho en una actividad",
+          "example": "Es un [as] de la aviación."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "as: card vs expert"
+    },
+    {
+      "id": "escaño_000051_1",
+      "target": "El partido espera conseguir al menos veinte [escaños] en el parlamento.",
+      "meanings": [
+        {
+          "definition": "El [escaño] es el puesto o asiento de un parlamentario en las cámaras legislativas",
+          "example": "El partido opositor perdió diez [escaños] en las últimas elecciones."
+        },
+        {
+          "definition": "El [escaño] es un banco con respaldo en el que pueden sentarse varias personas",
+          "example": "Se sentaron en un viejo [escaño] de madera en la plaza."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "escaño: parliament seat vs bench"
+    },
+    {
+      "id": "escaño_000051_2",
+      "target": "Se sentó en el [escaño] de piedra del jardín a leer un libro.",
+      "meanings": [
+        {
+          "definition": "El [escaño] es el puesto o asiento de un parlamentario en las cámaras legislativas",
+          "example": "El partido opositor perdió diez [escaños] en las últimas elecciones."
+        },
+        {
+          "definition": "El [escaño] es un banco con respaldo en el que pueden sentarse varias personas",
+          "example": "Se sentaron en un viejo [escaño] de madera en la plaza."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "escaño: parliament seat vs bench"
+    },
+    {
+      "id": "bajo_000178_1",
+      "target": "Escondió la llave [bajo] la maceta de la entrada.",
+      "meanings": [
+        {
+          "definition": "[Bajo] indica una posición inferior en el espacio o debajo de algo",
+          "example": "El gato está durmiendo [bajo] la mesa."
+        },
+        {
+          "definition": "[Bajo] indica dependencia, subordinación o cumplimiento de órdenes",
+          "example": "El país prosperó [bajo] el nuevo gobierno."
+        },
+        {
+          "definition": "[Bajo] indica que algo sucede durante un tiempo o circunstancia específica",
+          "example": "Trabajamos [bajo] mucha presión durante el proyecto."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "bajo: under/position vs others"
+    },
+    {
+      "id": "bajo_000178_2",
+      "target": "El departamento funciona [bajo] la supervisión directa del director general.",
+      "meanings": [
+        {
+          "definition": "[Bajo] indica una posición inferior en el espacio o debajo de algo",
+          "example": "El gato está durmiendo [bajo] la mesa."
+        },
+        {
+          "definition": "[Bajo] indica dependencia, subordinación o cumplimiento de órdenes",
+          "example": "El país prosperó [bajo] el nuevo gobierno."
+        },
+        {
+          "definition": "[Bajo] indica que algo sucede durante un tiempo o circunstancia específica",
+          "example": "Trabajamos [bajo] mucha presión durante el proyecto."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "bajo: under/command vs others"
+    },
+    {
+      "id": "bajo_000178_3",
+      "target": "[Bajo] esas circunstancias, no tuvimos más remedio que aceptar.",
+      "meanings": [
+        {
+          "definition": "[Bajo] indica una posición inferior en el espacio o debajo de algo",
+          "example": "El gato está durmiendo [bajo] la mesa."
+        },
+        {
+          "definition": "[Bajo] indica dependencia, subordinación o cumplimiento de órdenes",
+          "example": "El país prosperó [bajo] el nuevo gobierno."
+        },
+        {
+          "definition": "[Bajo] indica que algo sucede durante un tiempo o circunstancia específica",
+          "example": "Trabajamos [bajo] mucha presión durante el proyecto."
+        }
+      ],
+      "correct_meaning_indices": [
+        2
+      ],
+      "notes": "bajo: under/condition vs others"
+    },
+    {
+      "id": "fabricar_000004_1",
+      "target": "Esta planta se dedica a [fabricar] componentes electrónicos para aviones.",
+      "meanings": [
+        {
+          "definition": "[Fabricar] es producir objetos en serie, generalmente en una fábrica",
+          "example": "Esta empresa [fabrica] piezas para automóviles."
+        },
+        {
+          "definition": "[Fabricar] es inventar algo falso o mentiroso",
+          "example": "El sospechoso [fabricó] una coartada perfecta."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "fabricar: manufacture vs invent/fake"
+    },
+    {
+      "id": "fabricar_000004_2",
+      "target": "El acusado intentó [fabricar] pruebas para demostrar su inocencia.",
+      "meanings": [
+        {
+          "definition": "[Fabricar] es producir objetos en serie, generalmente en una fábrica",
+          "example": "Esta empresa [fabrica] piezas para automóviles."
+        },
+        {
+          "definition": "[Fabricar] es inventar algo falso o mentiroso",
+          "example": "El sospechoso [fabricó] una coartada perfecta."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "fabricar: manufacture vs invent/fake"
+    },
+    {
+      "id": "aprobar_000005_1",
+      "target": "Necesitas [aprobar] el examen final para graduarte este año.",
+      "meanings": [
+        {
+          "definition": "[Aprobar] es superar satisfactoriamente un examen o curso",
+          "example": "Estudió mucho y logró [aprobar] todas las asignaturas."
+        },
+        {
+          "definition": "[Aprobar] es dar por bueno o aceptar oficialmente un plan, ley o propuesta",
+          "example": "El Congreso [aprobó] la nueva ley de vivienda."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "aprobar: pass exam vs approve law"
+    },
+    {
+      "id": "aprobar_000005_2",
+      "target": "El consejo de administración debe [aprobar] el presupuesto antes del viernes.",
+      "meanings": [
+        {
+          "definition": "[Aprobar] es superar satisfactoriamente un examen o curso",
+          "example": "Estudió mucho y logró [aprobar] todas las asignaturas."
+        },
+        {
+          "definition": "[Aprobar] es dar por bueno o aceptar oficialmente un plan, ley o propuesta",
+          "example": "El Congreso [aprobó] la nueva ley de vivienda."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "aprobar: pass exam vs approve law"
+    },
+    {
+      "id": "atrevido_000135_1",
+      "target": "Fue un movimiento [atrevido] invertir todo su capital en una start-up.",
+      "meanings": [
+        {
+          "definition": "Alguien [atrevido] es que tiene valor para realizar acciones peligrosas o difíciles",
+          "example": "Fue muy [atrevido] al saltar desde esa altura."
+        },
+        {
+          "definition": "[Atrevido] significa que falta al respeto o es demasiado libre en sus palabras",
+          "example": "Ese comentario sobre su ropa me pareció un poco [atrevido]."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "atrevido: brave vs insolent"
+    },
+    {
+      "id": "atrevido_000135_2",
+      "target": "Me pareció muy [atrevido] que me contestara de esa manera tan irrespetuosa.",
+      "meanings": [
+        {
+          "definition": "Alguien [atrevido] es que tiene valor para realizar acciones peligrosas o difíciles",
+          "example": "Fue muy [atrevido] al saltar desde esa altura."
+        },
+        {
+          "definition": "[Atrevido] significa que falta al respeto o es demasiado libre en sus palabras",
+          "example": "Ese comentario sobre su ropa me pareció un poco [atrevido]."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "atrevido: brave vs insolent"
+    },
+    {
+      "id": "huérfano_000136_1",
+      "target": "La guerra dejó a miles de niños [huérfanos] y sin hogar.",
+      "meanings": [
+        {
+          "definition": "Un [huérfano] es una persona que ha perdido a su padre, a su madre o a ambos",
+          "example": "El niño se quedó [huérfano] después del accidente."
+        },
+        {
+          "definition": "[Huérfano] significa falto de algo necesario o de apoyo",
+          "example": "El proyecto se quedó [huérfano] de financiación."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "huérfano: orphan vs lacking"
+    },
+    {
+      "id": "huérfano_000136_2",
+      "target": "Tras la dimisión del líder, el partido se siente [huérfano] de ideas.",
+      "meanings": [
+        {
+          "definition": "Un [huérfano] es una persona que ha perdido a su padre, a su madre o a ambos",
+          "example": "El niño se quedó [huérfano] después del accidente."
+        },
+        {
+          "definition": "[Huérfano] significa falto de algo necesario o de apoyo",
+          "example": "El proyecto se quedó [huérfano] de financiación."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "huérfano: orphan vs lacking"
+    },
+    {
+      "id": "equivocar_000006_1",
+      "target": "Si piensas que voy a rendirme, te [equivocas] por completo.",
+      "meanings": [
+        {
+          "definition": "[Equivocar] o equivocarse es cometer un error o no acertar en algo",
+          "example": "Lo siento, me he [equivocado] de número."
+        },
+        {
+          "definition": "[Equivocar] es tomar una cosa por otra erróneamente",
+          "example": "[Equivoqué] tu abrigo con el mío porque son iguales."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "equivocar: make mistake vs confuse with"
+    },
+    {
+      "id": "equivocar_000006_2",
+      "target": "Con tanta niebla, es fácil [equivocar] el camino y perderse.",
+      "meanings": [
+        {
+          "definition": "[Equivocar] o equivocarse es cometer un error o no acertar en algo",
+          "example": "Lo siento, me he [equivocado] de número."
+        },
+        {
+          "definition": "[Equivocar] es tomar una cosa por otra erróneamente",
+          "example": "[Equivoqué] tu abrigo con el mío porque son iguales."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "equivocar: make mistake vs confuse with"
+    },
+    {
+      "id": "pala_000053_1",
+      "target": "Usa la [pala] para cavar un hoyo profundo en la arena.",
+      "meanings": [
+        {
+          "definition": "La [pala] es una herramienta para cavar o mover materiales como tierra o nieve",
+          "example": "Necesito una [pala] para plantar este árbol en el jardín."
+        },
+        {
+          "definition": "La [pala] es un instrumento plano usado en ciertos deportes como el pádel",
+          "example": "Me he comprado una [pala] de pádel nueva."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "pala: shovel vs racket"
+    },
+    {
+      "id": "pala_000053_2",
+      "target": "Se le rompió la [pala] de pádel en mitad del partido.",
+      "meanings": [
+        {
+          "definition": "La [pala] es una herramienta para cavar o mover materiales como tierra o nieve",
+          "example": "Necesito una [pala] para plantar este árbol en el jardín."
+        },
+        {
+          "definition": "La [pala] es un instrumento plano usado en ciertos deportes como el pádel",
+          "example": "Me he comprado una [pala] de pádel nueva."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "pala: shovel vs racket"
+    },
+    {
+      "id": "restablecer_000007_1",
+      "target": "Los técnicos trabajan día y noche para [restablecer] la conexión a internet.",
+      "meanings": [
+        {
+          "definition": "[Restablecer] es volver a poner algo en el estado que tenía antes",
+          "example": "Los técnicos lograron [restablecer] el suministro eléctrico."
+        },
+        {
+          "definition": "[Restablecerse] es recuperar la salud después de una enfermedad",
+          "example": "Se está [restableciendo] lentamente de la operación."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "restablecer: restore vs recover health"
+    },
+    {
+      "id": "restablecer_000007_2",
+      "target": "Espero que se [restablezca] pronto de su enfermedad.",
+      "meanings": [
+        {
+          "definition": "[Restablecer] es volver a poner algo en el estado que tenía antes",
+          "example": "Los técnicos lograron [restablecer] el suministro eléctrico."
+        },
+        {
+          "definition": "[Restablecerse] es recuperar la salud después de una enfermedad",
+          "example": "Se está [restableciendo] lentamente de la operación."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "restablecer: restore vs recover health"
+    },
+    {
+      "id": "librería_000056_1",
+      "target": "En esa [librería] de viejo encontré una primera edición muy rara.",
+      "meanings": [
+        {
+          "definition": "Una [librería] es una tienda donde se venden libros",
+          "example": "Fui a la [librería] a comprar el último libro de mi autor favorito."
+        },
+        {
+          "definition": "Una [librería] es un mueble con estantes para colocar libros",
+          "example": "Tenemos una [librería] enorme en el salón llena de clásicos."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "librería: bookstore vs bookshelf"
+    },
+    {
+      "id": "librería_000056_2",
+      "target": "Necesitamos comprar una [librería] nueva porque ya no caben más libros.",
+      "meanings": [
+        {
+          "definition": "Una [librería] es una tienda donde se venden libros",
+          "example": "Fui a la [librería] a comprar el último libro de mi autor favorito."
+        },
+        {
+          "definition": "Una [librería] es un mueble con estantes para colocar libros",
+          "example": "Tenemos una [librería] enorme en el salón llena de clásicos."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "librería: bookstore vs bookshelf"
+    },
+    {
+      "id": "cuánto_000176_1",
+      "target": "No sé [cuánto] tiempo tendremos que esperar aquí.",
+      "meanings": [
+        {
+          "definition": "[Cuánto] indica cantidad o grado en oraciones interrogativas o exclamativas",
+          "example": "¿[Cuánto] cuesta ese reloj de plata?"
+        },
+        {
+          "definition": "[Cuánto] indica una gran cantidad o intensidad de forma exclamativa",
+          "example": "¡[Cuánto] has crecido desde la última vez!"
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "cuánto: amount vs intensity"
+    },
+    {
+      "id": "cuánto_000176_2",
+      "target": "¡[Cuánto] me alegro de verte después de tanto tiempo!",
+      "meanings": [
+        {
+          "definition": "[Cuánto] indica cantidad o grado en oraciones interrogativas o exclamativas",
+          "example": "¿[Cuánto] cuesta ese reloj de plata?"
+        },
+        {
+          "definition": "[Cuánto] indica una gran cantidad o intensidad de forma exclamativa",
+          "example": "¡[Cuánto] has crecido desde la última vez!"
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "cuánto: amount vs intensity"
+    },
+    {
+      "id": "prometido_000143_1",
+      "target": "Su [prometido] le regaló un anillo de diamantes precioso.",
+      "meanings": [
+        {
+          "definition": "El [prometido] es quien ha dado palabra de matrimonio",
+          "example": "Mi hermana y su [prometido] se casan el próximo verano."
+        },
+        {
+          "definition": "[Prometido] significa que se ha asegurado mediante una promesa",
+          "example": "Todavía estoy esperando el aumento de sueldo [prometido]."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "prometido: fiancé vs promised"
+    },
+    {
+      "id": "prometido_000143_2",
+      "target": "El gobierno no ha cumplido con el aumento salarial [prometido].",
+      "meanings": [
+        {
+          "definition": "El [prometido] es quien ha dado palabra de matrimonio",
+          "example": "Mi hermana y su [prometido] se casan el próximo verano."
+        },
+        {
+          "definition": "[Prometido] significa que se ha asegurado mediante una promesa",
+          "example": "Todavía estoy esperando el aumento de sueldo [prometido]."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "prometido: fiancé vs promised"
+    },
+    {
+      "id": "manchar_000008_1",
+      "target": "Ten cuidado de no [manchar] el mantel con la salsa de tomate.",
+      "meanings": [
+        {
+          "definition": "[Manchar] es poner sucia una cosa con manchas",
+          "example": "Ten cuidado de no [manchar] la camisa con el vino."
+        },
+        {
+          "definition": "[Manchar] es perjudicar la buena fama o el honor de alguien",
+          "example": "Ese escándalo [manchó] su carrera política para siempre."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "manchar: stain/dirty vs tarnish reputation"
+    },
+    {
+      "id": "manchar_000008_2",
+      "target": "No permitas que una mentira pueda [manchar] tu reputación profesional.",
+      "meanings": [
+        {
+          "definition": "[Manchar] es poner sucia una cosa con manchas",
+          "example": "Ten cuidado de no [manchar] la camisa con el vino."
+        },
+        {
+          "definition": "[Manchar] es perjudicar la buena fama o el honor de alguien",
+          "example": "Ese escándalo [manchó] su carrera política para siempre."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "manchar: stain/dirty vs tarnish reputation"
+    },
+    {
+      "id": "corto_000144_1",
+      "target": "El vestido es demasiado [corto] para una ceremonia tan formal.",
+      "meanings": [
+        {
+          "definition": "[Corto] significa de poca longitud o duración",
+          "example": "Me gusta llevar el pelo [corto] en verano."
+        },
+        {
+          "definition": "Quedarse [corto] significa ser insuficiente o escaso",
+          "example": "Creo que nos vamos a quedar [cortos] de pan para la cena."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "corto: short vs insufficient"
+    },
+    {
+      "id": "corto_000144_2",
+      "target": "Nos quedamos [cortos] de presupuesto y tuvimos que cancelar el viaje.",
+      "meanings": [
+        {
+          "definition": "[Corto] significa de poca longitud o duración",
+          "example": "Me gusta llevar el pelo [corto] en verano."
+        },
+        {
+          "definition": "Quedarse [corto] significa ser insuficiente o escaso",
+          "example": "Creo que nos vamos a quedar [cortos] de pan para la cena."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "corto: short vs insufficient"
+    },
+    {
+      "id": "aparente_000146_1",
+      "target": "Su frialdad es solo [aparente], en realidad es muy sensible.",
+      "meanings": [
+        {
+          "definition": "[Aparente] significa que parece real pero no lo es necesariamente",
+          "example": "Su calma era solo [aparente]; por dentro estaba muy nervioso."
+        },
+        {
+          "definition": "[Aparente] significa adecuado u oportuno para algo",
+          "example": "Es un lugar muy [aparente] para celebrar la fiesta."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "aparente: seeming vs suitable"
+    },
+    {
+      "id": "aparente_000146_2",
+      "target": "Este no es el momento ni el lugar [aparente] para discutir eso.",
+      "meanings": [
+        {
+          "definition": "[Aparente] significa que parece real pero no lo es necesariamente",
+          "example": "Su calma era solo [aparente]; por dentro estaba muy nervioso."
+        },
+        {
+          "definition": "[Aparente] significa adecuado u oportuno para algo",
+          "example": "Es un lugar muy [aparente] para celebrar la fiesta."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "aparente: seeming vs suitable"
+    },
+    {
+      "id": "promocionar_000009_1",
+      "target": "Están invirtiendo mucho dinero para [promocionar] el nuevo perfume.",
+      "meanings": [
+        {
+          "definition": "[Promocionar] es dar a conocer un producto o servicio para que se venda",
+          "example": "La actriz está en Madrid para [promocionar] su nueva película."
+        },
+        {
+          "definition": "[Promocionar] es ayudar a alguien a subir de nivel o puesto en su trabajo",
+          "example": "Han decidido [promocionarla] a directora de ventas."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "promocionar: promote product vs promote person"
+    },
+    {
+      "id": "promocionar_000009_2",
+      "target": "Van a [promocionar] a Juan a jefe de departamento el próximo mes.",
+      "meanings": [
+        {
+          "definition": "[Promocionar] es dar a conocer un producto o servicio para que se venda",
+          "example": "La actriz está en Madrid para [promocionar] su nueva película."
+        },
+        {
+          "definition": "[Promocionar] es ayudar a alguien a subir de nivel o puesto en su trabajo",
+          "example": "Han decidido [promocionarla] a directora de ventas."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "promocionar: promote product vs promote person"
+    },
+    {
+      "id": "ir_000011_1",
+      "target": "Tenemos que [ir] al aeropuerto antes de las seis.",
+      "meanings": [
+        {
+          "definition": "[Ir] es moverse de un lugar hacia otro",
+          "example": "Mañana [voy] a la playa con mis amigos."
+        },
+        {
+          "definition": "[Irse] es marcharse de un lugar",
+          "example": "Es tarde, tengo que [irme] ya."
+        },
+        {
+          "definition": "[Ir] a + infinitivo indica una acción futura próxima",
+          "example": "[Voy] a estudiar español todo el verano."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "ir: move vs leave vs future"
+    },
+    {
+      "id": "ir_000011_2",
+      "target": "Se hizo tarde y los invitados empezaron a [irse].",
+      "meanings": [
+        {
+          "definition": "[Ir] es moverse de un lugar hacia otro",
+          "example": "Mañana [voy] a la playa con mis amigos."
+        },
+        {
+          "definition": "[Irse] es marcharse de un lugar",
+          "example": "Es tarde, tengo que [irme] ya."
+        },
+        {
+          "definition": "[Ir] a + infinitivo indica una acción futura próxima",
+          "example": "[Voy] a estudiar español todo el verano."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "ir: move vs leave vs future"
+    },
+    {
+      "id": "ir_000011_3",
+      "target": "[Voy] a preparar la cena mientras tú pones la mesa.",
+      "meanings": [
+        {
+          "definition": "[Ir] es moverse de un lugar hacia otro",
+          "example": "Mañana [voy] a la playa con mis amigos."
+        },
+        {
+          "definition": "[Irse] es marcharse de un lugar",
+          "example": "Es tarde, tengo que [irme] ya."
+        },
+        {
+          "definition": "[Ir] a + infinitivo indica una acción futura próxima",
+          "example": "[Voy] a estudiar español todo el verano."
+        }
+      ],
+      "correct_meaning_indices": [
+        2
+      ],
+      "notes": "ir: move vs leave vs future"
+    },
+    {
+      "id": "invención_000063_1",
+      "target": "La [invención] del teléfono revolucionó las comunicaciones.",
+      "meanings": [
+        {
+          "definition": "La [invención] es la creación de algo nuevo o acción de inventar",
+          "example": "La [invención] de la imprenta cambió el mundo."
+        },
+        {
+          "definition": "Una [invención] puede ser una historia falsa o mentira fabricada",
+          "example": "Todo lo que dijo fue una pura [invención]."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "invención: creation vs lie"
+    },
+    {
+      "id": "invención_000063_2",
+      "target": "Esa historia sobre su pasado aristocrático es pura [invención].",
+      "meanings": [
+        {
+          "definition": "La [invención] es la creación de algo nuevo o acción de inventar",
+          "example": "La [invención] de la imprenta cambió el mundo."
+        },
+        {
+          "definition": "Una [invención] puede ser una historia falsa o mentira fabricada",
+          "example": "Todo lo que dijo fue una pura [invención]."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "invención: creation vs lie"
+    },
+    {
+      "id": "conseguir_000012_1",
+      "target": "Luchó mucho hasta [conseguir] el respeto de sus compañeros.",
+      "meanings": [
+        {
+          "definition": "[Conseguir] es llegar a tener lo que se desea o busca",
+          "example": "Por fin [consiguió] el puesto de trabajo que quería."
+        },
+        {
+          "definition": "[Conseguir] es lograr realizar una acción difícil",
+          "example": "[Consiguió] abrir la puerta sin la llave."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "conseguir: obtain vs manage to"
+    },
+    {
+      "id": "conseguir_000012_2",
+      "target": "No [consigo] entender por qué se comportó de esa manera.",
+      "meanings": [
+        {
+          "definition": "[Conseguir] es llegar a tener lo que se desea o busca",
+          "example": "Por fin [consiguió] el puesto de trabajo que quería."
+        },
+        {
+          "definition": "[Conseguir] es lograr realizar una acción difícil",
+          "example": "[Consiguió] abrir la puerta sin la llave."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "conseguir: obtain vs manage to"
+    },
+    {
+      "id": "acondicionar_000013_1",
+      "target": "Van a [acondicionar] el local para convertirlo en una oficina moderna.",
+      "meanings": [
+        {
+          "definition": "[Acondicionar] es preparar un lugar o cosa para un fin determinado",
+          "example": "Tuvieron que [acondicionar] el local para la fiesta."
+        },
+        {
+          "definition": "[Acondicionar] es tratar el cabello con productos suavizantes",
+          "example": "Es importante [acondicionar] el cabello después del tinte."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "acondicionar: prepare place vs hair"
+    },
+    {
+      "id": "acondicionar_000013_2",
+      "target": "Es recomendable [acondicionar] el cabello con una mascarilla hidratante.",
+      "meanings": [
+        {
+          "definition": "[Acondicionar] es preparar un lugar o cosa para un fin determinado",
+          "example": "Tuvieron que [acondicionar] el local para la fiesta."
+        },
+        {
+          "definition": "[Acondicionar] es tratar el cabello con productos suavizantes",
+          "example": "Es importante [acondicionar] el cabello después del tinte."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "acondicionar: prepare place vs hair"
+    },
+    {
+      "id": "queda_000066_1",
+      "target": "Durante el toque de [queda], nadie podía salir a la calle.",
+      "meanings": [
+        {
+          "definition": "La [queda] es una señal o aviso que prohíbe el tránsito libre por las calles",
+          "example": "El gobierno ha decretado el toque de [queda]."
+        },
+        {
+          "definition": "La [queda] es la acción de quedarse en un lugar",
+          "example": "Tras la [queda] en el hotel, regresamos a casa."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "queda: curfew vs stay"
+    },
+    {
+      "id": "queda_000066_2",
+      "target": "No tengo noticias de su [queda] en la ciudad.",
+      "meanings": [
+        {
+          "definition": "La [queda] es una señal o aviso que prohíbe el tránsito libre por las calles",
+          "example": "El gobierno ha decretado el toque de [queda]."
+        },
+        {
+          "definition": "La [queda] es la acción de quedarse en un lugar",
+          "example": "Tras la [queda] en el hotel, regresamos a casa."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "queda: curfew vs stay"
+    },
+    {
+      "id": "concordar_000015_1",
+      "target": "Sus declaraciones no [concuerdan] con las pruebas encontradas.",
+      "meanings": [
+        {
+          "definition": "[Concordar] es tener la misma opinión o estar de acuerdo",
+          "example": "Mis ideas [concuerdan] perfectamente con las tuyas."
+        },
+        {
+          "definition": "[Concordar] es tener correspondencia gramatical entre palabras",
+          "example": "El sujeto debe [concordar] con el verbo en número y persona."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "concordar: agree vs grammatical"
+    },
+    {
+      "id": "concordar_000015_2",
+      "target": "El adjetivo debe [concordar] en género y número con el sustantivo.",
+      "meanings": [
+        {
+          "definition": "[Concordar] es tener la misma opinión o estar de acuerdo",
+          "example": "Mis ideas [concuerdan] perfectamente con las tuyas."
+        },
+        {
+          "definition": "[Concordar] es tener correspondencia gramatical entre palabras",
+          "example": "El sujeto debe [concordar] con el verbo en número y persona."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "concordar: agree vs grammatical"
+    },
+    {
+      "id": "distinguir_000017_1",
+      "target": "A esta distancia es difícil [distinguir] los detalles del cuadro.",
+      "meanings": [
+        {
+          "definition": "[Distinguir] es conocer la diferencia entre dos o más cosas",
+          "example": "Es difícil [distinguir] a los gemelos cuando van vestidos igual."
+        },
+        {
+          "definition": "[Distinguirse] es hacer que alguien destaque por sus buenas cualidades",
+          "example": "Se [distingue] por su gran capacidad de trabajo."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "distinguir: differentiate vs stand out"
+    },
+    {
+      "id": "distinguir_000017_2",
+      "target": "Se [distingue] por su elegancia y buen gusto al vestir.",
+      "meanings": [
+        {
+          "definition": "[Distinguir] es conocer la diferencia entre dos o más cosas",
+          "example": "Es difícil [distinguir] a los gemelos cuando van vestidos igual."
+        },
+        {
+          "definition": "[Distinguirse] es hacer que alguien destaque por sus buenas cualidades",
+          "example": "Se [distingue] por su gran capacidad de trabajo."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "distinguir: differentiate vs stand out"
+    },
+    {
+      "id": "desear_000018_1",
+      "target": "Le [deseo] todo lo mejor en su nueva etapa profesional.",
+      "meanings": [
+        {
+          "definition": "[Desear] es querer o anhelar que algo suceda o tener algo",
+          "example": "Te [deseo] mucha suerte en tu nuevo proyecto."
+        },
+        {
+          "definition": "[Desear] es sentir atracción sexual por alguien",
+          "example": "Se notaba que la [deseaba] desde el primer momento."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "desear: want vs desire sexually"
+    },
+    {
+      "id": "desear_000018_2",
+      "target": "La miraba con una intensidad que revelaba cuánto la [deseaba].",
+      "meanings": [
+        {
+          "definition": "[Desear] es querer o anhelar que algo suceda o tener algo",
+          "example": "Te [deseo] mucha suerte en tu nuevo proyecto."
+        },
+        {
+          "definition": "[Desear] es sentir atracción sexual por alguien",
+          "example": "Se notaba que la [deseaba] desde el primer momento."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "desear: want vs desire sexually"
+    },
+    {
+      "id": "medio_000177_1",
+      "target": "El vaso está [medio] lleno o medio vacío, según cómo se mire.",
+      "meanings": [
+        {
+          "definition": "[Medio] indica que algo no es total o completo",
+          "example": "No entres ahora, la habitación está [medio] limpia."
+        },
+        {
+          "definition": "[Medio] indica una posición o estado intermedio de manera informal",
+          "example": "Me miró [medio] raro cuando le dije la verdad."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "medio: half/partial vs sort of"
+    },
+    {
+      "id": "medio_000177_2",
+      "target": "Me siento [medio] mareado con este calor.",
+      "meanings": [
+        {
+          "definition": "[Medio] indica que algo no es total o completo",
+          "example": "No entres ahora, la habitación está [medio] limpia."
+        },
+        {
+          "definition": "[Medio] indica una posición o estado intermedio de manera informal",
+          "example": "Me miró [medio] raro cuando le dije la verdad."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "medio: half/partial vs sort of"
+    },
+    {
+      "id": "mantener_000019_1",
+      "target": "Debemos [mantener] la temperatura constante en el laboratorio.",
+      "meanings": [
+        {
+          "definition": "[Mantener] es hacer que algo siga en el mismo estado o situación",
+          "example": "Es importante [mantener] la calma en situaciones difíciles."
+        },
+        {
+          "definition": "[Mantener] es dar a alguien lo necesario para vivir (dinero, comida)",
+          "example": "Trabaja duro para [mantener] a su familia."
+        },
+        {
+          "definition": "[Mantener] es sostener una opinión o una conversación",
+          "example": "[Mantuvo] su palabra hasta el final."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "mantener: keep state vs support vs hold opinion"
+    },
+    {
+      "id": "mantener_000019_2",
+      "target": "Con su sueldo apenas puede [mantener] a su familia numerosa.",
+      "meanings": [
+        {
+          "definition": "[Mantener] es hacer que algo siga en el mismo estado o situación",
+          "example": "Es importante [mantener] la calma en situaciones difíciles."
+        },
+        {
+          "definition": "[Mantener] es dar a alguien lo necesario para vivir (dinero, comida)",
+          "example": "Trabaja duro para [mantener] a su familia."
+        },
+        {
+          "definition": "[Mantener] es sostener una opinión o una conversación",
+          "example": "[Mantuvo] su palabra hasta el final."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "mantener: keep state vs support vs hold opinion"
+    },
+    {
+      "id": "mantener_000019_3",
+      "target": "Ella [mantiene] que es inocente a pesar de las acusaciones.",
+      "meanings": [
+        {
+          "definition": "[Mantener] es hacer que algo siga en el mismo estado o situación",
+          "example": "Es importante [mantener] la calma en situaciones difíciles."
+        },
+        {
+          "definition": "[Mantener] es dar a alguien lo necesario para vivir (dinero, comida)",
+          "example": "Trabaja duro para [mantener] a su familia."
+        },
+        {
+          "definition": "[Mantener] es sostener una opinión o una conversación",
+          "example": "[Mantuvo] su palabra hasta el final."
+        }
+      ],
+      "correct_meaning_indices": [
+        2
+      ],
+      "notes": "mantener: keep state vs support vs hold opinion"
+    },
+    {
+      "id": "mula_000070_1",
+      "target": "Cargaron la [mula] con leña para subir a la montaña.",
+      "meanings": [
+        {
+          "definition": "La [mula] es un animal híbrido de burro y yegua, usado para carga",
+          "example": "La [mula] llevaba las cestas de uvas hasta el pueblo."
+        },
+        {
+          "definition": "Una [mula] es una persona que transporta droga ilegalmente",
+          "example": "Detuvieron a una [mula] en el control de pasaportes."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "mula: animal vs drug mule"
+    },
+    {
+      "id": "mula_000070_2",
+      "target": "La policía detuvo a una [mula] en el aeropuerto con dos kilos de cocaína.",
+      "meanings": [
+        {
+          "definition": "La [mula] es un animal híbrido de burro y yegua, usado para carga",
+          "example": "La [mula] llevaba las cestas de uvas hasta el pueblo."
+        },
+        {
+          "definition": "Una [mula] es una persona que transporta droga ilegalmente",
+          "example": "Detuvieron a una [mula] en el control de pasaportes."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "mula: animal vs drug mule"
+    },
+    {
+      "id": "siniestro_000149_1",
+      "target": "El callejón tenía un aspecto [siniestro] bajo la luz de la luna.",
+      "meanings": [
+        {
+          "definition": "[Siniestro] significa que produce miedo o sospecha de algo malo",
+          "example": "Había un hombre [siniestro] vigilando la entrada del edificio."
+        },
+        {
+          "definition": "[Siniestro] significa que está en el lado izquierdo",
+          "example": "Se lesionó el ojo [siniestro] durante el partido."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "siniestro: scary vs left"
+    },
+    {
+      "id": "siniestro_000149_2",
+      "target": "En heráldica, el lado [siniestro] del escudo es el izquierdo.",
+      "meanings": [
+        {
+          "definition": "[Siniestro] significa que produce miedo o sospecha de algo malo",
+          "example": "Había un hombre [siniestro] vigilando la entrada del edificio."
+        },
+        {
+          "definition": "[Siniestro] significa que está en el lado izquierdo",
+          "example": "Se lesionó el ojo [siniestro] durante el partido."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "siniestro: scary vs left"
+    },
+    {
+      "id": "calentamiento_000071_1",
+      "target": "El [calentamiento] global está provocando el deshielo de los polos.",
+      "meanings": [
+        {
+          "definition": "El [calentamiento] es el aumento de la temperatura de algo o del ambiente",
+          "example": "El [calentamiento] global es una amenaza real."
+        },
+        {
+          "definition": "El [calentamiento] consiste en ejercicios suaves antes de una actividad física intensa",
+          "example": "Hicimos diez minutos de [calentamiento] antes del partido."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "calentamiento: global warming vs warm-up"
+    },
+    {
+      "id": "calentamiento_000071_2",
+      "target": "Es fundamental hacer un buen [calentamiento] antes de correr un maratón.",
+      "meanings": [
+        {
+          "definition": "El [calentamiento] es el aumento de la temperatura de algo o del ambiente",
+          "example": "El [calentamiento] global es una amenaza real."
+        },
+        {
+          "definition": "El [calentamiento] consiste en ejercicios suaves antes de una actividad física intensa",
+          "example": "Hicimos diez minutos de [calentamiento] antes del partido."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "calentamiento: global warming vs warm-up"
+    },
+    {
+      "id": "atajo_000074_1",
+      "target": "Tomamos un [atajo] por el bosque para llegar antes al pueblo.",
+      "meanings": [
+        {
+          "definition": "Un [atajo] es un camino más corto que el principal para ir de un lugar a otro",
+          "example": "Conozco un [atajo] para llegar antes a la playa."
+        },
+        {
+          "definition": "Un [atajo] es una combinación de teclas para realizar una función rápida en informática",
+          "example": "Uso el [atajo] 'Control+C' para copiar texto."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "atajo: shortcut path vs keyboard shortcut"
+    },
+    {
+      "id": "atajo_000074_2",
+      "target": "Con este [atajo] de teclado puedes guardar el documento más rápido.",
+      "meanings": [
+        {
+          "definition": "Un [atajo] es un camino más corto que el principal para ir de un lugar a otro",
+          "example": "Conozco un [atajo] para llegar antes a la playa."
+        },
+        {
+          "definition": "Un [atajo] es una combinación de teclas para realizar una función rápida en informática",
+          "example": "Uso el [atajo] 'Control+C' para copiar texto."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "atajo: shortcut path vs keyboard shortcut"
+    },
+    {
+      "id": "hermandad_000076_1",
+      "target": "Existe una gran [hermandad] entre los miembros del equipo de bomberos.",
+      "meanings": [
+        {
+          "definition": "La [hermandad] es una relación de afecto y solidaridad entre hermanos o personas que se tratan como tales",
+          "example": "Hay una fuerte [hermandad] entre los miembros del equipo."
+        },
+        {
+          "definition": "Una [hermandad] es una asociación de personas con un fin religioso o social común",
+          "example": "Pertenece a la [hermandad] de la Virgen de la Macarena."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "hermandad: brotherhood vs religious guild"
+    },
+    {
+      "id": "hermandad_000076_2",
+      "target": "La [hermandad] organiza la procesión de Semana Santa.",
+      "meanings": [
+        {
+          "definition": "La [hermandad] es una relación de afecto y solidaridad entre hermanos o personas que se tratan como tales",
+          "example": "Hay una fuerte [hermandad] entre los miembros del equipo."
+        },
+        {
+          "definition": "Una [hermandad] es una asociación de personas con un fin religioso o social común",
+          "example": "Pertenece a la [hermandad] de la Virgen de la Macarena."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "hermandad: brotherhood vs religious guild"
+    },
+    {
+      "id": "pipa_000079_1",
+      "target": "Se sentó en el porche a fumar en [pipa] tranquilamente.",
+      "meanings": [
+        {
+          "definition": "Una [pipa] es un objeto para fumar tabaco picado",
+          "example": "Mi abuelo siempre fumaba en [pipa] después de comer."
+        },
+        {
+          "definition": "Una [pipa] es una semilla de girasol tostada que se come como aperitivo",
+          "example": "Compramos un paquete de [pipas] para ver el partido de fútbol."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "pipa: pipe vs sunflower seed"
+    },
+    {
+      "id": "pipa_000079_2",
+      "target": "Me pasé la tarde comiendo [pipas] y viendo la televisión.",
+      "meanings": [
+        {
+          "definition": "Una [pipa] es un objeto para fumar tabaco picado",
+          "example": "Mi abuelo siempre fumaba en [pipa] después de comer."
+        },
+        {
+          "definition": "Una [pipa] es una semilla de girasol tostada que se come como aperitivo",
+          "example": "Compramos un paquete de [pipas] para ver el partido de fútbol."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "pipa: pipe vs sunflower seed"
+    },
+    {
+      "id": "franquicia_000085_1",
+      "target": "Están pensando en abrir una [franquicia] de comida rápida en el centro.",
+      "meanings": [
+        {
+          "definition": "Una [franquicia] es un modelo de negocio donde una empresa otorga el derecho a explotar su marca a otra persona",
+          "example": "Ha decidido abrir una [franquicia] de una conocida cadena de café."
+        },
+        {
+          "definition": "La [franquicia] es la cantidad de dinero que el asegurado debe pagar en caso de siniestro",
+          "example": "Mi seguro de coche tiene una [franquicia] de trescientos euros."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "franquicia: business vs insurance excess"
+    },
+    {
+      "id": "franquicia_000085_2",
+      "target": "El seguro a todo riesgo tiene una [franquicia] de 200 euros.",
+      "meanings": [
+        {
+          "definition": "Una [franquicia] es un modelo de negocio donde una empresa otorga el derecho a explotar su marca a otra persona",
+          "example": "Ha decidido abrir una [franquicia] de una conocida cadena de café."
+        },
+        {
+          "definition": "La [franquicia] es la cantidad de dinero que el asegurado debe pagar en caso de siniestro",
+          "example": "Mi seguro de coche tiene una [franquicia] de trescientos euros."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "franquicia: business vs insurance excess"
+    },
+    {
+      "id": "sumergir_000021_1",
+      "target": "Debes [sumergir] los platos en agua caliente para quitar la grasa.",
+      "meanings": [
+        {
+          "definition": "[Sumergir] es introducir algo por completo en un líquido",
+          "example": "Tienes que [sumergir] la prenda en agua fría."
+        },
+        {
+          "definition": "[Sumergirse] es meterse de lleno en una actividad o estado emocional",
+          "example": "Se [sumergió] en sus pensamientos y no oyó el teléfono."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "sumergir: submerge physical vs immerse abstract"
+    },
+    {
+      "id": "sumergir_000021_2",
+      "target": "Se [sumergió] tanto en la lectura que olvidó comer.",
+      "meanings": [
+        {
+          "definition": "[Sumergir] es introducir algo por completo en un líquido",
+          "example": "Tienes que [sumergir] la prenda en agua fría."
+        },
+        {
+          "definition": "[Sumergirse] es meterse de lleno en una actividad o estado emocional",
+          "example": "Se [sumergió] en sus pensamientos y no oyó el teléfono."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "sumergir: submerge physical vs immerse abstract"
+    },
+    {
+      "id": "recado_000088_1",
+      "target": "Le dejé un [recado] a tu secretaria para que me llames.",
+      "meanings": [
+        {
+          "definition": "Un [recado] es un mensaje que se deja o se envía a una persona por medio de otra",
+          "example": "¿Desea dejarle algún [recado] al señor Martínez?"
+        },
+        {
+          "definition": "Hacer un [recado] es la acción de ir a un sitio para hacer una gestión corta, como comprar algo",
+          "example": "Tengo que salir un momento a hacer unos [recados]."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "recado: message vs errand"
+    },
+    {
+      "id": "recado_000088_2",
+      "target": "Voy a salir un momento a hacer unos [recados] al centro.",
+      "meanings": [
+        {
+          "definition": "Un [recado] es un mensaje que se deja o se envía a una persona por medio de otra",
+          "example": "¿Desea dejarle algún [recado] al señor Martínez?"
+        },
+        {
+          "definition": "Hacer un [recado] es la acción de ir a un sitio para hacer una gestión corta, como comprar algo",
+          "example": "Tengo que salir un momento a hacer unos [recados]."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "recado: message vs errand"
+    },
+    {
+      "id": "desmoronar_000022_1",
+      "target": "El acantilado empezó a [desmoronarse] debido a la erosión del mar.",
+      "meanings": [
+        {
+          "definition": "[Desmoronar] es deshacer poco a poco algo físico o material",
+          "example": "La vieja muralla empezó a [desmoronarse] con la lluvia."
+        },
+        {
+          "definition": "[Desmoronarse] es perder el ánimo, la fuerza moral o el control",
+          "example": "Se [desmoronó] al recibir la mala noticia."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "desmoronar: crumble physical vs emotional"
+    },
+    {
+      "id": "desmoronar_000022_2",
+      "target": "Tras la muerte de su esposa, su vida se [desmoronó] por completo.",
+      "meanings": [
+        {
+          "definition": "[Desmoronar] es deshacer poco a poco algo físico o material",
+          "example": "La vieja muralla empezó a [desmoronarse] con la lluvia."
+        },
+        {
+          "definition": "[Desmoronarse] es perder el ánimo, la fuerza moral o el control",
+          "example": "Se [desmoronó] al recibir la mala noticia."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "desmoronar: crumble physical vs emotional"
+    },
+    {
+      "id": "liberar_000023_1",
+      "target": "Tras pagar la fianza, el juez ordenó [liberar] al detenido.",
+      "meanings": [
+        {
+          "definition": "[Liberar] es poner en libertad a alguien que estaba preso o atado",
+          "example": "El gobierno decidió [liberar] a los prisioneros políticos."
+        },
+        {
+          "definition": "[Liberar] es quitar una carga, obligación o impedimento",
+          "example": "Hacer ejercicio ayuda a [liberar] tensiones."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "liberar: release prisoner vs release stress"
+    },
+    {
+      "id": "liberar_000023_2",
+      "target": "Gritar en la montaña me ayuda a [liberar] el estrés acumulado.",
+      "meanings": [
+        {
+          "definition": "[Liberar] es poner en libertad a alguien que estaba preso o atado",
+          "example": "El gobierno decidió [liberar] a los prisioneros políticos."
+        },
+        {
+          "definition": "[Liberar] es quitar una carga, obligación o impedimento",
+          "example": "Hacer ejercicio ayuda a [liberar] tensiones."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "liberar: release prisoner vs release stress"
+    },
+    {
+      "id": "inclinación_000090_1",
+      "target": "La [inclinación] del terreno dificulta la construcción de la casa.",
+      "meanings": [
+        {
+          "definition": "La [inclinación] es la posición de una cosa que se aparta de la horizontal o vertical",
+          "example": "La [inclinación] de la Torre de Pisa es muy famosa."
+        },
+        {
+          "definition": "La [inclinación] es la preferencia o tendencia sentimental o intelectual hacia algo",
+          "example": "Tiene una clara [inclinación] por la música clásica."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "inclinación: slope vs tendency"
+    },
+    {
+      "id": "inclinación_000090_2",
+      "target": "Desde pequeño mostró una clara [inclinación] hacia la pintura.",
+      "meanings": [
+        {
+          "definition": "La [inclinación] es la posición de una cosa que se aparta de la horizontal o vertical",
+          "example": "La [inclinación] de la Torre de Pisa es muy famosa."
+        },
+        {
+          "definition": "La [inclinación] es la preferencia o tendencia sentimental o intelectual hacia algo",
+          "example": "Tiene una clara [inclinación] por la música clásica."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "inclinación: slope vs tendency"
+    },
+    {
+      "id": "quiebra_000091_1",
+      "target": "La mala gestión llevó a la empresa a la [quiebra] en menos de un año.",
+      "meanings": [
+        {
+          "definition": "La [quiebra] es una situación jurídica y económica en la que una empresa no puede pagar sus deudas",
+          "example": "La fábrica cerró tras declarar la [quiebra] técnica."
+        },
+        {
+          "definition": "Una [quiebra] es una rotura o abertura en algo sólido",
+          "example": "Se veía una [quiebra] profunda en la roca de la montaña."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "quiebra: bankruptcy vs fissure"
+    },
+    {
+      "id": "quiebra_000091_2",
+      "target": "Observaron una [quiebra] en el terreno tras el terremoto.",
+      "meanings": [
+        {
+          "definition": "La [quiebra] es una situación jurídica y económica en la que una empresa no puede pagar sus deudas",
+          "example": "La fábrica cerró tras declarar la [quiebra] técnica."
+        },
+        {
+          "definition": "Una [quiebra] es una rotura o abertura en algo sólido",
+          "example": "Se veía una [quiebra] profunda en la roca de la montaña."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "quiebra: bankruptcy vs fissure"
+    },
+    {
+      "id": "corrección_000092_1",
+      "target": "La [corrección] del manuscrito llevó más tiempo del esperado.",
+      "meanings": [
+        {
+          "definition": "La [corrección] es la alteración que se hace para eliminar un error o defecto",
+          "example": "El profesor terminó la [corrección] de los exámenes."
+        },
+        {
+          "definition": "La [corrección] es el comportamiento adecuado a las normas de cortesía y educación",
+          "example": "Siempre se comporta con mucha [corrección] en las reuniones."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "corrección: error fixing vs politeness"
+    },
+    {
+      "id": "corrección_000092_2",
+      "target": "Siempre trata a sus empleados con la máxima [corrección] y respeto.",
+      "meanings": [
+        {
+          "definition": "La [corrección] es la alteración que se hace para eliminar un error o defecto",
+          "example": "El profesor terminó la [corrección] de los exámenes."
+        },
+        {
+          "definition": "La [corrección] es el comportamiento adecuado a las normas de cortesía y educación",
+          "example": "Siempre se comporta con mucha [corrección] en las reuniones."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "corrección: error fixing vs politeness"
+    },
+    {
+      "id": "dotar_000024_1",
+      "target": "El gobierno prometió [dotar] al hospital de nuevos equipos médicos.",
+      "meanings": [
+        {
+          "definition": "[Dotar] es equipar a una persona o cosa con algo necesario",
+          "example": "El ayuntamiento va a [dotar] al parque de nuevas farolas."
+        },
+        {
+          "definition": "[Dotar] es dar la naturaleza ciertas cualidades o talentos",
+          "example": "La naturaleza la [dotó] de una voz prodigiosa."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "dotar: equip vs endow"
+    },
+    {
+      "id": "dotar_000024_2",
+      "target": "La naturaleza la [dotó] de una inteligencia excepcional.",
+      "meanings": [
+        {
+          "definition": "[Dotar] es equipar a una persona o cosa con algo necesario",
+          "example": "El ayuntamiento va a [dotar] al parque de nuevas farolas."
+        },
+        {
+          "definition": "[Dotar] es dar la naturaleza ciertas cualidades o talentos",
+          "example": "La naturaleza la [dotó] de una voz prodigiosa."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "dotar: equip vs endow"
+    },
+    {
+      "id": "resbalar_000025_1",
+      "target": "Casi me mato al [resbalar] con una cáscara de plátano.",
+      "meanings": [
+        {
+          "definition": "[Resbalar] es deslizarse sobre una superficie lisa o mojada perdiendo el equilibrio",
+          "example": "Ten cuidado de no [resbalar] con el suelo mojado."
+        },
+        {
+          "definition": "[Resbalar] significa no dar importancia a lo que alguien dice",
+          "example": "A ella le [resbalan] las críticas de los demás."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "resbalar: slip vs ignore"
+    },
+    {
+      "id": "resbalar_000025_2",
+      "target": "Sus insultos me [resbalan], no me importan en absoluto.",
+      "meanings": [
+        {
+          "definition": "[Resbalar] es deslizarse sobre una superficie lisa o mojada perdiendo el equilibrio",
+          "example": "Ten cuidado de no [resbalar] con el suelo mojado."
+        },
+        {
+          "definition": "[Resbalar] significa no dar importancia a lo que alguien dice",
+          "example": "A ella le [resbalan] las críticas de los demás."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "resbalar: slip vs ignore"
+    },
+    {
+      "id": "incursión_000097_1",
+      "target": "Las tropas hicieron una [incursión] rápida en territorio enemigo.",
+      "meanings": [
+        {
+          "definition": "Una [incursión] es una entrada breve en un lugar ajeno, a menudo con fines militares o de exploración",
+          "example": "El ejército realizó una [incursión] en territorio enemigo."
+        },
+        {
+          "definition": "Una [incursión] es una actividad breve en un campo o ámbito que no es el habitual de uno",
+          "example": "El actor hizo una pequeña [incursión] en el mundo de la dirección."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "incursión: military raid vs brief foray"
+    },
+    {
+      "id": "incursión_000097_2",
+      "target": "Su [incursión] en el mundo de la moda fue breve pero exitosa.",
+      "meanings": [
+        {
+          "definition": "Una [incursión] es una entrada breve en un lugar ajeno, a menudo con fines militares o de exploración",
+          "example": "El ejército realizó una [incursión] en territorio enemigo."
+        },
+        {
+          "definition": "Una [incursión] es una actividad breve en un campo o ámbito que no es el habitual de uno",
+          "example": "El actor hizo una pequeña [incursión] en el mundo de la dirección."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "incursión: military raid vs brief foray"
+    },
+    {
+      "id": "constitución_000098_1",
+      "target": "La reforma de la [Constitución] requiere un amplio consenso político.",
+      "meanings": [
+        {
+          "definition": "La [Constitución] es la Ley fundamental de un Estado que define su régimen básico.",
+          "example": "La [Constitución] española fue aprobada en 1978."
+        },
+        {
+          "definition": "La [constitución] es la forma o estado físico de una persona o cosa.",
+          "example": "Tiene una [constitución] física muy fuerte."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "constitución: law vs physique"
+    },
+    {
+      "id": "constitución_000098_2",
+      "target": "A pesar de su edad, tiene una [constitución] física envidiable.",
+      "meanings": [
+        {
+          "definition": "La [Constitución] es la Ley fundamental de un Estado que define su régimen básico.",
+          "example": "La [Constitución] española fue aprobada en 1978."
+        },
+        {
+          "definition": "La [constitución] es la forma o estado físico de una persona o cosa.",
+          "example": "Tiene una [constitución] física muy fuerte."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "constitución: law vs physique"
+    },
+    {
+      "id": "agrupación_000099_1",
+      "target": "La [agrupación] de vecinos protestó por el ruido de las obras.",
+      "meanings": [
+        {
+          "definition": "Una [agrupación] es un conjunto de personas o cosas unidas con un fin común.",
+          "example": "La [agrupación] musical dio un concierto en la plaza."
+        },
+        {
+          "definition": "La [agrupación] es la acción de reunir elementos en grupos.",
+          "example": "La [agrupación] de los datos facilitó el estudio."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "agrupación: group vs action of grouping"
+    },
+    {
+      "id": "agrupación_000099_2",
+      "target": "La [agrupación] de los archivos por fecha facilita la búsqueda.",
+      "meanings": [
+        {
+          "definition": "Una [agrupación] es un conjunto de personas o cosas unidas con un fin común.",
+          "example": "La [agrupación] musical dio un concierto en la plaza."
+        },
+        {
+          "definition": "La [agrupación] es la acción de reunir elementos en grupos.",
+          "example": "La [agrupación] de los datos facilitó el estudio."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "agrupación: group vs action of grouping"
+    },
+    {
+      "id": "escuchar_000026_1",
+      "target": "Me gusta [escuchar] el sonido de la lluvia contra la ventana.",
+      "meanings": [
+        {
+          "definition": "[Escuchar] es prestar atención a lo que se oye",
+          "example": "Me gusta [escuchar] música mientras estudio."
+        },
+        {
+          "definition": "[Escuchar] es atender a un aviso o consejo",
+          "example": "Debes [escuchar] los consejos de tus padres."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "escuchar: listen vs heed"
+    },
+    {
+      "id": "escuchar_000026_2",
+      "target": "Nunca quieres [escuchar] mis consejos y así te va.",
+      "meanings": [
+        {
+          "definition": "[Escuchar] es prestar atención a lo que se oye",
+          "example": "Me gusta [escuchar] música mientras estudio."
+        },
+        {
+          "definition": "[Escuchar] es atender a un aviso o consejo",
+          "example": "Debes [escuchar] los consejos de tus padres."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "escuchar: listen vs heed"
+    },
+    {
+      "id": "velo_000101_1",
+      "target": "La novia se levantó el [velo] para besar al novio.",
+      "meanings": [
+        {
+          "definition": "El [velo] es un trozo de tela fina con que se cubre la cabeza o la cara.",
+          "example": "La novia llevaba un [velo] de encaje blanco."
+        },
+        {
+          "definition": "Un [velo] es una capa fina que cubre o dificulta la visión de algo.",
+          "example": "Un [velo] de tristeza cubrió su mirada."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "velo: fabric vs mist/abstract"
+    },
+    {
+      "id": "velo_000101_2",
+      "target": "Un [velo] de misterio rodea la desaparición del barco.",
+      "meanings": [
+        {
+          "definition": "El [velo] es un trozo de tela fina con que se cubre la cabeza o la cara.",
+          "example": "La novia llevaba un [velo] de encaje blanco."
+        },
+        {
+          "definition": "Un [velo] es una capa fina que cubre o dificulta la visión de algo.",
+          "example": "Un [velo] de tristeza cubrió su mirada."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "velo: fabric vs mist/abstract"
+    },
+    {
+      "id": "salado_000159_1",
+      "target": "El guiso está muy [salado], se te fue la mano con la sal.",
+      "meanings": [
+        {
+          "definition": "[Salado] significa que tiene demasiada sal o sabor a sal",
+          "example": "La sopa está demasiado [salada], no puedo comerla."
+        },
+        {
+          "definition": "[Salado] significa que tiene gracia o es agudo",
+          "example": "Tu primo es muy [salado], siempre nos hace reír a todos."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "salado: salty vs funny"
+    },
+    {
+      "id": "salado_000159_2",
+      "target": "Es un niño muy [salado], siempre tiene una respuesta graciosa.",
+      "meanings": [
+        {
+          "definition": "[Salado] significa que tiene demasiada sal o sabor a sal",
+          "example": "La sopa está demasiado [salada], no puedo comerla."
+        },
+        {
+          "definition": "[Salado] significa que tiene gracia o es agudo",
+          "example": "Tu primo es muy [salado], siempre nos hace reír a todos."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "salado: salty vs funny"
+    },
+    {
+      "id": "culminar_000027_1",
+      "target": "La obra va a [culminar] con la colocación de la cúpula.",
+      "meanings": [
+        {
+          "definition": "[Culminar] es llegar al punto más alto o finalizar algo con éxito",
+          "example": "El festival [culminará] con un gran espectáculo de fuegos artificiales."
+        },
+        {
+          "definition": "[Culminar] es llegar a la cima de una elevación",
+          "example": "Tras cinco horas de ascenso, logramos [culminar] la montaña."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "culminar: finish vs reach summit"
+    },
+    {
+      "id": "culminar_000027_2",
+      "target": "Los alpinistas lograron [culminar] el K2 tras semanas de esfuerzo.",
+      "meanings": [
+        {
+          "definition": "[Culminar] es llegar al punto más alto o finalizar algo con éxito",
+          "example": "El festival [culminará] con un gran espectáculo de fuegos artificiales."
+        },
+        {
+          "definition": "[Culminar] es llegar a la cima de una elevación",
+          "example": "Tras cinco horas de ascenso, logramos [culminar] la montaña."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "culminar: finish vs reach summit"
+    },
+    {
+      "id": "inconveniente_000104_1",
+      "target": "Si no tienes [inconveniente], prefiero reunirme mañana.",
+      "meanings": [
+        {
+          "definition": "Un [inconveniente] es un obstáculo o problema que dificulta algo.",
+          "example": "No veo ningún [inconveniente] en cambiar la fecha."
+        },
+        {
+          "definition": "Un [inconveniente] es una falta de ventaja o utilidad de algo.",
+          "example": "La distancia es el principal [inconveniente] de esta casa."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "inconveniente: problem vs disadvantage"
+    },
+    {
+      "id": "inconveniente_000104_2",
+      "target": "El principal [inconveniente] de este piso es el ruido de la calle.",
+      "meanings": [
+        {
+          "definition": "Un [inconveniente] es un obstáculo o problema que dificulta algo.",
+          "example": "No veo ningún [inconveniente] en cambiar la fecha."
+        },
+        {
+          "definition": "Un [inconveniente] es una falta de ventaja o utilidad de algo.",
+          "example": "La distancia es el principal [inconveniente] de esta casa."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "inconveniente: problem vs disadvantage"
+    },
+    {
+      "id": "extrañar_000029_1",
+      "target": "Es normal [extrañar] a los amigos cuando te mudas a otro país.",
+      "meanings": [
+        {
+          "definition": "[Extrañar] es sentir la falta de alguien o algo",
+          "example": "[Extraño] mucho a mi familia cuando estoy de viaje."
+        },
+        {
+          "definition": "[Extrañar] es causar sorpresa o admiración por algo raro",
+          "example": "Me [extraña] que no haya llamado todavía."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "extrañar: miss vs surprise"
+    },
+    {
+      "id": "extrañar_000029_2",
+      "target": "Me [extraña] mucho que no haya venido a la fiesta.",
+      "meanings": [
+        {
+          "definition": "[Extrañar] es sentir la falta de alguien o algo",
+          "example": "[Extraño] mucho a mi familia cuando estoy de viaje."
+        },
+        {
+          "definition": "[Extrañar] es causar sorpresa o admiración por algo raro",
+          "example": "Me [extraña] que no haya llamado todavía."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "extrañar: miss vs surprise"
+    },
+    {
+      "id": "bueno_000160_1",
+      "target": "Es un hombre [bueno] que siempre ayuda a los demás.",
+      "meanings": [
+        {
+          "definition": "[Bueno] significa que tiene bondad, calidad o es útil",
+          "example": "Es un [buen] hombre, siempre ayuda a sus vecinos."
+        },
+        {
+          "definition": "[Bueno] significa que tiene buen sabor o es físicamente atractivo",
+          "example": "¡Qué [bueno] está este café!"
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "bueno: good vs tasty/hot"
+    },
+    {
+      "id": "bueno_000160_2",
+      "target": "¡Qué [bueno] está este pastel de chocolate!",
+      "meanings": [
+        {
+          "definition": "[Bueno] significa que tiene bondad, calidad o es útil",
+          "example": "Es un [buen] hombre, siempre ayuda a sus vecinos."
+        },
+        {
+          "definition": "[Bueno] significa que tiene buen sabor o es físicamente atractivo",
+          "example": "¡Qué [bueno] está este café!"
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "bueno: good vs tasty/hot"
+    },
+    {
+      "id": "infante_000108_1",
+      "target": "La tasa de mortalidad de los [infantes] ha disminuido drásticamente.",
+      "meanings": [
+        {
+          "definition": "Un [infante] es un niño pequeño, generalmente que aún no habla.",
+          "example": "La salud de los [infantes] es prioridad en el hospital."
+        },
+        {
+          "definition": "El [infante] es un título de los hijos del rey de España que no son herederos.",
+          "example": "El [infante] don Juan Carlos nació en Roma."
+        },
+        {
+          "definition": "Un [infante] es un soldado que sirve en la infantería.",
+          "example": "Los [infantes] avanzaron por el campo de batalla."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "infante: child vs prince vs soldier"
+    },
+    {
+      "id": "infante_000108_2",
+      "target": "El [infante] don Felipe asistió al acto oficial.",
+      "meanings": [
+        {
+          "definition": "Un [infante] es un niño pequeño, generalmente que aún no habla.",
+          "example": "La salud de los [infantes] es prioridad en el hospital."
+        },
+        {
+          "definition": "El [infante] es un título de los hijos del rey de España que no son herederos.",
+          "example": "El [infante] don Juan Carlos nació en Roma."
+        },
+        {
+          "definition": "Un [infante] es un soldado que sirve en la infantería.",
+          "example": "Los [infantes] avanzaron por el campo de batalla."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "infante: child vs prince vs soldier"
+    },
+    {
+      "id": "infante_000108_3",
+      "target": "Los [infantes] de marina desembarcaron en la playa al amanecer.",
+      "meanings": [
+        {
+          "definition": "Un [infante] es un niño pequeño, generalmente que aún no habla.",
+          "example": "La salud de los [infantes] es prioridad en el hospital."
+        },
+        {
+          "definition": "El [infante] es un título de los hijos del rey de España que no son herederos.",
+          "example": "El [infante] don Juan Carlos nació en Roma."
+        },
+        {
+          "definition": "Un [infante] es un soldado que sirve en la infantería.",
+          "example": "Los [infantes] avanzaron por el campo de batalla."
+        }
+      ],
+      "correct_meaning_indices": [
+        2
+      ],
+      "notes": "infante: child vs prince vs soldier"
+    },
+    {
+      "id": "amanecer_000030_1",
+      "target": "En verano suele [amanecer] antes de las seis de la mañana.",
+      "meanings": [
+        {
+          "definition": "[Amanecer] es empezar a aparecer la luz del día",
+          "example": "Mañana va a [amanecer] a las seis de la mañana."
+        },
+        {
+          "definition": "[Amanecer] es estar en un lugar o estado al empezar el día",
+          "example": "[Amanecí] con un dolor de cabeza terrible."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "amanecer: dawn vs wake up state"
+    },
+    {
+      "id": "amanecer_000030_2",
+      "target": "[Amanecí] con un dolor de garganta muy fuerte.",
+      "meanings": [
+        {
+          "definition": "[Amanecer] es empezar a aparecer la luz del día",
+          "example": "Mañana va a [amanecer] a las seis de la mañana."
+        },
+        {
+          "definition": "[Amanecer] es estar en un lugar o estado al empezar el día",
+          "example": "[Amanecí] con un dolor de cabeza terrible."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "amanecer: dawn vs wake up state"
+    },
+    {
+      "id": "fosa_000109_1",
+      "target": "Los arqueólogos descubrieron una antigua [fosa] común.",
+      "meanings": [
+        {
+          "definition": "Una [fosa] es una excavación en la tierra para enterrar uno o más cadáveres.",
+          "example": "Encontraron una [fosa] común de la época de la guerra."
+        },
+        {
+          "definition": "Una [fosa] es una cavidad o conducto en el cuerpo humano.",
+          "example": "Tiene una obstrucción en las [fosas] nasales."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "fosa: grave vs cavity"
+    },
+    {
+      "id": "fosa_000109_2",
+      "target": "El aire entra por las [fosas] nasales y llega a los pulmones.",
+      "meanings": [
+        {
+          "definition": "Una [fosa] es una excavación en la tierra para enterrar uno o más cadáveres.",
+          "example": "Encontraron una [fosa] común de la época de la guerra."
+        },
+        {
+          "definition": "Una [fosa] es una cavidad o conducto en el cuerpo humano.",
+          "example": "Tiene una obstrucción en las [fosas] nasales."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "fosa: grave vs cavity"
+    },
+    {
+      "id": "asedio_000110_1",
+      "target": "La ciudad resistió el [asedio] enemigo durante seis meses.",
+      "meanings": [
+        {
+          "definition": "El [asedio] es la acción de rodear un lugar con fuerzas militares para rendirlo.",
+          "example": "El [asedio] de la ciudad duró tres meses."
+        },
+        {
+          "definition": "El [asedio] es una importunación o acoso constante a una persona.",
+          "example": "El actor se quejó del [asedio] de los periodistas."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "asedio: siege vs harassment"
+    },
+    {
+      "id": "asedio_000110_2",
+      "target": "No soporto el [asedio] de los vendedores telefónicos a todas horas.",
+      "meanings": [
+        {
+          "definition": "El [asedio] es la acción de rodear un lugar con fuerzas militares para rendirlo.",
+          "example": "El [asedio] de la ciudad duró tres meses."
+        },
+        {
+          "definition": "El [asedio] es una importunación o acoso constante a una persona.",
+          "example": "El actor se quejó del [asedio] de los periodistas."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "asedio: siege vs harassment"
+    },
+    {
+      "id": "aproximar_000031_1",
+      "target": "Por favor, [aproxima] la silla a la mesa.",
+      "meanings": [
+        {
+          "definition": "[Aproximar] es poner algo o a alguien cerca de otro",
+          "example": "[Aproxima] la silla a la mesa para comer mejor."
+        },
+        {
+          "definition": "[Aproximarse] es acercarse en el tiempo o espacio",
+          "example": "Se [aproxima] la fecha del examen final."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "aproximar: move closer vs approach"
+    },
+    {
+      "id": "aproximar_000031_2",
+      "target": "Una tormenta se [aproxima] desde el oeste.",
+      "meanings": [
+        {
+          "definition": "[Aproximar] es poner algo o a alguien cerca de otro",
+          "example": "[Aproxima] la silla a la mesa para comer mejor."
+        },
+        {
+          "definition": "[Aproximarse] es acercarse en el tiempo o espacio",
+          "example": "Se [aproxima] la fecha del examen final."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "aproximar: move closer vs approach"
+    },
+    {
+      "id": "hacienda_000111_1",
+      "target": "Todos los ciudadanos deben declarar sus ingresos a [Hacienda].",
+      "meanings": [
+        {
+          "definition": "[Hacienda] es el departamento del gobierno encargado de los impuestos y finanzas.",
+          "example": "Tengo que presentar la declaración a [Hacienda]."
+        },
+        {
+          "definition": "Una [hacienda] es una finca agrícola o ganadera de gran extensión.",
+          "example": "Su familia posee una [hacienda] de café en Colombia."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "hacienda: tax authority vs farm"
+    },
+    {
+      "id": "hacienda_000111_2",
+      "target": "Pasó el verano en la [hacienda] de sus abuelos montando a caballo.",
+      "meanings": [
+        {
+          "definition": "[Hacienda] es el departamento del gobierno encargado de los impuestos y finanzas.",
+          "example": "Tengo que presentar la declaración a [Hacienda]."
+        },
+        {
+          "definition": "Una [hacienda] es una finca agrícola o ganadera de gran extensión.",
+          "example": "Su familia posee una [hacienda] de café en Colombia."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "hacienda: tax authority vs farm"
+    },
+    {
+      "id": "gallo_000112_1",
+      "target": "El [gallo] nos despierta cada mañana con su canto.",
+      "meanings": [
+        {
+          "definition": "El [gallo] es un ave de corral, macho de la gallina.",
+          "example": "El [gallo] canta al amanecer."
+        },
+        {
+          "definition": "Un [gallo] es un error o nota falsa al cantar o hablar.",
+          "example": "Se le escapó un [gallo] en mitad de la canción."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "gallo: rooster vs voice crack"
+    },
+    {
+      "id": "gallo_000112_2",
+      "target": "Al intentar llegar a la nota alta, al cantante le salió un [gallo].",
+      "meanings": [
+        {
+          "definition": "El [gallo] es un ave de corral, macho de la gallina.",
+          "example": "El [gallo] canta al amanecer."
+        },
+        {
+          "definition": "Un [gallo] es un error o nota falsa al cantar o hablar.",
+          "example": "Se le escapó un [gallo] en mitad de la canción."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "gallo: rooster vs voice crack"
+    },
+    {
+      "id": "erigir_000032_1",
+      "target": "Decidieron [erigir] un monumento a las víctimas del terremoto.",
+      "meanings": [
+        {
+          "definition": "[Erigir] es levantar o construir un monumento o edificio",
+          "example": "[Erigieron] una estatua en honor al libertador."
+        },
+        {
+          "definition": "[Erigir] es fundar o instituir una organización o cargo",
+          "example": "La pequeña villa se [erigió] en municipio independiente."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "erigir: erect monument vs establish"
+    },
+    {
+      "id": "erigir_000032_2",
+      "target": "La ciudad se [erigió] en capital del reino en el siglo XV.",
+      "meanings": [
+        {
+          "definition": "[Erigir] es levantar o construir un monumento o edificio",
+          "example": "[Erigieron] una estatua en honor al libertador."
+        },
+        {
+          "definition": "[Erigir] es fundar o instituir una organización o cargo",
+          "example": "La pequeña villa se [erigió] en municipio independiente."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "erigir: erect monument vs establish"
+    },
+    {
+      "id": "preguntar_000033_1",
+      "target": "Levanta la mano si quieres [preguntar] algo al profesor.",
+      "meanings": [
+        {
+          "definition": "[Preguntar] es hacer una cuestión para saber algo",
+          "example": "¿Puedo [preguntarte] algo sobre el examen?"
+        },
+        {
+          "definition": "[Preguntar] por alguien es buscar a alguien o interesarse por su salud",
+          "example": "Tu tía llamó para [preguntar] por ti."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "preguntar: ask question vs ask after"
+    },
+    {
+      "id": "preguntar_000033_2",
+      "target": "Llamé al hospital para [preguntar] por el estado del paciente.",
+      "meanings": [
+        {
+          "definition": "[Preguntar] es hacer una cuestión para saber algo",
+          "example": "¿Puedo [preguntarte] algo sobre el examen?"
+        },
+        {
+          "definition": "[Preguntar] por alguien es buscar a alguien o interesarse por su salud",
+          "example": "Tu tía llamó para [preguntar] por ti."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "preguntar: ask question vs ask after"
+    },
+    {
+      "id": "tregua_000113_1",
+      "target": "Los combatientes acordaron una [tregua] de 24 horas para evacuar a los heridos.",
+      "meanings": [
+        {
+          "definition": "Una [tregua] es una suspensión temporal de hostilidades en una guerra o conflicto.",
+          "example": "Ambos ejércitos firmaron una [tregua] por Navidad."
+        },
+        {
+          "definition": "Una [tregua] es un descanso o alivio en un trabajo o dolor.",
+          "example": "El trabajo no me da [tregua] esta semana."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "tregua: truce vs respite"
+    },
+    {
+      "id": "tregua_000113_2",
+      "target": "El dolor de muelas no me da [tregua], necesito ir al dentista.",
+      "meanings": [
+        {
+          "definition": "Una [tregua] es una suspensión temporal de hostilidades en una guerra o conflicto.",
+          "example": "Ambos ejércitos firmaron una [tregua] por Navidad."
+        },
+        {
+          "definition": "Una [tregua] es un descanso o alivio en un trabajo o dolor.",
+          "example": "El trabajo no me da [tregua] esta semana."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "tregua: truce vs respite"
+    },
+    {
+      "id": "catalán_000115_1",
+      "target": "El [catalán] es una lengua cooficial en Cataluña.",
+      "meanings": [
+        {
+          "definition": "El [catalán] es un idioma romance hablado en Cataluña y otras regiones.",
+          "example": "Ella habla [catalán] y español con fluidez."
+        },
+        {
+          "definition": "Un [catalán] es una persona natural de Cataluña.",
+          "example": "Mi vecino es [catalán], nació en Barcelona."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "catalán: language vs person"
+    },
+    {
+      "id": "catalán_000115_2",
+      "target": "Joan es [catalán], de un pueblo cerca de Girona.",
+      "meanings": [
+        {
+          "definition": "El [catalán] es un idioma romance hablado en Cataluña y otras regiones.",
+          "example": "Ella habla [catalán] y español con fluidez."
+        },
+        {
+          "definition": "Un [catalán] es una persona natural de Cataluña.",
+          "example": "Mi vecino es [catalán], nació en Barcelona."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "catalán: language vs person"
+    },
+    {
+      "id": "tomar_000034_1",
+      "target": "[Toma] el libro que está sobre la mesa.",
+      "meanings": [
+        {
+          "definition": "[Tomar] es agarrar o asir algo con la mano",
+          "example": "[Toma] mi mano para cruzar la calle."
+        },
+        {
+          "definition": "[Tomar] es comer o beber algo",
+          "example": "Vamos a [tomar] un café después de clase."
+        },
+        {
+          "definition": "[Tomar] es utilizar un medio de transporte",
+          "example": "Tengo que [tomar] el metro para ir al trabajo."
+        },
+        {
+          "definition": "[Tomar] es adoptar una decisión o actitud",
+          "example": "Es hora de [tomar] una decisión importante."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "tomar: take/grab vs drink vs transport vs decision"
+    },
+    {
+      "id": "tomar_000034_2",
+      "target": "No deberías [tomar] tanto café, te pondrá nervioso.",
+      "meanings": [
+        {
+          "definition": "[Tomar] es agarrar o asir algo con la mano",
+          "example": "[Toma] mi mano para cruzar la calle."
+        },
+        {
+          "definition": "[Tomar] es comer o beber algo",
+          "example": "Vamos a [tomar] un café después de clase."
+        },
+        {
+          "definition": "[Tomar] es utilizar un medio de transporte",
+          "example": "Tengo que [tomar] el metro para ir al trabajo."
+        },
+        {
+          "definition": "[Tomar] es adoptar una decisión o actitud",
+          "example": "Es hora de [tomar] una decisión importante."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "tomar: take/grab vs drink vs transport vs decision"
+    },
+    {
+      "id": "tomar_000034_3",
+      "target": "Para llegar al centro, tienes que [tomar] el autobús número 5.",
+      "meanings": [
+        {
+          "definition": "[Tomar] es agarrar o asir algo con la mano",
+          "example": "[Toma] mi mano para cruzar la calle."
+        },
+        {
+          "definition": "[Tomar] es comer o beber algo",
+          "example": "Vamos a [tomar] un café después de clase."
+        },
+        {
+          "definition": "[Tomar] es utilizar un medio de transporte",
+          "example": "Tengo que [tomar] el metro para ir al trabajo."
+        },
+        {
+          "definition": "[Tomar] es adoptar una decisión o actitud",
+          "example": "Es hora de [tomar] una decisión importante."
+        }
+      ],
+      "correct_meaning_indices": [
+        2
+      ],
+      "notes": "tomar: take/grab vs drink vs transport vs decision"
+    },
+    {
+      "id": "tomar_000034_4",
+      "target": "Es difícil [tomar] una decisión cuando hay tanto en juego.",
+      "meanings": [
+        {
+          "definition": "[Tomar] es agarrar o asir algo con la mano",
+          "example": "[Toma] mi mano para cruzar la calle."
+        },
+        {
+          "definition": "[Tomar] es comer o beber algo",
+          "example": "Vamos a [tomar] un café después de clase."
+        },
+        {
+          "definition": "[Tomar] es utilizar un medio de transporte",
+          "example": "Tengo que [tomar] el metro para ir al trabajo."
+        },
+        {
+          "definition": "[Tomar] es adoptar una decisión o actitud",
+          "example": "Es hora de [tomar] una decisión importante."
+        }
+      ],
+      "correct_meaning_indices": [
+        3
+      ],
+      "notes": "tomar: take/grab vs drink vs transport vs decision"
+    },
+    {
+      "id": "nominación_000117_1",
+      "target": "Su interpretación le valió una [nominación] al premio Goya.",
+      "meanings": [
+        {
+          "definition": "Una [nominación] es una propuesta de una persona para un premio o cargo.",
+          "example": "La película recibió cinco [nominaciones] a los Oscar."
+        },
+        {
+          "definition": "La [nominación] es la acción de dar nombre a algo.",
+          "example": "La [nominación] de las nuevas calles fue discutida en el ayuntamiento."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "nominación: award nomination vs naming"
+    },
+    {
+      "id": "nominación_000117_2",
+      "target": "La [nominación] de las calles del nuevo barrio generó debate.",
+      "meanings": [
+        {
+          "definition": "Una [nominación] es una propuesta de una persona para un premio o cargo.",
+          "example": "La película recibió cinco [nominaciones] a los Oscar."
+        },
+        {
+          "definition": "La [nominación] es la acción de dar nombre a algo.",
+          "example": "La [nominación] de las nuevas calles fue discutida en el ayuntamiento."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "nominación: award nomination vs naming"
+    },
+    {
+      "id": "repuesto_000119_1",
+      "target": "Tuvimos que pedir el [repuesto] a la fábrica porque no lo tenían en el taller.",
+      "meanings": [
+        {
+          "definition": "Un [repuesto] es una pieza que sirve para sustituir a otra igual en una máquina",
+          "example": "Es difícil encontrar [repuestos] para este modelo antiguo de coche."
+        },
+        {
+          "definition": "Un [repuesto] es una reserva de algo para casos de necesidad",
+          "example": "Tenemos un [repuesto] de víveres en el sótano."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "repuesto: spare part vs stock"
+    },
+    {
+      "id": "repuesto_000119_2",
+      "target": "Siempre guardo un [repuesto] de pilas por si se va la luz.",
+      "meanings": [
+        {
+          "definition": "Un [repuesto] es una pieza que sirve para sustituir a otra igual en una máquina",
+          "example": "Es difícil encontrar [repuestos] para este modelo antiguo de coche."
+        },
+        {
+          "definition": "Un [repuesto] es una reserva de algo para casos de necesidad",
+          "example": "Tenemos un [repuesto] de víveres en el sótano."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "repuesto: spare part vs stock"
+    },
+    {
+      "id": "maquinaria_000120_1",
+      "target": "La [maquinaria] textil ha evolucionado mucho en los últimos años.",
+      "meanings": [
+        {
+          "definition": "La [maquinaria] es un conjunto de máquinas que se aplican a un fin determinado",
+          "example": "La fábrica ha renovado toda su [maquinaria] pesada."
+        },
+        {
+          "definition": "La [maquinaria] es un mecanismo que hace funcionar un aparato",
+          "example": "La [maquinaria] del reloj es muy compleja."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "maquinaria: machines vs mechanism"
+    },
+    {
+      "id": "maquinaria_000120_2",
+      "target": "La [maquinaria] de este reloj suizo es una obra de arte.",
+      "meanings": [
+        {
+          "definition": "La [maquinaria] es un conjunto de máquinas que se aplican a un fin determinado",
+          "example": "La fábrica ha renovado toda su [maquinaria] pesada."
+        },
+        {
+          "definition": "La [maquinaria] es un mecanismo que hace funcionar un aparato",
+          "example": "La [maquinaria] del reloj es muy compleja."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "maquinaria: machines vs mechanism"
+    },
+    {
+      "id": "esperma_000121_1",
+      "target": "La calidad del [esperma] puede verse afectada por el estrés.",
+      "meanings": [
+        {
+          "definition": "El [esperma] es un líquido biológico masculino que contiene los espermatozoides",
+          "example": "El análisis de [esperma] confirmó que es fértil."
+        },
+        {
+          "definition": "La [esperma] es la grasa de la ballena o cera de las velas",
+          "example": "La [esperma] de la vela goteaba sobre la mesa."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "esperma: sperm vs wax"
+    },
+    {
+      "id": "esperma_000121_2",
+      "target": "Antiguamente se usaba [esperma] de ballena para fabricar velas.",
+      "meanings": [
+        {
+          "definition": "El [esperma] es un líquido biológico masculino que contiene los espermatozoides",
+          "example": "El análisis de [esperma] confirmó que es fértil."
+        },
+        {
+          "definition": "La [esperma] es la grasa de la ballena o cera de las velas",
+          "example": "La [esperma] de la vela goteaba sobre la mesa."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "esperma: sperm vs wax"
+    },
+    {
+      "id": "rebelar_000035_1",
+      "target": "Los adolescentes suelen [rebelarse] contra la autoridad de sus padres.",
+      "meanings": [
+        {
+          "definition": "[Rebelarse] es oponer resistencia a la autoridad o mandato",
+          "example": "El pueblo se [rebeló] contra el dictador."
+        },
+        {
+          "definition": "[Rebelar] es excitar a alguien a la rebelión",
+          "example": "Sus palabras [rebelaron] a los trabajadores."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "rebelar: rebel vs incite"
+    },
+    {
+      "id": "rebelar_000035_2",
+      "target": "El discurso del líder consiguió [rebelar] a la multitud contra el gobierno.",
+      "meanings": [
+        {
+          "definition": "[Rebelarse] es oponer resistencia a la autoridad o mandato",
+          "example": "El pueblo se [rebeló] contra el dictador."
+        },
+        {
+          "definition": "[Rebelar] es excitar a alguien a la rebelión",
+          "example": "Sus palabras [rebelaron] a los trabajadores."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "rebelar: rebel vs incite"
+    },
+    {
+      "id": "balance_000122_1",
+      "target": "El [balance] económico de la empresa es muy positivo este trimestre.",
+      "meanings": [
+        {
+          "definition": "El [balance] es un estudio que resume los resultados de una actividad en un tiempo",
+          "example": "El [balance] del año muestra beneficios positivos."
+        },
+        {
+          "definition": "El [balance] es un movimiento de un cuerpo que se inclina a un lado y a otro",
+          "example": "El suave [balance] del barco me marea."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "balance: financial vs swaying"
+    },
+    {
+      "id": "balance_000122_2",
+      "target": "El suave [balance] de la hamaca me ayudó a dormirme.",
+      "meanings": [
+        {
+          "definition": "El [balance] es un estudio que resume los resultados de una actividad en un tiempo",
+          "example": "El [balance] del año muestra beneficios positivos."
+        },
+        {
+          "definition": "El [balance] es un movimiento de un cuerpo que se inclina a un lado y a otro",
+          "example": "El suave [balance] del barco me marea."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "balance: financial vs swaying"
+    },
+    {
+      "id": "proposición_000123_1",
+      "target": "Aceptó la [proposición] de matrimonio con gran alegría.",
+      "meanings": [
+        {
+          "definition": "Una [proposición] es una exposición de una idea o plan para que se acepte",
+          "example": "Me hizo una [proposición] de negocios muy interesante."
+        },
+        {
+          "definition": "Una [proposición] es un enunciado que puede ser verdadero o falso en lógica",
+          "example": "En lógica, una [proposición] es una unidad de razonamiento."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "proposición: proposal vs proposition"
+    },
+    {
+      "id": "proposición_000123_2",
+      "target": "En lógica, una [proposición] debe ser verdadera o falsa.",
+      "meanings": [
+        {
+          "definition": "Una [proposición] es una exposición de una idea o plan para que se acepte",
+          "example": "Me hizo una [proposición] de negocios muy interesante."
+        },
+        {
+          "definition": "Una [proposición] es un enunciado que puede ser verdadero o falso en lógica",
+          "example": "En lógica, una [proposición] es una unidad de razonamiento."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "proposición: proposal vs proposition"
+    },
+    {
+      "id": "gustar_000036_1",
+      "target": "A mi hermana le [gusta] mucho la música clásica.",
+      "meanings": [
+        {
+          "definition": "[Gustar] es causar placer o agrado a alguien",
+          "example": "Me [gusta] mucho viajar por Europa."
+        },
+        {
+          "definition": "[Gustar] es probar una cosa por medio del gusto",
+          "example": "[Gustó] el vino antes de servirlo."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "gustar: like/please vs taste"
+    },
+    {
+      "id": "gustar_000036_2",
+      "target": "El chef invitó a los comensales a [gustar] el nuevo plato.",
+      "meanings": [
+        {
+          "definition": "[Gustar] es causar placer o agrado a alguien",
+          "example": "Me [gusta] mucho viajar por Europa."
+        },
+        {
+          "definition": "[Gustar] es probar una cosa por medio del gusto",
+          "example": "[Gustó] el vino antes de servirlo."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "gustar: like/please vs taste"
+    },
+    {
+      "id": "describir_000037_1",
+      "target": "La testigo pudo [describir] al ladrón con gran detalle.",
+      "meanings": [
+        {
+          "definition": "[Describir] es explicar cómo es alguien o algo por medio del lenguaje",
+          "example": "¿Puedes [describir] al hombre que viste?"
+        },
+        {
+          "definition": "[Describir] es trazar una línea o figura en el espacio",
+          "example": "El avión [describió] un círculo sobre la ciudad."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "describir: describe verbally vs trace path"
+    },
+    {
+      "id": "describir_000037_2",
+      "target": "El satélite [describe] una órbita elíptica alrededor de la Tierra.",
+      "meanings": [
+        {
+          "definition": "[Describir] es explicar cómo es alguien o algo por medio del lenguaje",
+          "example": "¿Puedes [describir] al hombre que viste?"
+        },
+        {
+          "definition": "[Describir] es trazar una línea o figura en el espacio",
+          "example": "El avión [describió] un círculo sobre la ciudad."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "describir: describe verbally vs trace path"
+    },
+    {
+      "id": "peón_000127_1",
+      "target": "Empezó trabajando como [peón] de albañil y ahora es el encargado.",
+      "meanings": [
+        {
+          "definition": "Un [peón] es un obrero que realiza trabajos que no requieren especialización",
+          "example": "Trabajó como [peón] en la construcción de la carretera."
+        },
+        {
+          "definition": "Un [peón] es una pieza de menos valor en el juego del ajedrez",
+          "example": "Perdió un [peón] al comienzo de la partida."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "peón: laborer vs pawn"
+    },
+    {
+      "id": "peón_000127_2",
+      "target": "En el ajedrez, el [peón] solo puede avanzar hacia adelante.",
+      "meanings": [
+        {
+          "definition": "Un [peón] es un obrero que realiza trabajos que no requieren especialización",
+          "example": "Trabajó como [peón] en la construcción de la carretera."
+        },
+        {
+          "definition": "Un [peón] es una pieza de menos valor en el juego del ajedrez",
+          "example": "Perdió un [peón] al comienzo de la partida."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "peón: laborer vs pawn"
+    },
+    {
+      "id": "hermana_000129_1",
+      "target": "Tengo una [hermana] mayor que vive en Londres.",
+      "meanings": [
+        {
+          "definition": "Una [hermana] es una persona nacida de los mismos padres respecto a otra",
+          "example": "Mi [hermana] pequeña empieza la universidad este año."
+        },
+        {
+          "definition": "Una [hermana] es una mujer que pertenece a una comunidad religiosa",
+          "example": "La [hermana] Teresa trabaja en el hospital de la misión."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "hermana: sister vs nun"
+    },
+    {
+      "id": "hermana_000129_2",
+      "target": "La [hermana] Lucía dedicó su vida a cuidar de los pobres.",
+      "meanings": [
+        {
+          "definition": "Una [hermana] es una persona nacida de los mismos padres respecto a otra",
+          "example": "Mi [hermana] pequeña empieza la universidad este año."
+        },
+        {
+          "definition": "Una [hermana] es una mujer que pertenece a una comunidad religiosa",
+          "example": "La [hermana] Teresa trabaja en el hospital de la misión."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "hermana: sister vs nun"
+    },
+    {
+      "id": "mayor_000174_1",
+      "target": "Este problema es [mayor] de lo que pensábamos al principio.",
+      "meanings": [
+        {
+          "definition": "[Mayor] significa que supera a otra cosa en tamaño, cantidad o importancia",
+          "example": "La demanda de este producto es [mayor] que la del año pasado."
+        },
+        {
+          "definition": "[Mayor] significa persona que tiene más edad que otra o que es de edad avanzada",
+          "example": "Mi hermano [mayor] vive en Madrid desde hace cinco años."
+        },
+        {
+          "definition": "[Mayor] significa que es el principal o más importante en una jerarquía",
+          "example": "Se necesita la aprobación del estado [mayor] para iniciar la operación."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "mayor: bigger vs older vs major"
+    },
+    {
+      "id": "mayor_000174_2",
+      "target": "Cuando seas [mayor] entenderás por qué te digo esto.",
+      "meanings": [
+        {
+          "definition": "[Mayor] significa que supera a otra cosa en tamaño, cantidad o importancia",
+          "example": "La demanda de este producto es [mayor] que la del año pasado."
+        },
+        {
+          "definition": "[Mayor] significa persona que tiene más edad que otra o que es de edad avanzada",
+          "example": "Mi hermano [mayor] vive en Madrid desde hace cinco años."
+        },
+        {
+          "definition": "[Mayor] significa que es el principal o más importante en una jerarquía",
+          "example": "Se necesita la aprobación del estado [mayor] para iniciar la operación."
+        }
+      ],
+      "correct_meaning_indices": [
+        1
+      ],
+      "notes": "mayor: bigger vs older vs major"
+    },
+    {
+      "id": "mayor_000174_3",
+      "target": "El estado [mayor] del ejército se reunió de urgencia.",
+      "meanings": [
+        {
+          "definition": "[Mayor] significa que supera a otra cosa en tamaño, cantidad o importancia",
+          "example": "La demanda de este producto es [mayor] que la del año pasado."
+        },
+        {
+          "definition": "[Mayor] significa persona que tiene más edad que otra o que es de edad avanzada",
+          "example": "Mi hermano [mayor] vive en Madrid desde hace cinco años."
+        },
+        {
+          "definition": "[Mayor] significa que es el principal o más importante en una jerarquía",
+          "example": "Se necesita la aprobación del estado [mayor] para iniciar la operación."
+        }
+      ],
+      "correct_meaning_indices": [
+        2
+      ],
+      "notes": "mayor: bigger vs older vs major"
     }
   ],
   "metadata": {
     "language": "es",
     "created": "2026-01-03",
-    "source": "Created for WSD test framework (not from experiments/)",
-    "total_cases": 5,
-    "description": "Test cases with both definitions and examples for each meaning"
+    "source": "Generated from translations_w_embeddings_and_topics.json + manual sentences",
+    "total_cases": 139,
+    "description": "Extended WSD test set"
   }
 }
