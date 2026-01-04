@@ -100,6 +100,11 @@ if __name__ == "__main__":
         "jactarse",
         "sobremesa",
         "madrugar",
+        "integral",
+        "sembrar",
+        "escaño",  # die wichtigste Bedeutung (Parlamentsitz) ist hier nicht vorhanden
+        # "fabricar",
+        # "aprobar",
     ]
 
     for word in test_words:

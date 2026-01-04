@@ -20,7 +20,7 @@ def test_spacy_wordnet():
         nlp.add_pipe("spacy_wordnet", after="lemmatizer")
 
     # Testwörter
-    test_words = ["medio", "perro", "comer", "grande"]
+    test_words = ["medio", "perro", "comer", "grande", "laberinto", "zorro"]
 
     for word in test_words:
         print(f"\n{'='*50}")
