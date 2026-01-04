@@ -96,43 +96,13 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
 - `tocar` (berühren): `"poner la mano sobre algo o alguien"`
 - `tocar` (Instrument): `"producir música con un instrumento"`
 
-### 3. Thematische Assoziationen (topics)
-- **Pflichtfeld**: Jede Bedeutung muss eine Liste von **12-18 thematischen Begriffen** enthalten
-- Die Begriffe beschreiben **Themenfelder und Kontexte**, in denen dieses Wort typischerweise vorkommt
-- **Sprache**: Spanisch (Substantive in Grundform)
-- **Zweck**: Ermöglicht das Clustering von Wörtern, die in ähnlichen Geschichten/Kontexten vorkommen
-
-**Was gehört in topics:**
-- **Themenfelder**: Übergeordnete Bereiche (z.B. `comercio`, `medicina`, `transporte`)
-- **Typische Objekte**: Konkrete Dinge, die oft im gleichen Kontext vorkommen
-- **Typische Orte**: Wo diese Handlung/dieses Ding vorkommt
-- **Typische Akteure**: Personen/Rollen, die damit zu tun haben
-- **Verwandte Handlungen**: Verben, die oft zusammen vorkommen
-- **Verwandte Konzepte**: Begriffe, die thematisch zusammengehören
-
-**Wichtige Regeln:**
-- Denke: "In welchen Geschichten/Situationen würde dieses Wort vorkommen?"
-- Wähle Begriffe auf verschiedenen Abstraktionsebenen (allgemein bis spezifisch)
-- Vermeide Synonyme des Wortes selbst
-- Bevorzuge konkrete, bildhafte Begriffe über abstrakte
-- Mische verschiedene Kategorien (Orte, Objekte, Personen, Handlungen)
-
-**Beispiele:**
-- `vender` (verkaufen): `["comercio", "dinero", "tienda", "producto", "cliente", "precio", "mercado", "vendedor", "comprar", "negocio", "oferta", "caja", "factura", "descuento", "inventario"]`
-- `coche` (Auto): `["transporte", "carretera", "gasolina", "viaje", "tráfico", "conductor", "aparcamiento", "motor", "rueda", "velocidad", "accidente", "taller", "permiso", "autopista", "pasajero"]`
-- `médico` (Arzt): `["salud", "hospital", "enfermedad", "paciente", "tratamiento", "consulta", "diagnóstico", "receta", "clínica", "emergencia", "síntoma", "cura", "bata", "estetoscopio", "cita"]`
-
-**Gutes Clustering-Beispiel:**
-- `vender` und `coche` teilen sich `comercio`, `cliente`, `precio` → Sie passen zusammen in einer Geschichte über Autoverkauf
-- `médico` und `enfermedad` teilen sich `salud`, `hospital`, `tratamiento` → Sie passen zusammen in einer Arztgeschichte
-
-### 4. Beispielsätze (example_es)
+### 3. Beispielsätze (example_es)
 - Verwende natürliche, alltägliche spanische Sätze
 - Der Beispielsatz muss die spezifische Bedeutung klar demonstrieren
 - Vermeide zu einfache oder zu komplexe Sätze
 - Der Kontext sollte eindeutig sein
 
-### 5. Structure-Feld
+### 4. Structure-Feld
 - **WICHTIG: Sei sehr sparsam mit Platzhaltern!** Verwende sie nur wenn unbedingt notwendig zum Verständnis
 - Die meisten Wörter brauchen KEINE Platzhalter - nur das Lemma reicht
 - Verwende Platzhalter NUR wenn sie grammatisch wichtig oder bedeutungsunterscheidend sind
@@ -198,7 +168,7 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
 
 **Kombination:** Mit Schrägstrich: `[algo / alguien]`
 
-### 6. Flags-Feld
+### 5. Flags-Feld
 - **Pflichtfeld**: Jede Bedeutung muss ein `flags` Array enthalten
 - Das flags-Array kann leer sein: `"flags": []`
 - Füge bei Bedarf Warnungen hinzu:
@@ -261,7 +231,7 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
 - `"flags": ["offensive", "regionalism:Argentinien"]` - Vulgär und argentinisch
 - `"flags": ["regionalism:Lateinamerika"]` - Allgemein lateinamerikanisch (wenn Land unbekannt)
 
-### 7. Übersetzungen (translations)
+### 6. Übersetzungen (translations)
 - Gib nur so viele deutsche Übersetzungen an, wie wirklich nötig und gleichwertig sind
 - Sortiere nach Häufigkeit und Natürlichkeit
 - **WICHTIG: Verwende hints sehr sparsam!** Integriere Informationen direkt in den Text, wann immer möglich
@@ -351,7 +321,7 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
   **h) Format bei mehreren Hints**
   - Wenn mehrere Informationen nötig sind, verwende das Format: "hint": "Kontext1 / Kontext2" (z. B. "Wetter / Front" oder "med. / Technik").
 
-### 8. Qualitätsstandards
+### 7. Qualitätsstandards
 - **Qualität über Quantität**: Weniger, präzise Übersetzungen sind besser als viele ähnliche
 - **Genauigkeit über Vollständigkeit**: Fokussiere auf die wichtigsten Bedeutungen
 - **Sparsamkeit bei hints**: Maximal 20-30% der Übersetzungen sollten hints haben
@@ -373,7 +343,6 @@ Gib ein JSON-Objekt mit folgendem Format zurück:
       "meanings": [
         {
           "definition_es": "...",
-          "topics": ["tema1", "tema2", "tema3", "..."],
           "structure": "...",
           "example_es": "...",
           "estimated_share": 0.4,

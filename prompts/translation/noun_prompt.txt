@@ -22,7 +22,6 @@
     "meanings": [
       {
         "definition_es": "ciudad principal donde está el gobierno de un país",
-        "topics": ["país", "gobierno", "política", "ciudad", "nación", "parlamento", "ministerio", "embajada", "centro", "administración", "turismo", "monumento", "historia", "poder", "sede"],
         "gender": "f",
         "example_es": "Madrid es la capital de España.",
         "estimated_share": 0.67,
@@ -31,7 +30,6 @@
       },
       {
         "definition_es": "dinero o recursos económicos disponibles para invertir",
-        "topics": ["economía", "inversión", "banco", "empresa", "negocio", "dinero", "finanzas", "bolsa", "acción", "beneficio", "préstamo", "riesgo", "interés", "fondo", "patrimonio"],
         "gender": "m",
         "example_es": "La empresa necesita más capital extranjero.",
         "estimated_share": 0.33,
@@ -47,7 +45,6 @@
     "meanings": [
       {
         "definition_es": "lista de platos y bebidas disponibles en un restaurante",
-        "topics": ["restaurante", "comida", "camarero", "plato", "bebida", "precio", "mesa", "cena", "almuerzo", "pedido", "cocina", "menú", "postre", "vino", "servicio"],
         "gender": "f",
         "example_es": "¿Me puede traer la carta, por favor?",
         "estimated_share": 0.58,
@@ -56,7 +53,6 @@
       },
       {
         "definition_es": "mensaje escrito que se envía a otra persona",
-        "topics": ["correo", "sobre", "sello", "buzón", "papel", "escribir", "enviar", "destinatario", "remitente", "dirección", "mensaje", "respuesta", "postal", "comunicación", "firma"],
         "gender": "f",
         "example_es": "Ayer escribí una carta a mi abuela.",
         "estimated_share": 0.29,
@@ -65,7 +61,6 @@
       },
       {
         "definition_es": "naipe usado para juegos de mesa",
-        "topics": ["juego", "baraja", "póker", "casino", "apuesta", "mesa", "ronda", "turno", "ganar", "perder", "suerte", "as", "rey", "partida", "jugador"],
         "gender": "f",
         "example_es": "Mis tíos juegan a las cartas todos los domingos.",
         "estimated_share": 0.13,
@@ -81,7 +76,6 @@
     "meanings": [
       {
         "definition_es": "parte superior de la cara entre las cejas y el pelo",
-        "topics": ["cara", "cabeza", "cuerpo", "fiebre", "temperatura", "sudor", "arruga", "piel", "gesto", "expresión", "ceño", "pelo", "salud", "dolor", "termómetro"],
         "gender": "f",
         "example_es": "El niño tiene fiebre, tócale la frente.",
         "estimated_share": 0.72,
@@ -90,7 +84,6 @@
       },
       {
         "definition_es": "zona donde se enfrentan fuerzas opuestas o masa de aire",
-        "topics": ["guerra", "ejército", "soldado", "batalla", "meteorología", "tiempo", "tormenta", "lluvia", "frío", "calor", "conflicto", "línea", "avance", "defensa", "clima"],
         "gender": "m",
         "example_es": "Un frente frío llegará mañana por el norte.",
         "estimated_share": 0.28,

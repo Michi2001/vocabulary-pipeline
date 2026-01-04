@@ -31,7 +31,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
     "meanings": [
       {
         "definition_es": "indica la causa o razón de algo",
-        "topics": ["causa", "razón", "motivo", "explicación", "consecuencia", "problema", "circunstancia", "situación", "evento", "decisión", "justificación", "argumento", "fundamento", "origen", "factor"],
         "structure": "por [motivo]",
         "example_es": "No pudimos salir a pasear por la lluvia.",
         "estimated_share": 0.4,
@@ -40,7 +39,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       },
       {
         "definition_es": "indica movimiento a través de un espacio",
-        "topics": ["movimiento", "paso", "camino", "entrada", "salida", "ventana", "puerta", "calle", "pasillo", "recorrido", "trayecto", "atravesar", "cruzar", "tránsito", "ruta"],
         "structure": "por [lugar]",
         "example_es": "El ladrón entró en la casa por la ventana.",
         "estimated_share": 0.3,
@@ -49,7 +47,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       },
       {
         "definition_es": "indica intercambio o precio",
-        "topics": ["intercambio", "precio", "valor", "comercio", "trueque", "compra", "venta", "negociación", "oferta", "dinero", "equivalencia", "transacción", "cambio", "pago", "costo"],
         "structure": "por [precio / intercambio]",
         "example_es": "Te cambio mi bocadillo por tu manzana.",
         "estimated_share": 0.1,
@@ -58,7 +55,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       },
       {
         "definition_es": "indica el agente en construcciones pasivas",
-        "topics": ["agente", "autor", "creador", "responsable", "ejecutor", "artista", "escritor", "constructor", "inventor", "diseñador", "acción", "obra", "producción", "realización", "autoría"],
         "structure": "[participio] por [alguien]",
         "example_es": "Este libro fue escrito por García Márquez.",
         "estimated_share": 0.2,
@@ -74,7 +70,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
     "meanings": [
       {
         "definition_es": "indica finalidad o propósito de una acción",
-        "topics": ["propósito", "objetivo", "meta", "fin", "intención", "razón", "utilidad", "función", "necesidad", "motivo", "plan", "estrategia", "medio", "herramienta", "solución"],
         "structure": "para [infinitivo]",
         "example_es": "Necesito gafas nuevas para ver mejor de lejos.",
         "estimated_share": 0.4,
@@ -83,7 +78,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       },
       {
         "definition_es": "indica el destinatario o beneficiario",
-        "topics": ["destinatario", "regalo", "beneficiario", "receptor", "persona", "familia", "amigo", "compra", "dedicatoria", "entrega", "envío", "sorpresa", "ocasión", "celebración", "generosidad"],
         "structure": "para [alguien]",
         "example_es": "He comprado un regalo para mi madre.",
         "estimated_share": 0.45,
@@ -92,7 +86,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       },
       {
         "definition_es": "indica dirección o destino",
-        "topics": ["destino", "dirección", "viaje", "tren", "avión", "salida", "partida", "rumbo", "ciudad", "país", "llegada", "transporte", "estación", "aeropuerto", "trayecto"],
         "structure": "para [lugar]",
         "example_es": "El tren sale para Madrid en cinco minutos.",
         "estimated_share": 0.15,
@@ -108,7 +101,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
     "meanings": [
       {
         "definition_es": "indica ubicación en un lugar",
-        "topics": ["ubicación", "lugar", "posición", "sitio", "espacio", "mesa", "casa", "habitación", "oficina", "ciudad", "país", "superficie", "interior", "localización", "punto"],
         "structure": "en [lugar]",
         "example_es": "Las llaves están en la mesa de la cocina.",
         "estimated_share": 0.82,
@@ -117,7 +109,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       },
       {
         "definition_es": "indica un momento o período de tiempo",
-        "topics": ["tiempo", "fecha", "año", "mes", "momento", "época", "período", "siglo", "nacimiento", "evento", "historia", "calendario", "estación", "día", "hora"],
         "structure": "en [tiempo]",
         "example_es": "Nací en 1990, en el mes de agosto.",
         "estimated_share": 0.13,
@@ -126,7 +117,6 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       },
       {
         "definition_es": "indica el medio de transporte utilizado",
-        "topics": ["transporte", "viaje", "vehículo", "bicicleta", "coche", "autobús", "tren", "avión", "metro", "desplazamiento", "trabajo", "commute", "movilidad", "ecología", "tráfico"],
         "structure": "ir en [transporte]",
         "example_es": "Prefiero ir al trabajo en bicicleta para hacer deporte.",
         "estimated_share": 0.05,
