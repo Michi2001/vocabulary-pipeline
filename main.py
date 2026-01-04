@@ -216,32 +216,6 @@ if __name__ == "__main__":
 
         logger.info("LLM translation completed")
 
-    # Optional: Embedding generation (runs after translation)
-    embedding_config = config.get("embeddings", {})
-    if embedding_config.get("enabled", False):
-        if translations is not None:
-            logger.info("Embedding generation enabled - generating embeddings...")
-
-            try:
-                generator = EmbeddingGenerator(
-                    model_name=embedding_config.get(
-                        "model", "sentence-transformers/LaBSE"
-                    ),
-                    batch_size=embedding_config.get("batch_size", 32),
-                )
-                translations = generator.generate(translations)
-
-                logger.info("Embedding generation completed")
-
-            except Exception as e:
-                logger.error(f"Embedding generation failed: {e}")
-                logger.warning("Continuing without embeddings")
-        else:
-            logger.warning(
-                "Embeddings enabled but no translations available. "
-                "Enable llm_translation first."
-            )
-
     # Save translations to JSON (if available)
     if translations is not None:
         translations_path = os.path.join(output_dir, "translations.json")
