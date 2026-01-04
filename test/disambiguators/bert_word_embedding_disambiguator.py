@@ -1,7 +1,7 @@
 """
 BERT-based word embedding disambiguator.
 
-Uses contextualized BERT embeddings (last 4 layers averaged) of target words
+Uses contextualized BERT embeddings (second-to-last layer) of target words
 to compare meanings via cosine similarity.
 """
 
@@ -39,11 +39,9 @@ class BertWordEmbeddingDisambiguator(BaseDisambiguator):
             self._model = AutoModel.from_pretrained(self.model_name)
             self._model.eval()
 
-    def _get_contextual_embedding(
-        self, sentence_with_brackets: str
-    ) -> torch.Tensor:
+    def _get_contextual_embedding(self, sentence_with_brackets: str) -> torch.Tensor:
         """
-        Get BERT contextual embedding for bracketed word (last 4 layers averaged).
+        Get BERT contextual embedding for bracketed word (all layers averaged).
 
         Args:
             sentence_with_brackets: Sentence with [target_word] in brackets
@@ -54,8 +52,8 @@ class BertWordEmbeddingDisambiguator(BaseDisambiguator):
         self._load_model()
 
         # Extract bracketed word and its position
-        target_word, clean_sentence, char_start, char_end = self._extract_bracketed_word(
-            sentence_with_brackets
+        target_word, clean_sentence, char_start, char_end = (
+            self._extract_bracketed_word(sentence_with_brackets)
         )
 
         # Tokenize clean sentence
@@ -74,16 +72,15 @@ class BertWordEmbeddingDisambiguator(BaseDisambiguator):
                 f"not found in tokenized sentence"
             )
 
-        # Get BERT embeddings from all hidden layers
+        # Get BERT embeddings from second-to-last hidden layer
         with torch.no_grad():
             outputs = self._model(**inputs, output_hidden_states=True)
-            hidden_states = outputs.hidden_states
+            hidden_states = (
+                outputs.hidden_states
+            )  # tuple of (num_layers, batch_size, seq_len, hidden_dim)
 
-            # Use last 4 layers
-            last_four_layers = torch.stack(hidden_states[-4:])
-
-            # Average across the 4 layers
-            embeddings = last_four_layers.mean(dim=0)[0]  # [seq_len, hidden_dim]
+            # Use second-to-last layer (index -2)
+            embeddings = hidden_states[-2][0]  # [seq_len, hidden_dim]
 
         # Average embeddings of target word tokens
         word_embedding = embeddings[target_positions].mean(dim=0)
