@@ -9,7 +9,8 @@ from src.corpus_readers.base_reader import BaseCorpusReader
 from src.lemmatizer import Lemmatizer
 from src.frequency_counter import FrequencyCounter
 from src.post_processor import FrequencyPostProcessor
-from src.sentence_token_store import SentenceTokenStore
+from src.sentence_store import SentenceStore
+from src.vocab import LemmaToken
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,6 @@ class SingleCorpusProcessor:
         processing_config: Dict[str, Any],
         cache_config: Dict[str, Any] = None,
         filter_config: Dict[str, Any] = None,
-        sentence_store_config: Dict[str, Any] = None,
     ):
         """
         Initialize the single corpus processor.
@@ -41,7 +41,6 @@ class SingleCorpusProcessor:
             processing_config: Processing configuration (batch sizes, etc.)
             cache_config: Optional cache configuration (enabled, directory)
             filter_config: Optional filter configuration (accepted_pos, pos_mappings, etc.)
-            sentence_store_config: Optional config for sentence-token storage (enabled)
         """
         self.corpus_config = corpus_config
         self.reader = reader
@@ -49,13 +48,12 @@ class SingleCorpusProcessor:
         self.processing_config = processing_config
         self.cache_config = cache_config or {"enabled": False}
         self.filter_config = filter_config or {}
-        self.sentence_store_config = sentence_store_config or {"enabled": False}
 
         self.corpus_name = corpus_config.get(
             "name", Path(corpus_config["file_path"]).stem
         )
 
-        self._sentence_store: SentenceTokenStore = None
+        self._sentence_store: SentenceStore = None
 
     def _generate_cache_key(self) -> str:
         """
@@ -101,21 +99,19 @@ class SingleCorpusProcessor:
         cache_corpus_dir.mkdir(parents=True, exist_ok=True)
         return cache_corpus_dir / f"{cache_key}.pkl"
 
-    def _get_sentence_store_path(self, cache_key: str) -> Path:
-        """Get path for sentence-token store file."""
+    def _get_store_path(self, cache_key: str) -> Path:
+        """Get base path for SentenceStore directory."""
         cache_base_dir = Path(self.cache_config.get("directory", "cache"))
-        cache_corpus_dir = cache_base_dir / self.corpus_name
-        cache_corpus_dir.mkdir(parents=True, exist_ok=True)
-        return cache_corpus_dir / f"{cache_key}_sentences.jsonl.gz"
+        store_dir = cache_base_dir / self.corpus_name / cache_key / "store"
+        return store_dir
 
-    def get_sentence_store(self) -> SentenceTokenStore:
-        """Get the sentence store (available after processing with sentence_store enabled)."""
+    def get_sentence_store(self) -> SentenceStore:
+        """Get the sentence store (available after processing)."""
         if self._sentence_store is None:
-            if self.sentence_store_config.get("enabled", False):
-                cache_key = self._generate_cache_key()
-                store_path = self._get_sentence_store_path(cache_key)
-                if store_path.exists():
-                    self._sentence_store = SentenceTokenStore(store_path)
+            cache_key = self._generate_cache_key()
+            store_path = self._get_store_path(cache_key)
+            if store_path.exists():
+                self._sentence_store = SentenceStore(store_path)
         return self._sentence_store
 
     def _load_from_cache(self, cache_key: str) -> FrequencyCounter:
@@ -165,12 +161,12 @@ class SingleCorpusProcessor:
         except Exception as e:
             logger.warning(f"Failed to save cache for {self.corpus_name}: {e}")
 
-    def _process_corpus(self, cache_key: str = None) -> FrequencyCounter:
+    def _process_corpus(self, cache_key: str) -> FrequencyCounter:
         """
-        Process corpus without cache.
+        Process corpus and store sentences with index-aligned tokens.
 
         Args:
-            cache_key: Cache key for sentence store path (optional)
+            cache_key: Cache key for store path
 
         Returns:
             FrequencyCounter with frequency data
@@ -191,39 +187,35 @@ class SingleCorpusProcessor:
             f"Processing {processed_sentences:,}/{total_sentences:,} sentences from {self.corpus_name}"
         )
 
-        # Initialize counter
+        # Initialize counter and store
         counter = FrequencyCounter()
+        store_path = self._get_store_path(cache_key)
+        self._sentence_store = SentenceStore(store_path)
 
         # Read sentences in batches
         sentence_batches: Generator[List[str], None, None] = self.reader.read_sentences(
             batch_size=self.processing_config.get("sentence_batch_size", 10000)
         )
 
-        # Check if we should store sentence-token mappings
-        store_sentences = self.sentence_store_config.get("enabled", False)
+        # Track sentence IDs
+        sid = 0
 
-        if store_sentences and cache_key:
-            # Process with sentence-token storage
-            store_path = self._get_sentence_store_path(cache_key)
-            self._sentence_store = SentenceTokenStore(store_path)
-            self._sentence_store.open_write()
+        def on_sentence(original_tokens: List[str], lemma_tokens: List[LemmaToken]):
+            nonlocal sid
+            sent_writer.write(sid, original_tokens)
+            lemma_writer.write(sid, lemma_tokens)
+            sid += 1
 
-            try:
-                lemma_pos_stream = self.lemmatizer.process_corpus_batches_with_offsets(
-                    sentence_batches,
-                    on_sentence=lambda tokens: self._sentence_store.write(tokens),
-                )
-                counter.update(lemma_pos_stream)
-            finally:
-                self._sentence_store.close()
-
-            logger.info(f"Sentence-token store saved: {store_path}")
-        else:
-            # Process without sentence storage (original behavior)
-            lemma_pos_stream: Generator[Tuple[str, str], None, None] = (
-                self.lemmatizer.process_corpus_batches(sentence_batches)
+        # Process with index-aligned sentence storage
+        with self._sentence_store.open_sentences_writer() as sent_writer, \
+             self._sentence_store.open_lemmatized_writer() as lemma_writer:
+            lemma_pos_stream = self.lemmatizer.process_corpus_batches_aligned(
+                sentence_batches,
+                on_sentence=on_sentence,
             )
             counter.update(lemma_pos_stream)
+
+        logger.info(f"SentenceStore saved: {store_path}")
 
         stats = counter.get_statistics()
         logger.info(
@@ -249,18 +241,15 @@ class SingleCorpusProcessor:
             if cached_counter is not None:
                 raw_counter = cached_counter
                 # Check if sentence store exists when cache hit
-                if self.sentence_store_config.get("enabled", False):
-                    store_path = self._get_sentence_store_path(cache_key)
-                    if store_path.exists():
-                        self._sentence_store = SentenceTokenStore(store_path)
-                        logger.info(f"Loaded sentence store from cache: {store_path}")
-                    else:
-                        # Cache hit but no sentence store - need to reprocess
-                        logger.info(
-                            "Sentence store missing, reprocessing corpus..."
-                        )
-                        raw_counter = self._process_corpus(cache_key)
-                        self._save_to_cache(cache_key, raw_counter)
+                store_path = self._get_store_path(cache_key)
+                if store_path.exists() and SentenceStore(store_path).has_sentences():
+                    self._sentence_store = SentenceStore(store_path)
+                    logger.info(f"Loaded SentenceStore from cache: {store_path}")
+                else:
+                    # Cache hit but no sentence store - need to reprocess
+                    logger.info("SentenceStore missing, reprocessing corpus...")
+                    raw_counter = self._process_corpus(cache_key)
+                    self._save_to_cache(cache_key, raw_counter)
             else:
                 # Process corpus and cache raw results
                 raw_counter = self._process_corpus(cache_key)

@@ -1,16 +1,22 @@
 """LLM-based lemma corrector with caching support."""
 
 import hashlib
+import json
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Set, Tuple
 import csv
 
 from src.frequency_counter import FrequencyCounter
 from src.llm_providers.base_provider import BaseLLMProvider
 from src.lemma_cache import LemmaCache
+from src.vocab import LemmaToken
+from src.sentence_store import SentenceStore
 
 logger = logging.getLogger(__name__)
+
+# Type alias for correction mapping
+CorrectionMapping = Dict[LemmaToken, LemmaToken]
 
 
 class LemmaCorrector:
@@ -50,7 +56,7 @@ class LemmaCorrector:
 
     def correct(
         self, counter: FrequencyCounter, min_frequency: int = 1
-    ) -> FrequencyCounter:
+    ) -> Tuple[FrequencyCounter, CorrectionMapping, Set[LemmaToken]]:
         """
         Apply LLM corrections to FrequencyCounter.
 
@@ -59,7 +65,10 @@ class LemmaCorrector:
             min_frequency: Minimum frequency threshold (same as output filter)
 
         Returns:
-            Corrected FrequencyCounter
+            Tuple of:
+                - Corrected FrequencyCounter
+                - CorrectionMapping: {(orig_lemma, pos): (corrected_lemma, pos)} for MERGE operations
+                - Set of deleted LemmaTokens
         """
         logger.info("Starting LLM-based lemma correction...")
 
@@ -115,12 +124,18 @@ class LemmaCorrector:
         mapping_path = self.output_dir / "llm_corrections.csv"
         self._save_corrections(all_corrections, mapping_path)
 
-        # Step 8: Apply corrections to counter
-        corrected_counter = self._apply_corrections(
+        # Step 8: Apply corrections to counter and build correction mapping
+        corrected_counter, correction_mapping, deleted_tokens = self._apply_corrections(
             counter, id_mapping, all_corrections
         )
 
-        # Step 9: Save cache to disk (if cache is enabled)
+        # Step 9: Save correction mapping to JSON
+        mapping_json_path = self.output_dir / "correction_mapping.json"
+        self._save_correction_mapping(
+            correction_mapping, deleted_tokens, mapping_json_path
+        )
+
+        # Step 10: Save cache to disk (if cache is enabled)
         if self.cache is not None:
             self.cache.save_all()
 
@@ -128,7 +143,7 @@ class LemmaCorrector:
             f"LLM correction complete. Applied {len(all_corrections)} operations."
         )
 
-        return corrected_counter
+        return corrected_counter, correction_mapping, deleted_tokens
 
     def _create_batches_from_items(
         self, items: List[Dict[str, Any]]
@@ -279,9 +294,9 @@ class LemmaCorrector:
         counter: FrequencyCounter,
         id_mapping: Dict[str, Dict],
         corrections: List[Dict[str, Any]],
-    ) -> FrequencyCounter:
+    ) -> Tuple[FrequencyCounter, CorrectionMapping, Set[LemmaToken]]:
         """
-        Apply corrections to create new FrequencyCounter.
+        Apply corrections to create new FrequencyCounter and build correction mapping.
 
         Three-pass algorithm:
         1. Build deletion and merge maps
@@ -294,7 +309,10 @@ class LemmaCorrector:
             corrections: List of correction operations from LLM
 
         Returns:
-            New corrected FrequencyCounter
+            Tuple of:
+                - New corrected FrequencyCounter
+                - CorrectionMapping for MERGE operations
+                - Set of deleted LemmaTokens
         """
         corrected_counter = FrequencyCounter()
 
@@ -312,6 +330,26 @@ class LemmaCorrector:
             elif operation == "MERGE":
                 target = correction["target"]  # Expected format: "lemma|POS"
                 merge_sources[item_id] = target
+
+        # Build correction mapping and deleted tokens set
+        correction_mapping: CorrectionMapping = {}
+        deleted_tokens: Set[LemmaToken] = set()
+
+        # Build deleted tokens set
+        for item_id in deleted_ids:
+            item_data = id_mapping[item_id]
+            lemma_token: LemmaToken = (item_data["lemma"], item_data["pos"])
+            deleted_tokens.add(lemma_token)
+
+        # Build correction mapping for MERGE operations
+        for item_id, target_key in merge_sources.items():
+            item_data = id_mapping[item_id]
+            original_token: LemmaToken = (item_data["lemma"], item_data["pos"])
+            # Parse target_key "lemma|POS" -> (lemma, pos)
+            parts = target_key.split("|")
+            if len(parts) == 2:
+                target_token: LemmaToken = (parts[0], parts[1])
+                correction_mapping[original_token] = target_token
 
         # Second pass: process KEEP operations
         keep_count = 0
@@ -373,7 +411,7 @@ class LemmaCorrector:
             f"{keep_count} kept"
         )
 
-        return corrected_counter
+        return corrected_counter, correction_mapping, deleted_tokens
 
     def _save_original(self, id_mapping: Dict[str, Dict], output_path: Path) -> None:
         """
@@ -414,3 +452,104 @@ class LemmaCorrector:
                 writer.writerow([correction["id"], correction["operation"], target])
 
         logger.info(f"LLM corrections saved: {output_path}")
+
+    def _save_correction_mapping(
+        self,
+        correction_mapping: CorrectionMapping,
+        deleted_tokens: Set[LemmaToken],
+        output_path: Path,
+    ) -> None:
+        """
+        Save correction mapping to JSON for use by SentenceStore.
+
+        Args:
+            correction_mapping: Mapping from original to corrected tokens
+            deleted_tokens: Set of deleted tokens
+            output_path: Path to output JSON file
+        """
+        # Convert to JSON-serializable format
+        # LemmaToken tuples become lists: [lemma, pos]
+        data = {
+            "merge_mapping": [
+                {"from": list(orig), "to": list(target)}
+                for orig, target in correction_mapping.items()
+            ],
+            "deleted": [list(token) for token in deleted_tokens],
+        }
+
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        logger.info(
+            f"Correction mapping saved: {output_path} "
+            f"({len(correction_mapping)} merges, {len(deleted_tokens)} deletions)"
+        )
+
+    @staticmethod
+    def load_correction_mapping(
+        mapping_path: Path,
+    ) -> Tuple[CorrectionMapping, Set[LemmaToken]]:
+        """
+        Load correction mapping from JSON file.
+
+        Args:
+            mapping_path: Path to correction_mapping.json
+
+        Returns:
+            Tuple of (CorrectionMapping, Set of deleted tokens)
+        """
+        with open(mapping_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        correction_mapping: CorrectionMapping = {}
+        for item in data.get("merge_mapping", []):
+            orig = tuple(item["from"])
+            target = tuple(item["to"])
+            correction_mapping[orig] = target
+
+        deleted_tokens: Set[LemmaToken] = set()
+        for item in data.get("deleted", []):
+            deleted_tokens.add(tuple(item))
+
+        return correction_mapping, deleted_tokens
+
+    @staticmethod
+    def apply_corrections_to_store(
+        sentence_store: "SentenceStore",
+        correction_mapping: CorrectionMapping,
+        deleted_tokens: Set[LemmaToken],
+    ) -> None:
+        """
+        Apply corrections to SentenceStore: read lemmatized, write corrected.
+
+        Reads lemmatized.jsonl.gz, applies the correction mapping and deletions,
+        and writes corrected.jsonl.gz.
+
+        Args:
+            sentence_store: SentenceStore instance
+            correction_mapping: Mapping from original to corrected tokens
+            deleted_tokens: Set of tokens to mark as deleted
+        """
+        logger.info("Applying corrections to sentence store...")
+        processed = 0
+
+        with sentence_store.open_corrected_writer() as writer:
+            for sid, tokens in sentence_store.iter_lemmatized():
+                corrected_tokens = []
+                for token in tokens:
+                    if token in deleted_tokens:
+                        # Mark deleted tokens with special value
+                        corrected_tokens.append(("_DELETED_", ""))
+                    elif token in correction_mapping:
+                        # Apply merge correction
+                        corrected_tokens.append(correction_mapping[token])
+                    else:
+                        # Keep unchanged
+                        corrected_tokens.append(token)
+                writer.write(sid, corrected_tokens)
+                processed += 1
+
+                if processed % 100000 == 0:
+                    logger.info(f"Applied corrections to {processed:,} sentences")
+
+        logger.info(f"Corrections applied to {processed:,} sentences")

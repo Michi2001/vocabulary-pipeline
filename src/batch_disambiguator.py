@@ -3,59 +3,33 @@ Batch Word Sense Disambiguator.
 
 Disambiguates polysemous words in sentences using pre-computed meaning embeddings.
 Processes sentences in batches for efficiency with large corpora.
+Uses index-aligned SentenceStore for efficient token lookup.
 """
 
-import gzip
-import json
 import logging
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Generator, Set
+from typing import Dict, List, Optional, Tuple, Set
 
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
 
-from src.sentence_token_store import SentenceTokenStore, SentenceTokens
+from src.vocab import Vocabulary, LemmaToken
+from src.sentence_store import SentenceStore
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class DisambiguationTask:
-    """A single token that needs disambiguation."""
-
-    sentence_id: int
-    token_idx: int
-    lemma: str
-    pos: str
-    char_start: int
-    char_end: int
-
-
-@dataclass
-class DisambiguatedToken:
-    """Result of disambiguating a single token."""
-
-    token_idx: int
-    lemma: str
-    pos: str
-    meaning_idx: int
-    word_variant_id: str
-    confidence: float
 
 
 class BatchDisambiguator:
     """
     Disambiguates polysemous words using BERT embeddings.
 
-    Uses pre-computed meaning embeddings from translations.json and compares
+    Uses pre-computed meaning embeddings from Vocabulary and compares
     them with runtime embeddings extracted from corpus sentences.
     """
 
     def __init__(
         self,
-        translations: List[Dict[str, Any]],
+        vocabulary: Vocabulary,
         model_name: str = "dccuchile/bert-base-spanish-wwm-cased",
         batch_size: int = 32,
     ):
@@ -63,66 +37,73 @@ class BatchDisambiguator:
         Initialize disambiguator.
 
         Args:
-            translations: List of translation dicts with meaning_embedding
+            vocabulary: Vocabulary with word variants and embeddings
             model_name: BERT model (must match MeaningEmbeddingGenerator)
             batch_size: Sentences per BERT batch
         """
+        self.vocabulary = vocabulary
         self.model_name = model_name
         self.batch_size = batch_size
         self._model = None
         self._tokenizer = None
 
         # Build lookup structures
-        self._build_lookups(translations)
+        self._build_lookups()
 
-    def _build_lookups(self, translations: List[Dict[str, Any]]):
-        """Build lookup tables for efficient disambiguation."""
-        # Meaning embeddings: {(lemma, pos): [(meaning_idx, word_variant_id, embedding), ...]}
-        self.meaning_embeddings: Dict[
-            Tuple[str, str], List[Tuple[int, str, np.ndarray]]
-        ] = {}
+    def _build_lookups(self):
+        """
+        Build lookup tables from Vocabulary.word_variants.
 
-        # Track which lemmas are polysemous (have >1 meaning with embeddings)
-        self.polysemous_lemmas: Set[Tuple[str, str]] = set()
+        Uses WordVariant objects directly instead of reconstructing IDs.
+        """
+        # All lemma tokens in vocabulary (for O(1) membership checks)
+        self.vocab_lemma_tokens: Set[LemmaToken] = set()
 
-        # Word variant IDs for mono-semantic words: (lemma, pos) -> word_variant_id
-        self.mono_variant_ids: Dict[Tuple[str, str], str] = {}
+        # Polysemous lemmas: LemmaToken -> [(meaning_idx, variant_id, embedding), ...]
+        self.meaning_embeddings: Dict[LemmaToken, List[Tuple[int, str, np.ndarray]]] = (
+            {}
+        )
 
-        for translation in translations:
-            lemma = translation.get("lemma", "").lower()
-            pos = translation.get("pos", "")
-            trans_id = translation.get("id", "")
+        # Mono-semantic lemmas: LemmaToken -> variant_id
+        self.mono_variant_ids: Dict[LemmaToken, str] = {}
 
-            if not lemma or not pos:
-                continue
+        # Temporary dict to collect variants per lemma token
+        variants_by_lemma: Dict[LemmaToken, List[Tuple[int, str, np.ndarray]]] = {}
 
-            meanings = translation.get("meanings", [])
-            key = (lemma, pos)
+        # Build from word_variants (single source of truth)
+        for variant in self.vocabulary.word_variants:
+            key = variant.lemma_token
+            self.vocab_lemma_tokens.add(key)
 
-            embeddings_for_lemma = []
-            for meaning_idx, meaning in enumerate(meanings):
-                embedding = meaning.get("meaning_embedding")
-                if embedding is not None:
-                    # Create word variant ID: translation_id + meaning index
-                    variant_id = f"{trans_id}_{meaning_idx}"
-                    embeddings_for_lemma.append(
-                        (meaning_idx, variant_id, np.array(embedding, dtype=np.float32))
-                    )
+            # Only process if we have an embedding
+            if variant.meaning.bert_embedding is not None:
+                if key not in variants_by_lemma:
+                    variants_by_lemma[key] = []
 
-            if len(embeddings_for_lemma) > 1:
-                self.meaning_embeddings[key] = embeddings_for_lemma
-                self.polysemous_lemmas.add(key)
-            elif len(embeddings_for_lemma) == 1:
-                # Mono-semantic: store variant ID directly
-                self.mono_variant_ids[key] = embeddings_for_lemma[0][1]
-            elif len(meanings) == 1:
-                # No embedding but single meaning - still mono-semantic
-                variant_id = f"{trans_id}_0"
-                self.mono_variant_ids[key] = variant_id
+                variants_by_lemma[key].append(
+                    (variant.meaning_idx, variant.id, variant.meaning.bert_embedding)
+                )
+
+        # Classify as mono-semantic or polysemous based on embedding count
+        for key, variants in variants_by_lemma.items():
+            if len(variants) > 1:
+                # Polysemous: multiple meanings with embeddings
+                self.meaning_embeddings[key] = variants
+            elif len(variants) == 1:
+                # Mono-semantic: single meaning with embedding
+                self.mono_variant_ids[key] = variants[0][1]
+
+        # Handle lemmas without embeddings but still in vocabulary
+        for variant in self.vocabulary.word_variants:
+            key = variant.lemma_token
+            if key not in variants_by_lemma and key not in self.mono_variant_ids:
+                # No embedding but still in vocab - treat as mono-semantic
+                self.mono_variant_ids[key] = variant.id
 
         logger.info(
-            f"Built disambiguation lookups: {len(self.polysemous_lemmas)} polysemous lemmas, "
-            f"{len(self.mono_variant_ids)} mono-semantic lemmas"
+            f"Built disambiguation lookups: {len(self.meaning_embeddings)} polysemous lemmas, "
+            f"{len(self.mono_variant_ids)} mono-semantic lemmas, "
+            f"{len(self.vocab_lemma_tokens)} total lemma tokens"
         )
 
     def _load_model(self):
@@ -133,24 +114,35 @@ class BatchDisambiguator:
             self._model = AutoModel.from_pretrained(self.model_name)
             self._model.eval()
 
-    def _get_embedding_for_token(
+    def _get_embedding_for_token_by_index(
         self,
         sentence_text: str,
-        char_start: int,
-        char_end: int,
+        original_tokens: List[str],
+        token_idx: int,
     ) -> Optional[np.ndarray]:
         """
-        Extract BERT embedding for a specific token in a sentence.
+        Extract BERT embedding for a token by its index.
+
+        Uses the original tokens to reconstruct character positions.
 
         Args:
-            sentence_text: Full sentence text
-            char_start: Character start position of target word
-            char_end: Character end position of target word
+            sentence_text: Reconstructed sentence text
+            original_tokens: List of original tokens
+            token_idx: Index of target token in original_tokens
 
         Returns:
             Embedding array or None if extraction fails
         """
         self._load_model()
+
+        # Calculate character position from tokens
+        # Tokens are joined by space, so we calculate position
+        char_start = 0
+        for i in range(token_idx):
+            char_start += len(original_tokens[i]) + 1  # +1 for space
+
+        target_token = original_tokens[token_idx]
+        char_end = char_start + len(target_token)
 
         inputs = self._tokenizer(
             sentence_text,
@@ -162,9 +154,9 @@ class BatchDisambiguator:
         # Map character positions to token positions
         target_positions = []
         for char_pos in range(char_start, char_end):
-            token_idx = inputs.char_to_token(0, char_pos)
-            if token_idx is not None and token_idx not in target_positions:
-                target_positions.append(token_idx)
+            bert_token_idx = inputs.char_to_token(0, char_pos)
+            if bert_token_idx is not None and bert_token_idx not in target_positions:
+                target_positions.append(bert_token_idx)
 
         if not target_positions:
             return None
@@ -188,141 +180,102 @@ class BatchDisambiguator:
     def _disambiguate_token(
         self,
         sentence_text: str,
-        token: Tuple[str, str, int, int],
+        original_tokens: List[str],
         token_idx: int,
-    ) -> Optional[DisambiguatedToken]:
+        lemma_token: LemmaToken,
+    ) -> Optional[str]:
         """
         Disambiguate a single token (mono-semantic or polysemous).
 
         Args:
-            sentence_text: Full sentence text
-            token: (lemma, pos, char_start, char_end)
+            sentence_text: Reconstructed sentence text
+            original_tokens: List of original tokens
             token_idx: Token index in sentence
+            lemma_token: (lemma, pos) tuple
 
         Returns:
-            DisambiguatedToken or None if token not in vocabulary
+            Word variant ID or None if token not in vocabulary
         """
-        lemma, pos, char_start, char_end = token
-        key = (lemma.lower(), pos)
+        # Skip deleted tokens
+        if lemma_token[0] == "_DELETED_":
+            return None
+
+        # Check if in vocabulary at all
+        if lemma_token not in self.vocab_lemma_tokens:
+            return None
 
         # Check if mono-semantic
-        if key in self.mono_variant_ids:
-            return DisambiguatedToken(
-                token_idx=token_idx,
-                lemma=lemma,
-                pos=pos,
-                meaning_idx=0,
-                word_variant_id=self.mono_variant_ids[key],
-                confidence=1.0,
-            )
+        if lemma_token in self.mono_variant_ids:
+            return self.mono_variant_ids[lemma_token]
 
         # Check if polysemous
-        if key not in self.meaning_embeddings:
+        if lemma_token not in self.meaning_embeddings:
             return None
 
         # Get embedding for this token in context
-        token_embedding = self._get_embedding_for_token(
-            sentence_text, char_start, char_end
+        token_embedding = self._get_embedding_for_token_by_index(
+            sentence_text, original_tokens, token_idx
         )
         if token_embedding is None:
             return None
 
         # Compare with all meaning embeddings
-        best_idx = 0
         best_variant_id = ""
         best_score = -1.0
 
-        for meaning_idx, variant_id, meaning_emb in self.meaning_embeddings[key]:
+        for meaning_idx, variant_id, meaning_emb in self.meaning_embeddings[
+            lemma_token
+        ]:
             score = self._cosine_similarity(token_embedding, meaning_emb)
             if score > best_score:
                 best_score = score
-                best_idx = meaning_idx
                 best_variant_id = variant_id
 
-        return DisambiguatedToken(
-            token_idx=token_idx,
-            lemma=lemma,
-            pos=pos,
-            meaning_idx=best_idx,
-            word_variant_id=best_variant_id,
-            confidence=best_score,
-        )
+        return best_variant_id
 
-    def disambiguate_sentence(
-        self,
-        sentence_tokens: SentenceTokens,
-        sentence_text: str,
-    ) -> List[DisambiguatedToken]:
+    def process(self, sentence_store: SentenceStore) -> None:
         """
-        Disambiguate all tokens in a sentence.
+        Process all sentences and write disambiguation results to store.
+
+        Reads corrected tokens (if available) or lemmatized tokens,
+        disambiguates each token, and writes results to disambiguated.jsonl.gz.
 
         Args:
-            sentence_tokens: Token information from SentenceTokenStore
-            sentence_text: Original sentence text (needed for BERT)
-
-        Returns:
-            List of disambiguated tokens (including mono-semantic)
+            sentence_store: SentenceStore with sentence and lemma data
         """
-        results = []
+        logger.info("Starting batch disambiguation...")
 
-        for idx, token in enumerate(sentence_tokens.tokens):
-            # Disambiguate token (handles both mono-semantic and polysemous)
-            result = self._disambiguate_token(sentence_text, token, idx)
-            if result:
-                results.append(result)
-
-        return results
-
-    def process(
-        self,
-        sentence_store: SentenceTokenStore,
-        corpus_reader,  # To get original sentence text
-        output_path: Path,
-    ):
-        """
-        Process all sentences and write disambiguation results.
-
-        Args:
-            sentence_store: Store with sentence-token mappings
-            corpus_reader: Reader to get original sentence texts
-            output_path: Path for output JSONL file
-        """
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        logger.info(f"Starting batch disambiguation to {output_path}")
-
-        # We need sentence texts - read corpus in parallel with token store
-        sentence_texts = list(corpus_reader.read_sentences(batch_size=100000))
-        flat_sentences = [s for batch in sentence_texts for s in batch]
+        # Determine which lemma source to use
+        if sentence_store.has_corrected():
+            logger.info("Using corrected lemmas for disambiguation")
+            lemma_iterator = sentence_store.iter_sentences_with_corrected()
+        else:
+            logger.info(
+                "Using original lemmas for disambiguation (no corrections found)"
+            )
+            lemma_iterator = sentence_store.iter_sentences_with_lemmatized()
 
         total_sentences = 0
         total_disambiguated = 0
 
-        with gzip.open(output_path, "wt", encoding="utf-8") as f:
-            for sentence_tokens in sentence_store.iter_sentences():
-                sid = sentence_tokens.sid
+        with sentence_store.open_disambiguated_writer() as writer:
+            for sid, original_tokens, lemma_tokens in lemma_iterator:
+                # Reconstruct sentence text from original tokens
+                sentence_text = " ".join(original_tokens)
 
-                if sid >= len(flat_sentences):
-                    logger.warning(f"Sentence ID {sid} out of range")
-                    continue
-
-                sentence_text = flat_sentences[sid]
-                results = self.disambiguate_sentence(sentence_tokens, sentence_text)
-
-                if results:
-                    # Write result
-                    variants = [
-                        [r.word_variant_id, r.token_idx, r.confidence] for r in results
-                    ]
-                    line = json.dumps(
-                        {"sid": sid, "variants": variants},
-                        ensure_ascii=False,
+                # Disambiguate each token
+                variants: List[Optional[str]] = []
+                for idx, lemma_token in enumerate(lemma_tokens):
+                    variant_id = self._disambiguate_token(
+                        sentence_text, original_tokens, idx, lemma_token
                     )
-                    f.write(line + "\n")
-                    total_disambiguated += len(results)
+                    variants.append(variant_id)
+                    if variant_id is not None:
+                        total_disambiguated += 1
 
+                writer.write(sid, variants)
                 total_sentences += 1
+
                 if total_sentences % 10000 == 0:
                     logger.info(
                         f"Processed {total_sentences:,} sentences, "
@@ -333,16 +286,3 @@ class BatchDisambiguator:
             f"Disambiguation complete: {total_sentences:,} sentences, "
             f"{total_disambiguated:,} tokens disambiguated"
         )
-
-
-def load_disambiguations(path: Path) -> Generator[Dict[str, Any], None, None]:
-    """
-    Load disambiguation results from JSONL file.
-
-    Yields:
-        Dicts with 'sid' and 'variants' keys
-    """
-    with gzip.open(path, "rt", encoding="utf-8") as f:
-        for line in f:
-            if line.strip():
-                yield json.loads(line)

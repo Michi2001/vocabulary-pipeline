@@ -5,6 +5,7 @@ Builds a sparse co-occurrence matrix from disambiguated sentences.
 Matrix dimensions are num_word_variants x num_word_variants.
 """
 
+import json
 import logging
 from pathlib import Path
 from typing import Dict, List, Any, Set, Tuple
@@ -12,7 +13,8 @@ from typing import Dict, List, Any, Set, Tuple
 import numpy as np
 from scipy import sparse
 
-from src.batch_disambiguator import load_disambiguations
+from src.vocab import Vocabulary
+from src.sentence_store import SentenceStore
 
 logger = logging.getLogger(__name__)
 
@@ -25,36 +27,29 @@ class CoOccurrenceBuilder:
     sentence are considered co-occurrent.
     """
 
-    def __init__(self, translations: List[Dict[str, Any]]):
+    def __init__(self, vocabulary: Vocabulary):
         """
-        Initialize with translation data to build variant index.
+        Initialize with vocabulary to build variant index.
 
         Args:
-            translations: List of translation dicts
+            vocabulary: Vocabulary with word variants
         """
-        self._build_variant_index(translations)
+        self.vocabulary = vocabulary
+        self._build_variant_index()
 
-    def _build_variant_index(self, translations: List[Dict[str, Any]]):
+    def _build_variant_index(self):
         """Build mapping from word variant IDs to matrix indices."""
-        # Collect all possible variant IDs
-        self.variant_ids: List[str] = []
+        # Use word variants from vocabulary (already sorted by frequency)
+        self.variant_ids: List[str] = [v.id for v in self.vocabulary.word_variants]
         self.variant_info: Dict[str, Dict[str, Any]] = {}
 
-        for translation in translations:
-            trans_id = translation.get("id", "")
-            lemma = translation.get("lemma", "")
-            pos = translation.get("pos", "")
-
-            meanings = translation.get("meanings", [])
-            for meaning_idx, meaning in enumerate(meanings):
-                variant_id = f"{trans_id}_{meaning_idx}"
-                self.variant_ids.append(variant_id)
-                self.variant_info[variant_id] = {
-                    "lemma": lemma,
-                    "pos": pos,
-                    "meaning_idx": meaning_idx,
-                    "translation_id": trans_id,
-                }
+        for variant in self.vocabulary.word_variants:
+            self.variant_info[variant.id] = {
+                "lemma": variant.lemma,
+                "pos": variant.pos,
+                "meaning_idx": variant.meaning_idx,
+                "translation_id": variant.source_translation_id,
+            }
 
         # Sort for consistent ordering
         self.variant_ids.sort()
@@ -66,16 +61,19 @@ class CoOccurrenceBuilder:
 
         logger.info(f"Built variant index with {len(self.variant_ids)} word variants")
 
-    def build(self, disambiguations_path: Path) -> sparse.csr_matrix:
+    def build(self, sentence_store: SentenceStore) -> sparse.csr_matrix:
         """
-        Build co-occurrence matrix from disambiguation results.
+        Build co-occurrence matrix from disambiguated sentences in store.
 
         Args:
-            disambiguations_path: Path to sentence_disambiguations.jsonl.gz
+            sentence_store: SentenceStore with disambiguated data
 
         Returns:
             Sparse co-occurrence matrix (symmetric)
         """
+        if not sentence_store.has_disambiguated():
+            raise ValueError("SentenceStore has no disambiguation data")
+
         n = len(self.variant_ids)
         logger.info(f"Building {n}x{n} co-occurrence matrix...")
 
@@ -85,23 +83,21 @@ class CoOccurrenceBuilder:
         sentence_count = 0
         pair_count = 0
 
-        for disambiguation in load_disambiguations(disambiguations_path):
-            variants = disambiguation.get("variants", [])
-
-            # Extract variant IDs from this sentence
-            variant_ids_in_sentence: List[str] = []
-            for variant_data in variants:
-                # Format: [variant_id, token_idx, confidence]
-                variant_id = variant_data[0]
-                if variant_id in self.variant_to_idx:
-                    variant_ids_in_sentence.append(variant_id)
+        for sid, variants in sentence_store.iter_disambiguated():
+            # Filter out None values (tokens not in vocabulary)
+            variant_ids_in_sentence = [v for v in variants if v is not None]
 
             # Count co-occurrences (all pairs)
             seen_pairs: Set[Tuple[int, int]] = set()
             for i, vid_i in enumerate(variant_ids_in_sentence):
+                if vid_i not in self.variant_to_idx:
+                    continue
                 idx_i = self.variant_to_idx[vid_i]
+
                 for j, vid_j in enumerate(variant_ids_in_sentence):
                     if i >= j:  # Skip self and duplicates (symmetric)
+                        continue
+                    if vid_j not in self.variant_to_idx:
                         continue
                     idx_j = self.variant_to_idx[vid_j]
 
@@ -136,7 +132,7 @@ class CoOccurrenceBuilder:
         total = n * n
         sparsity = 1 - (nnz / total) if total > 0 else 1
         logger.info(
-            f"Matrix statistics: {nnz:,} non-zero entries, " f"{sparsity:.4%} sparsity"
+            f"Matrix statistics: {nnz:,} non-zero entries, {sparsity:.4%} sparsity"
         )
 
         return csr_matrix
@@ -158,8 +154,6 @@ class CoOccurrenceBuilder:
 
         # Save variant index as JSON
         index_path = output_path.with_suffix(".json")
-        import json
-
         index_data = {
             "variant_ids": self.variant_ids,
             "variant_info": self.variant_info,
@@ -184,8 +178,6 @@ class CoOccurrenceBuilder:
         matrix = sparse.load_npz(matrix_path)
 
         index_path = matrix_path.with_suffix(".json")
-        import json
-
         with open(index_path, "r", encoding="utf-8") as f:
             index_data = json.load(f)
 

@@ -12,6 +12,7 @@ import os
 import shutil
 from pathlib import Path
 from datetime import datetime
+from typing import List, Optional
 
 from src.lemmatizer import Lemmatizer
 from src.output_writer import OutputWriter
@@ -22,10 +23,10 @@ from src.llm_providers import create_provider
 from src.llm_corrector import LemmaCorrector
 from src.llm_translator import LemmaTranslator
 from src.lemma_cache import LemmaCache
-from src.embedding_generator import EmbeddingGenerator
 from src.meaning_embedding_generator import MeaningEmbeddingGenerator
 from src.batch_disambiguator import BatchDisambiguator
 from src.cooccurrence_builder import CoOccurrenceBuilder
+from src.vocab import Translation, Vocabulary
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +49,6 @@ if __name__ == "__main__":
     output_config = config["output"]
     cache_config = config.get("cache", {"enabled": False})
     filter_config = config.get("filtering", {})
-    sentence_store_config = config.get("sentence_store", {"enabled": False})
     disambiguation_config = config.get("disambiguation", {"enabled": False})
     cooccurrence_config = config.get("cooccurrence", {"enabled": False})
 
@@ -129,7 +129,6 @@ if __name__ == "__main__":
             processing_config=processing_config,
             cache_config=cache_config,
             filter_config=filter_config,
-            sentence_store_config=sentence_store_config,
         )
         processors.append(processor)
 
@@ -145,6 +144,8 @@ if __name__ == "__main__":
 
     # Optional: LLM-based correction
     correction_config = config.get("llm_correction", {})
+    correction_mapping = None
+    deleted_tokens = None
     if correction_config.get("enabled", False):
         logger.info("LLM correction enabled - applying corrections...")
 
@@ -175,9 +176,20 @@ if __name__ == "__main__":
                     correction_provider, llm_cache, corrector_config
                 )
 
-                # Apply corrections
+                # Apply corrections - returns (counter, mapping, deleted)
                 min_freq = processing_config.get("min_frequency", 1)
-                counter = corrector.correct(counter, min_frequency=min_freq)
+                counter, correction_mapping, deleted_tokens = corrector.correct(
+                    counter, min_frequency=min_freq
+                )
+
+                # Apply corrections to SentenceStore if available
+                sentence_store = processors[0].get_sentence_store()
+                if sentence_store is not None and sentence_store.has_lemmatized():
+                    logger.info("Applying corrections to SentenceStore...")
+                    LemmaCorrector.apply_corrections_to_store(
+                        sentence_store, correction_mapping, deleted_tokens
+                    )
+                    logger.info("SentenceStore corrections applied")
 
                 logger.info("LLM correction completed successfully")
 
@@ -198,7 +210,7 @@ if __name__ == "__main__":
     OutputWriter.write_csv(frequencies, output_path)
 
     # Optional: LLM-based translation
-    translations = None
+    translations: Optional[List[Translation]] = None
     translation_config = config.get("llm_translation", {})
     if translation_config.get("enabled", False):
         logger.info("LLM translation enabled - translating lemmas...")
@@ -238,71 +250,51 @@ if __name__ == "__main__":
             translations = meaning_emb_generator.generate(translations)
             logger.info("Meaning embeddings generated")
 
+        # Save translations as JSON (convert Translation objects to dicts)
         translations_path = os.path.join(output_dir, "translations.json")
+        translations_dicts = [t.to_dict() for t in translations]
         with open(translations_path, "w", encoding="utf-8") as f:
-            json.dump(translations, f, ensure_ascii=False, indent=2)
+            json.dump(translations_dicts, f, ensure_ascii=False, indent=2)
         logger.info(f"Translations saved to: {translations_path}")
 
     # Disambiguation and Co-Occurrence Matrix (if enabled)
-    if (
-        translations is not None
-        and disambiguation_config.get("enabled", False)
-        and sentence_store_config.get("enabled", False)
-    ):
+    if translations is not None and disambiguation_config.get("enabled", False):
         logger.info("Starting batch disambiguation...")
 
-        # Get sentence stores from processors
-        # For now, use first processor's store (TODO: support multi-corpus)
+        # Get sentence store from first processor
+        # (TODO: support multi-corpus by combining stores)
         sentence_store = processors[0].get_sentence_store()
-        if sentence_store is not None and sentence_store.exists():
-            # Get corpus reader for sentence texts
-            corpus_config = corpora_configs[0]
-            corpus_type = corpus_config.get("type", "leipzig").lower()
-            max_sentences = corpus_config.get("max_sentences", None)
-            encoding = corpus_config.get("encoding", "utf-8")
-
-            if corpus_type == "leipzig":
-                corpus_reader = LeipzigCorpusReader(
-                    file_path=corpus_config["file_path"],
-                    encoding=encoding,
-                    max_sentences=max_sentences,
-                )
-            else:
-                corpus_reader = OpusCorpusReader(
-                    file_path=corpus_config["file_path"],
-                    encoding=encoding,
-                    max_sentences=max_sentences,
-                )
+        if sentence_store is not None and sentence_store.has_sentences():
+            # Create Vocabulary from translations
+            vocabulary = Vocabulary.from_translations_list(translations)
 
             # Run disambiguation
             model_name = disambiguation_config.get(
                 "model", "dccuchile/bert-base-spanish-wwm-cased"
             )
             disambiguator = BatchDisambiguator(
-                translations=translations,
+                vocabulary=vocabulary,
                 model_name=model_name,
                 batch_size=disambiguation_config.get("batch_size", 32),
             )
 
-            disambiguations_path = (
-                Path(output_dir) / "sentence_disambiguations.jsonl.gz"
-            )
-            disambiguator.process(sentence_store, corpus_reader, disambiguations_path)
-            logger.info(f"Disambiguation results saved to: {disambiguations_path}")
+            # Disambiguation writes directly to SentenceStore
+            disambiguator.process(sentence_store)
+            logger.info("Disambiguation completed and saved to SentenceStore")
 
             # Build co-occurrence matrix (if enabled)
             if cooccurrence_config.get("enabled", False):
                 logger.info("Building co-occurrence matrix...")
-                builder = CoOccurrenceBuilder(translations)
-                matrix = builder.build(disambiguations_path)
+                builder = CoOccurrenceBuilder(vocabulary)
+                matrix = builder.build(sentence_store)
 
                 matrix_path = Path(output_dir) / "cooccurrence_matrix.npz"
                 builder.save(matrix, matrix_path)
                 logger.info(f"Co-occurrence matrix saved to: {matrix_path}")
         else:
             logger.warning(
-                "Sentence store not available - skipping disambiguation. "
-                "Enable sentence_store and clear cache to generate."
+                "SentenceStore not available - skipping disambiguation. "
+                "Clear cache to regenerate."
             )
 
     logger.info("Pipeline completed!")

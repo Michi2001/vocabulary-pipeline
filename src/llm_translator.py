@@ -4,12 +4,13 @@ import hashlib
 import logging
 import re
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from collections import defaultdict
 
 from src.frequency_counter import FrequencyCounter
 from src.llm_providers.base_provider import BaseLLMProvider
 from src.lemma_cache import LemmaCache
+from src.vocab import Translation, Meaning
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class LemmaTranslator:
 
     def translate(
         self, counter: FrequencyCounter, min_frequency: int = 1
-    ) -> tuple[list[dict], dict]:
+    ) -> Tuple[List[Translation], Dict[str, int]]:
         """
         Translate lemmas and return translations.
 
@@ -71,7 +72,7 @@ class LemmaTranslator:
 
         Returns:
             Tuple of (translations, usage_stats):
-                - translations: List of translated lemma entries
+                - translations: List of Translation objects
                 - usage_stats: Dict with token usage statistics
         """
         logger.info("Starting LLM-based lemma translation...")
@@ -174,8 +175,13 @@ class LemmaTranslator:
         if self.cache is not None:
             self.cache.save_all()
 
+        # Convert dicts to Translation objects
+        translation_objects = [
+            Translation.from_dict(t) for t in enriched_translations
+        ]
+
         logger.info(
-            f"Translation complete. Translated {len(enriched_translations)} lemmas"
+            f"Translation complete. Translated {len(translation_objects)} lemmas"
         )
 
         # Log token usage summary
@@ -189,7 +195,7 @@ class LemmaTranslator:
         logger.info(f"Total Tokens:       {total_usage['total_tokens']:,}")
         logger.info("=" * 60 + "\n")
 
-        return enriched_translations, total_usage
+        return translation_objects, total_usage
 
     def _group_by_pos(
         self, frequencies: List[Dict[str, Any]]

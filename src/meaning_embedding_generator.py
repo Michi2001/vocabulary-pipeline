@@ -7,10 +7,12 @@ These embeddings are used later by the BatchDisambiguator for WSD.
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 
 import torch
 from transformers import AutoTokenizer, AutoModel
+
+from src.vocab import Translation
 
 logger = logging.getLogger(__name__)
 
@@ -101,20 +103,22 @@ class MeaningEmbeddingGenerator:
 
         return word_embedding.tolist()
 
-    def generate(self, translations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def generate(self, translations: List[Translation]) -> List[Translation]:
         """
-        Add meaning_embedding to each meaning with extracted target word metadata.
+        Add BERT embedding to each meaning with extracted target word metadata.
 
         Expects that LemmaTranslator has already extracted and stored:
         - _target_word: The target word
         - _target_start: Character start position
         - _target_end: Character end position
 
+        Modifies Translation objects in-place.
+
         Args:
-            translations: List of translation dicts with meanings
+            translations: List of Translation objects
 
         Returns:
-            Same list with meaning_embedding added to each meaning
+            Same list with embeddings added to meanings
         """
         logger.info(f"Generating meaning embeddings for {len(translations)} lemmas...")
 
@@ -123,33 +127,30 @@ class MeaningEmbeddingGenerator:
         missing_metadata = 0
 
         for translation in translations:
-            if "meanings" not in translation:
+            if not translation.meanings:
                 continue
 
-            lemma = translation.get("lemma", "unknown")
-
-            for meaning in translation["meanings"]:
+            for meaning in translation.meanings:
                 total_meanings += 1
-                example_es = meaning.get("example_es", "")
 
-                if not example_es:
+                if not meaning.example_es:
                     continue
 
                 # Check if metadata exists (extracted by LemmaTranslator)
-                if "_target_start" not in meaning or "_target_end" not in meaning:
+                if meaning._target_start is None or meaning._target_end is None:
                     missing_metadata += 1
                     continue
 
-                target_word = meaning.get("_target_word", "unknown")
-                char_start = meaning["_target_start"]
-                char_end = meaning["_target_end"]
+                target_word = meaning._target_word or "unknown"
+                char_start = meaning._target_start
+                char_end = meaning._target_end
 
                 # Generate embedding
                 embedding = self._get_contextual_embedding(
-                    example_es, char_start, char_end, target_word
+                    meaning.example_es, char_start, char_end, target_word
                 )
                 if embedding is not None:
-                    meaning["meaning_embedding"] = embedding
+                    meaning._bert_embedding = embedding
                     successful_embeddings += 1
 
         logger.info(
