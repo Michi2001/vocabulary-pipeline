@@ -43,7 +43,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "poner la mano o los dedos sobre algo o alguien",
         "structure": "tocar",
-        "example_es": "Por favor, no toques las pinturas del museo.",
+        "example_es": "Por favor, no [toques] las pinturas del museo.",
         "estimated_share": 0.48,
         "flags": [],
         "translations": [{"text": "anfassen"}, {"text": "berühren"}]
@@ -51,7 +51,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "producir música con un instrumento",
         "structure": "tocar",
-        "example_es": "Mi hermano toca la guitarra en una banda.",
+        "example_es": "Mi hermano [toca] la guitarra en una banda.",
         "estimated_share": 0.27,
         "flags": [],
         "translations": [{"text": "Instrument spielen"}]
@@ -59,7 +59,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "corresponder el turno o la responsabilidad a alguien",
         "structure": "tocar a [alguien]",
-        "example_es": "A cada uno le toca hacer su parte del trabajo.",
+        "example_es": "A cada uno le [toca] hacer su parte del trabajo.",
         "estimated_share": 0.23,
         "flags": [],
         "translations": [{"text": "an der Reihe sein"}]
@@ -67,7 +67,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "resultar premiado en un sorteo o juego de azar",
         "structure": "tocar a [alguien]",
-        "example_es": "¡Me ha tocado la lotería!",
+        "example_es": "¡Me ha [tocado] la lotería!",
         "estimated_share": 0.02,
         "flags": [],
         "translations": [{"text": "gewinnen", "hint": "Lotterie / Zufall"}]
@@ -82,7 +82,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "permanecer en un lugar sin moverse",
         "structure": "quedarse",
-        "example_es": "Hoy me quedo en casa porque estoy enfermo.",
+        "example_es": "Hoy me [quedo] en casa porque estoy enfermo.",
         "estimated_share": 0.42,
         "flags": [],
         "translations": [{"text": "bleiben"}]
@@ -90,7 +90,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "acordar un encuentro con alguien",
         "structure": "quedar con [alguien]",
-        "example_es": "He quedado con María a las ocho en el cine.",
+        "example_es": "He [quedado] con María a las ocho en el cine.",
         "estimated_share": 0.28,
         "flags": [],
         "translations": [{"text": "sich verabreden"}, {"text": "sich treffen"}]
@@ -98,7 +98,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "restar o sobrar una cantidad",
         "structure": "quedar",
-        "example_es": "Date prisa, solo quedan cinco minutos para que salga el tren.",
+        "example_es": "Date prisa, solo [quedan] cinco minutos para que salga el tren.",
         "estimated_share": 0.18,
         "flags": [],
         "translations": [{"text": "übrig bleiben"}]
@@ -106,7 +106,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "sentar bien o mal una prenda de ropa",
         "structure": "quedar [adverbio / adjetivo] a [alguien]",
-        "example_es": "Esa camisa te queda muy bien.",
+        "example_es": "Esa camisa te [queda] muy bien.",
         "estimated_share": 0.09,
         "flags": [],
         "translations": [{"text": "stehen", "hint": "Kleidung"}, {"text": "passen", "hint": "Kleidung / Größe"}]
@@ -114,7 +114,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "conservar algo para uno mismo",
         "structure": "quedarse con [algo]",
-        "example_es": "Me quedo con este libro, me ha gustado mucho.",
+        "example_es": "Me [quedo] con este libro, me ha gustado mucho.",
         "estimated_share": 0.03,
         "flags": [],
         "translations": [{"text": "behalten"}, {"text": "nehmen"}]
@@ -129,7 +129,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "hacer algo otra vez, repetir una acción",
         "structure": "volver a [infinitivo]",
-        "example_es": "Espero no volver a cometer el mismo error.",
+        "example_es": "Espero no [volver] a cometer el mismo error.",
         "estimated_share": 0.58,
         "flags": [],
         "translations": [{"text": "etwas wieder tun"}]
@@ -137,7 +137,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "regresar al lugar de origen",
         "structure": "volver",
-        "example_es": "Vuelvo a casa después del trabajo.",
+        "example_es": "[Vuelvo] a casa después del trabajo.",
         "estimated_share": 0.35,
         "flags": [],
         "translations": [{"text": "zurückkommen"}, {"text": "zurückkehren"}]
@@ -145,7 +145,7 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "transformarse o cambiar de estado",
         "structure": "volverse [adjetivo / sustantivo]",
-        "example_es": "Con el tiempo se volvió muy desconfiado.",
+        "example_es": "Con el tiempo se [volvió] muy desconfiado.",
         "estimated_share": 0.07,
         "flags": [],
         "translations": [{"text": "werden"}]

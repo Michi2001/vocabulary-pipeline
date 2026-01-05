@@ -20,7 +20,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce un momento específico en el pasado",
         "structure": "cuando [pasado]",
-        "example_es": "Cuando llegué a casa, vi que la puerta estaba abierta.",
+        "example_es": "[Cuando] llegué a casa, vi que la puerta estaba abierta.",
         "estimated_share": 0.46,
         "flags": [],
         "translations": [{"text": "als"}]
@@ -28,7 +28,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce una acción habitual o repetida",
         "structure": "cuando [presente]",
-        "example_es": "Cuando voy al supermercado, siempre compro chocolate.",
+        "example_es": "[Cuando] voy al supermercado, siempre compro chocolate.",
         "estimated_share": 0.32,
         "flags": [],
         "translations": [{"text": "immer wenn"}, {"text": "wenn"}]
@@ -36,7 +36,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce una acción futura o hipotética",
         "structure": "cuando [subjuntivo]",
-        "example_es": "Cuando tengas tiempo, llámame.",
+        "example_es": "[Cuando] tengas tiempo, llámame.",
         "estimated_share": 0.22,
         "flags": [],
         "translations": [{"text": "sobald"}, {"text": "wenn"}]
@@ -51,7 +51,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce una condición o hipótesis",
         "structure": "si [condición]",
-        "example_es": "Si llueve mañana, cancelaremos la barbacoa.",
+        "example_es": "[Si] llueve mañana, cancelaremos la barbacoa.",
         "estimated_share": 0.71,
         "flags": [],
         "translations": [{"text": "wenn"}, {"text": "falls"}]
@@ -59,7 +59,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce una pregunta indirecta sobre alternativas",
         "structure": "si [pregunta indirecta]",
-        "example_es": "No sé si Juan vendrá a la fiesta o se quedará en casa.",
+        "example_es": "No sé [si] Juan vendrá a la fiesta o se quedará en casa.",
         "estimated_share": 0.29,
         "flags": [],
         "translations": [{"text": "ob"}]
@@ -74,7 +74,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce un hecho real que no impide la acción principal",
         "structure": "aunque [indicativo]",
-        "example_es": "Voy a salir a correr aunque hace mucho frío.",
+        "example_es": "Voy a salir a correr [aunque] hace mucho frío.",
         "estimated_share": 0.63,
         "flags": [],
         "translations": [{"text": "obwohl"}, {"text": "obgleich"}]
@@ -82,7 +82,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce una situación hipotética que no impediría la acción",
         "structure": "aunque [subjuntivo]",
-        "example_es": "No compraría ese coche aunque fuera rico.",
+        "example_es": "No compraría ese coche [aunque] fuera rico.",
         "estimated_share": 0.37,
         "flags": [],
         "translations": [{"text": "selbst wenn"}, {"text": "auch wenn"}]
@@ -97,7 +97,7 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce una idea que contrasta con la anterior",
         "structure": "pero",
-        "example_es": "Me gustaría ir a la fiesta, pero tengo que trabajar.",
+        "example_es": "Me gustaría ir a la fiesta, [pero] tengo que trabajar.",
         "estimated_share": 1.0,
         "flags": [],
         "translations": [{"text": "aber"}]

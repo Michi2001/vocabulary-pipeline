@@ -102,6 +102,16 @@ Verwende präzise Werte wie 0.72, 0.23, 0.03, 0.02 statt nur 0.70, 0.20, 0.05, 0
 - Vermeide zu einfache oder zu komplexe Sätze
 - Der Kontext sollte eindeutig sein
 
+**KRITISCH - Zielwort markieren:**
+- Das Zielwort im Beispielsatz MUSS mit eckigen Klammern markiert werden: `[wort]`
+- Markiere die EXAKTE Wortform im Satz (konjugiertes Verb, Plural, etc.)
+- Nur EIN Wort pro Beispiel markieren (das Wort, das die Bedeutung demonstriert)
+- Beispiele:
+  - `"Vivo en la segunda [planta] del edificio."` (Nomen)
+  - `"Por favor, no [toques] las pinturas del museo."` (konjugiertes Verb)
+  - `"El equipo [ganó] la copa tras un partido emocionante."` (Vergangenheit)
+- Die Klammern werden für die automatische Worterkennung bei der Disambiguierung benötigt
+
 ### 4. Structure-Feld
 - **WICHTIG: Sei sehr sparsam mit Platzhaltern!** Verwende sie nur wenn unbedingt notwendig zum Verständnis
 - Die meisten Wörter brauchen KEINE Platzhalter - nur das Lemma reicht

@@ -60,13 +60,6 @@ The pipeline follows a multi-stage architecture with stream-based processing:
    - Cache key includes model config + combined prompt hash (general + POS-specific)
    - Outputs: `translations.json` with enriched frequency data
 
-**Stage 5: Embedding Generation (optional)**
-9. **EmbeddingGenerator** (src/embedding_generator.py) → generates semantic embeddings
-   - Creates vector embeddings for Spanish definitions (`definition_es`)
-   - Uses sentence-transformers models (e.g., LaBSE)
-   - Enables semantic clustering and similarity search
-   - Embeddings stored in `translations.json` under each meaning
-
 This separation enables cache reusability across different configurations and progressive enhancement of the data.
 
 ### Key Components
@@ -128,12 +121,6 @@ This separation enables cache reusability across different configurations and pr
 - Separate prompt hashes for correction vs translation
 - In-memory buffer with periodic disk writes (`save_all()`)
 
-**EmbeddingGenerator** (src/embedding_generator.py)
-- Generates semantic embeddings for Spanish definitions (`definition_es`)
-- Uses sentence-transformers models (default: LaBSE for multilingual support)
-- Batch encoding with progress tracking
-- Adds `embedding` field (vector as list) to each meaning in translations
-- Enables downstream clustering and semantic similarity search
 
 ### Corpus Reader Pattern
 

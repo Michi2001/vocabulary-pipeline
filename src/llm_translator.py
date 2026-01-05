@@ -1,8 +1,8 @@
 """LLM-based lemma translator with caching support."""
 
 import hashlib
-import json
 import logging
+import re
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from collections import defaultdict
@@ -12,6 +12,9 @@ from src.llm_providers.base_provider import BaseLLMProvider
 from src.lemma_cache import LemmaCache
 
 logger = logging.getLogger(__name__)
+
+# Regex for extracting bracketed target word from example sentences
+BRACKET_PATTERN = re.compile(r"\[([^\]]+)\]")
 
 POS_PROMPT_MAP = {
     "VERB": "verb_prompt.txt",
@@ -160,6 +163,9 @@ class LemmaTranslator:
         enriched_translations = self._enrich_with_frequency(
             all_translations, id_mapping
         )
+
+        # Validate and normalize translations
+        self._extract_target_words_and_normalize_translations(enriched_translations)
 
         # Sort by frequency descending (highest frequency first)
         enriched_translations.sort(key=lambda x: x.get("frequency", 0), reverse=True)
@@ -382,21 +388,45 @@ class LemmaTranslator:
         translations: List[Dict[str, Any]],
         id_mapping: Dict[str, Dict],
     ) -> List[Dict[str, Any]]:
-        """Add frequency field to each translation object and normalize estimated_share values."""
-        enriched = []
+        """
+        Add frequency field to each translation object.
 
+        Args:
+            translations: List of translation dicts from LLM
+            id_mapping: Mapping from translation ID to original lemma data
+
+        Returns:
+            Translation list with frequency added
+        """
         for translation in translations:
-            item_id = translation["id"]
-            if item_id in id_mapping:
-                # Add frequency from id_mapping
-                translation["frequency"] = id_mapping[item_id]["frequency"]
+            item_id = translation.get("id", "")
 
-            # Normalize estimated_share values
+            # Add frequency from original data
+            if item_id in id_mapping:
+                translation["frequency"] = id_mapping[item_id]["frequency"]
+            else:
+                logger.warning(f"ID not found in mapping: {item_id}")
+                translation["frequency"] = 0
+
+        return translations
+
+    def _extract_target_words_and_normalize_translations(
+        self, translations: List[Dict[str, Any]]
+    ) -> None:
+        """
+        Normalize estimated shares and extract target words from examples.
+
+        Modifies translations in-place.
+
+        Args:
+            translations: List of translation dicts
+        """
+        for translation in translations:
+            # Normalize estimated shares
             self._normalize_estimated_shares(translation)
 
-            enriched.append(translation)
-
-        return enriched
+            # Extract and process bracketed target words
+            self._extract_target_words(translation)
 
     def _normalize_estimated_shares(self, translation: Dict[str, Any]) -> None:
         """
@@ -443,3 +473,49 @@ class LemmaTranslator:
         for meaning in translation["meanings"]:
             if "estimated_share" in meaning:
                 meaning["estimated_share"] = meaning["estimated_share"] / total_share
+
+    def _extract_target_words(self, translation: Dict[str, Any]) -> None:
+        """
+        Extract bracketed target words from example_es fields.
+
+        For each meaning, checks that example_es contains a bracketed word [word].
+        Extracts the bracketed word, removes brackets from example_es, and stores
+        metadata (_target_word, _target_start, _target_end) for MeaningEmbeddingGenerator.
+        Logs warnings for missing brackets but does not fail.
+        """
+        if "meanings" not in translation or not translation["meanings"]:
+            return
+
+        lemma = translation.get("lemma", "unknown")
+        lemma_id = translation.get("id", "?")
+
+        for idx, meaning in enumerate(translation["meanings"]):
+            example_es = meaning.get("example_es", "")
+            if not example_es:
+                continue
+
+            match = BRACKET_PATTERN.search(example_es)
+            if not match:
+                logger.warning(
+                    f"Lemma '{lemma}' (ID: {lemma_id}), meaning {idx}: "
+                    f"No bracketed word in example_es: '{example_es[:50]}...'"
+                )
+            else:
+                # Extract bracketed word and position
+                target_word = match.group(1)
+                bracket_start = match.start()
+
+                # Position in cleaned sentence (without brackets)
+                char_start = bracket_start
+                char_end = char_start + len(target_word)
+
+                # Remove brackets from example_es
+                cleaned_sentence = example_es.replace(
+                    f"[{target_word}]", target_word, 1
+                )
+                meaning["example_es"] = cleaned_sentence
+
+                # Store metadata for MeaningEmbeddingGenerator
+                meaning["_target_word"] = target_word
+                meaning["_target_start"] = char_start
+                meaning["_target_end"] = char_end

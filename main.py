@@ -23,6 +23,9 @@ from src.llm_corrector import LemmaCorrector
 from src.llm_translator import LemmaTranslator
 from src.lemma_cache import LemmaCache
 from src.embedding_generator import EmbeddingGenerator
+from src.meaning_embedding_generator import MeaningEmbeddingGenerator
+from src.batch_disambiguator import BatchDisambiguator
+from src.cooccurrence_builder import CoOccurrenceBuilder
 
 
 logger = logging.getLogger(__name__)
@@ -45,6 +48,9 @@ if __name__ == "__main__":
     output_config = config["output"]
     cache_config = config.get("cache", {"enabled": False})
     filter_config = config.get("filtering", {})
+    sentence_store_config = config.get("sentence_store", {"enabled": False})
+    disambiguation_config = config.get("disambiguation", {"enabled": False})
+    cooccurrence_config = config.get("cooccurrence", {"enabled": False})
 
     # Create timestamped output directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -123,6 +129,7 @@ if __name__ == "__main__":
             processing_config=processing_config,
             cache_config=cache_config,
             filter_config=filter_config,
+            sentence_store_config=sentence_store_config,
         )
         processors.append(processor)
 
@@ -218,9 +225,84 @@ if __name__ == "__main__":
 
     # Save translations to JSON (if available)
     if translations is not None:
+        # Generate meaning embeddings for disambiguation (if enabled)
+        if disambiguation_config.get("enabled", False):
+            logger.info("Generating meaning embeddings for disambiguation...")
+            model_name = disambiguation_config.get(
+                "model", "dccuchile/bert-base-spanish-wwm-cased"
+            )
+            meaning_emb_generator = MeaningEmbeddingGenerator(
+                model_name=model_name,
+                batch_size=disambiguation_config.get("batch_size", 32),
+            )
+            translations = meaning_emb_generator.generate(translations)
+            logger.info("Meaning embeddings generated")
+
         translations_path = os.path.join(output_dir, "translations.json")
         with open(translations_path, "w", encoding="utf-8") as f:
             json.dump(translations, f, ensure_ascii=False, indent=2)
         logger.info(f"Translations saved to: {translations_path}")
+
+    # Disambiguation and Co-Occurrence Matrix (if enabled)
+    if (
+        translations is not None
+        and disambiguation_config.get("enabled", False)
+        and sentence_store_config.get("enabled", False)
+    ):
+        logger.info("Starting batch disambiguation...")
+
+        # Get sentence stores from processors
+        # For now, use first processor's store (TODO: support multi-corpus)
+        sentence_store = processors[0].get_sentence_store()
+        if sentence_store is not None and sentence_store.exists():
+            # Get corpus reader for sentence texts
+            corpus_config = corpora_configs[0]
+            corpus_type = corpus_config.get("type", "leipzig").lower()
+            max_sentences = corpus_config.get("max_sentences", None)
+            encoding = corpus_config.get("encoding", "utf-8")
+
+            if corpus_type == "leipzig":
+                corpus_reader = LeipzigCorpusReader(
+                    file_path=corpus_config["file_path"],
+                    encoding=encoding,
+                    max_sentences=max_sentences,
+                )
+            else:
+                corpus_reader = OpusCorpusReader(
+                    file_path=corpus_config["file_path"],
+                    encoding=encoding,
+                    max_sentences=max_sentences,
+                )
+
+            # Run disambiguation
+            model_name = disambiguation_config.get(
+                "model", "dccuchile/bert-base-spanish-wwm-cased"
+            )
+            disambiguator = BatchDisambiguator(
+                translations=translations,
+                model_name=model_name,
+                batch_size=disambiguation_config.get("batch_size", 32),
+            )
+
+            disambiguations_path = (
+                Path(output_dir) / "sentence_disambiguations.jsonl.gz"
+            )
+            disambiguator.process(sentence_store, corpus_reader, disambiguations_path)
+            logger.info(f"Disambiguation results saved to: {disambiguations_path}")
+
+            # Build co-occurrence matrix (if enabled)
+            if cooccurrence_config.get("enabled", False):
+                logger.info("Building co-occurrence matrix...")
+                builder = CoOccurrenceBuilder(translations)
+                matrix = builder.build(disambiguations_path)
+
+                matrix_path = Path(output_dir) / "cooccurrence_matrix.npz"
+                builder.save(matrix, matrix_path)
+                logger.info(f"Co-occurrence matrix saved to: {matrix_path}")
+        else:
+            logger.warning(
+                "Sentence store not available - skipping disambiguation. "
+                "Enable sentence_store and clear cache to generate."
+            )
 
     logger.info("Pipeline completed!")

@@ -24,7 +24,7 @@
       {
         "definition_es": "indica que algo ha ocurrido antes del momento presente",
         "structure": "ya",
-        "example_es": "No tengo hambre, ya he comido en casa.",
+        "example_es": "No tengo hambre, [ya] he comido en casa.",
         "estimated_share": 0.78,
         "flags": [],
         "translations": [{"text": "schon"}, {"text": "bereits"}]
@@ -32,7 +32,7 @@
       {
         "definition_es": "indica que algo ha dejado de ocurrir",
         "structure": "ya no",
-        "example_es": "Antes fumaba un paquete al día, pero ya no fumo.",
+        "example_es": "Antes fumaba un paquete al día, pero [ya] no fumo.",
         "estimated_share": 0.17,
         "flags": [],
         "translations": [{"text": "nicht mehr"}]
@@ -40,7 +40,7 @@
       {
         "definition_es": "expresa urgencia o inmediatez",
         "structure": "ya",
-        "example_es": "¡Limpia tu habitación ya, no quiero esperar más!",
+        "example_es": "¡Limpia tu habitación [ya], no quiero esperar más!",
         "estimated_share": 0.05,
         "flags": [],
         "translations": [{"text": "sofort"}, {"text": "jetzt gleich"}]
@@ -55,7 +55,7 @@
       {
         "definition_es": "de manera correcta, adecuada o satisfactoria",
         "structure": "bien",
-        "example_es": "Tu hijo dibuja muy bien para su edad.",
+        "example_es": "Tu hijo dibuja muy [bien] para su edad.",
         "estimated_share": 0.52,
         "flags": [],
         "translations": [{"text": "gut"}]
@@ -63,7 +63,7 @@
       {
         "definition_es": "en buen estado de salud o ánimo",
         "structure": "estar bien",
-        "example_es": "No te preocupes por mí, estoy bien.",
+        "example_es": "No te preocupes por mí, estoy [bien].",
         "estimated_share": 0.38,
         "flags": [],
         "translations": [{"text": "gut"}, {"text": "wohlauf"}]
@@ -71,7 +71,7 @@
       {
         "definition_es": "intensifica un adjetivo, bastante o muy",
         "structure": "bien [adjetivo]",
-        "example_es": "El agua de la piscina está bien fría hoy.",
+        "example_es": "El agua de la piscina está [bien] fría hoy.",
         "estimated_share": 0.10,
         "flags": [],
         "translations": [{"text": "sehr"}, {"text": "ziemlich"}, {"text": "echt"}]
@@ -86,7 +86,7 @@
       {
         "definition_es": "a poca distancia en el espacio",
         "structure": "cerca",
-        "example_es": "Me gusta vivir cerca de la playa para ver el mar.",
+        "example_es": "Me gusta vivir [cerca] de la playa para ver el mar.",
         "estimated_share": 1.0,
         "flags": [],
         "translations": [{"text": "in der Nähe"}, {"text": "nah"}]
