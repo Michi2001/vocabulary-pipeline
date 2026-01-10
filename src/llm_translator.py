@@ -165,8 +165,12 @@ class LemmaTranslator:
             all_translations, id_mapping
         )
 
-        # Validate and normalize translations
-        self._extract_target_words_and_normalize_translations(enriched_translations)
+        for translation in enriched_translations:
+            # Normalize estimated shares
+            self._normalize_estimated_shares(translation)
+
+            # Extract and process bracketed target words
+            self._extract_target_words(translation)
 
         # Sort by frequency descending (highest frequency first)
         enriched_translations.sort(key=lambda x: x.get("frequency", 0), reverse=True)
@@ -176,9 +180,7 @@ class LemmaTranslator:
             self.cache.save_all()
 
         # Convert dicts to Translation objects
-        translation_objects = [
-            Translation.from_dict(t) for t in enriched_translations
-        ]
+        translation_objects = [Translation.from_dict(t) for t in enriched_translations]
 
         logger.info(
             f"Translation complete. Translated {len(translation_objects)} lemmas"
@@ -415,24 +417,6 @@ class LemmaTranslator:
                 translation["frequency"] = 0
 
         return translations
-
-    def _extract_target_words_and_normalize_translations(
-        self, translations: List[Dict[str, Any]]
-    ) -> None:
-        """
-        Normalize estimated shares and extract target words from examples.
-
-        Modifies translations in-place.
-
-        Args:
-            translations: List of translation dicts
-        """
-        for translation in translations:
-            # Normalize estimated shares
-            self._normalize_estimated_shares(translation)
-
-            # Extract and process bracketed target words
-            self._extract_target_words(translation)
 
     def _normalize_estimated_shares(self, translation: Dict[str, Any]) -> None:
         """
