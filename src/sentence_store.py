@@ -8,12 +8,16 @@ All token lists per sentence have the same length and order (index-aligned).
 import gzip
 import json
 import logging
+import pickle
 from pathlib import Path
-from typing import Generator, List, Tuple, Optional, Iterator
+from typing import Generator, List, Tuple, Optional, Iterator, Dict, Set
 
 from src.vocab import LemmaToken
 
 logger = logging.getLogger(__name__)
+
+# Type alias for correction mapping
+CorrectionMapping = Dict[LemmaToken, LemmaToken]
 
 
 class _BaseWriter:
@@ -71,15 +75,6 @@ class LemmatizedWriter(_BaseWriter):
         self._write_line({"sid": sid, "tokens": token_list})
 
 
-class CorrectedWriter(_BaseWriter):
-    """Writer for corrected lemmatized tokens."""
-
-    def write(self, sid: int, tokens: List[LemmaToken]):
-        """Write corrected tokens (lemma, pos) for a sentence."""
-        token_list = [[t[0], t[1]] for t in tokens]
-        self._write_line({"sid": sid, "tokens": token_list})
-
-
 class DisambiguatedWriter(_BaseWriter):
     """Writer for disambiguated variant IDs."""
 
@@ -96,7 +91,7 @@ class SentenceStore:
     Files:
     - sentences.jsonl.gz:     {sid, tokens: ["El", "gato", ...]}
     - lemmatized.jsonl.gz:    {sid, tokens: [["el","DET"], ["gato","NOUN"], ...]}
-    - corrected.jsonl.gz:     {sid, tokens: [["el","DET"], ["gato","NOUN"], ...]}
+    - correction_mapping.pkl: Correction mapping and deleted tokens
     - disambiguated.jsonl.gz: {sid, variants: ["000123", null, ...]}
     """
 
@@ -110,8 +105,13 @@ class SentenceStore:
         self.base_path = Path(base_path)
         self._sentences_path = self.base_path / "sentences.jsonl.gz"
         self._lemmatized_path = self.base_path / "lemmatized.jsonl.gz"
-        self._corrected_path = self.base_path / "corrected.jsonl.gz"
+        self._correction_mapping_path = self.base_path / "correction_mapping.pkl"
         self._disambiguated_path = self.base_path / "disambiguated.jsonl.gz"
+
+        # Lazy-loaded correction data
+        self._correction_mapping: Optional[CorrectionMapping] = None
+        self._deleted_tokens: Optional[Set[LemmaToken]] = None
+        self._corrections_loaded = False
 
     # Writer methods
     def open_sentences_writer(self) -> SentencesWriter:
@@ -122,13 +122,61 @@ class SentenceStore:
         """Open writer for lemmatized tokens."""
         return LemmatizedWriter(self._lemmatized_path)
 
-    def open_corrected_writer(self) -> CorrectedWriter:
-        """Open writer for corrected tokens."""
-        return CorrectedWriter(self._corrected_path)
-
     def open_disambiguated_writer(self) -> DisambiguatedWriter:
         """Open writer for disambiguation results."""
         return DisambiguatedWriter(self._disambiguated_path)
+
+    # Correction mapping methods
+    def save_correction_mapping(
+        self,
+        correction_mapping: CorrectionMapping,
+        deleted_tokens: Set[LemmaToken],
+    ) -> None:
+        """
+        Save correction mapping and deleted tokens to disk.
+
+        Args:
+            correction_mapping: Mapping from original to corrected tokens
+            deleted_tokens: Set of tokens marked for deletion
+        """
+        self.base_path.mkdir(parents=True, exist_ok=True)
+        data = {
+            "correction_mapping": correction_mapping,
+            "deleted_tokens": deleted_tokens,
+        }
+        with open(self._correction_mapping_path, "wb") as f:
+            pickle.dump(data, f)
+        logger.info(
+            f"Saved correction mapping: {len(correction_mapping)} mappings, "
+            f"{len(deleted_tokens)} deleted tokens"
+        )
+
+        # Update in-memory cache
+        self._correction_mapping = correction_mapping
+        self._deleted_tokens = deleted_tokens
+        self._corrections_loaded = True
+
+    def _load_correction_mapping(self) -> None:
+        """Lazy load correction mapping from disk."""
+        if self._corrections_loaded:
+            return
+
+        if not self._correction_mapping_path.exists():
+            raise FileNotFoundError(
+                f"Correction mapping not found: {self._correction_mapping_path}. "
+                "Run LLM correction first or use iter_lemmatized() instead."
+            )
+
+        with open(self._correction_mapping_path, "rb") as f:
+            data = pickle.load(f)
+        self._correction_mapping = data.get("correction_mapping", {})
+        self._deleted_tokens = data.get("deleted_tokens", set())
+        logger.info(
+            f"Loaded correction mapping: {len(self._correction_mapping)} mappings, "
+            f"{len(self._deleted_tokens)} deleted tokens"
+        )
+
+        self._corrections_loaded = True
 
     # Read methods (streaming)
     def iter_sentences(self) -> Generator[Tuple[int, List[str]], None, None]:
@@ -160,17 +208,29 @@ class SentenceStore:
                 yield data["sid"], tokens
 
     def iter_corrected(self) -> Generator[Tuple[int, List[LemmaToken]], None, None]:
-        """Iterate over corrected tokens."""
-        if not self._corrected_path.exists():
-            raise FileNotFoundError(f"Corrected file not found: {self._corrected_path}")
+        """
+        Iterate over corrected tokens by applying correction mapping to lemmatized tokens.
 
-        with gzip.open(self._corrected_path, "rt", encoding="utf-8") as f:
-            for line in f:
-                if not line.strip():
-                    continue
-                data = json.loads(line)
-                tokens = [(t[0], t[1]) for t in data["tokens"]]
-                yield data["sid"], tokens
+        This method applies the correction mapping dynamically, avoiding the need to
+        store a separate corrected.jsonl.gz file.
+        """
+        # Load correction mapping if not already loaded
+        self._load_correction_mapping()
+
+        # Apply corrections dynamically
+        for sid, tokens in self.iter_lemmatized():
+            corrected_tokens = []
+            for token in tokens:
+                if token in self._deleted_tokens:
+                    # Mark deleted tokens with special value
+                    corrected_tokens.append(("_DELETED_", ""))
+                elif token in self._correction_mapping:
+                    # Apply merge correction
+                    corrected_tokens.append(self._correction_mapping[token])
+                else:
+                    # Keep unchanged
+                    corrected_tokens.append(token)
+            yield sid, corrected_tokens
 
     def iter_disambiguated(
         self,
@@ -226,8 +286,8 @@ class SentenceStore:
         return self._lemmatized_path.exists()
 
     def has_corrected(self) -> bool:
-        """Check if corrected file exists."""
-        return self._corrected_path.exists()
+        """Check if correction mapping exists."""
+        return self._correction_mapping_path.exists()
 
     def has_disambiguated(self) -> bool:
         """Check if disambiguated file exists."""
@@ -251,7 +311,7 @@ class SentenceStore:
         if self.has_lemmatized():
             parts.append("lemmatized")
         if self.has_corrected():
-            parts.append("corrected")
+            parts.append("corrections")
         if self.has_disambiguated():
             parts.append("disambiguated")
         return f"SentenceStore({self.base_path}, files=[{', '.join(parts)}])"

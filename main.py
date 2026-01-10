@@ -182,14 +182,11 @@ if __name__ == "__main__":
                     counter, min_frequency=min_freq
                 )
 
-                # Apply corrections to SentenceStore if available
                 sentence_store = processors[0].get_sentence_store()
-                if sentence_store is not None and sentence_store.has_lemmatized():
-                    logger.info("Applying corrections to SentenceStore...")
-                    LemmaCorrector.apply_corrections_to_store(
-                        sentence_store, correction_mapping, deleted_tokens
-                    )
-                    logger.info("SentenceStore corrections applied")
+                sentence_store.save_correction_mapping(
+                    correction_mapping, deleted_tokens
+                )
+                logger.info("Corrections saved to sentence store")
 
                 logger.info("LLM correction completed successfully")
 

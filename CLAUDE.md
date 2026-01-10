@@ -59,7 +59,7 @@ The pipeline follows a multi-stage architecture with stream-based processing:
 3. **Lemmatizer** (src/lemmatizer.py) → yields ALL tokens with original POS tags and lemmas
 4. **SentenceStore** → stores lemmatized tokens in `lemmatized.jsonl.gz` (if enabled)
 5. **FrequencyCounter** (src/frequency_counter.py) → aggregates raw frequencies (lemma|ORIGINAL_POS)
-6. **Cache** → stores raw, unfiltered frequency data
+6. **Cache** → stores raw, unfiltered frequency data in pickle format
 
 **Stage 2: Post-Processing (after cache)**
 7. **PostProcessor** (src/post_processor.py) → applies POS filtering, mapping, lemma cleaning
@@ -70,7 +70,8 @@ The pipeline follows a multi-stage architecture with stream-based processing:
    - Identifies lemmatization errors (e.g., incorrect conjugations)
    - Supports three operations: KEEP, DELETE, MERGE
    - Applies corrections to FrequencyCounter (removes deleted, merges variants)
-   - Applies corrections to SentenceStore → writes `corrected.jsonl.gz`
+   - Saves correction mapping to SentenceStore → `correction_mapping.pkl`
+   - Corrected tokens generated dynamically via `iter_corrected()`
    - Cache key includes model config + system prompt hash
    - Outputs: `original_with_ids.csv`, `llm_corrections.csv`
 
@@ -173,8 +174,9 @@ This separation enables cache reusability across different configurations and pr
 - Four file types:
   - `sentences.jsonl.gz`: Original sentence tokens
   - `lemmatized.jsonl.gz`: Lemmatized tokens (lemma, pos) tuples
-  - `corrected.jsonl.gz`: LLM-corrected tokens
+  - `correction_mapping.pkl`: Correction mapping and deleted tokens (compact)
   - `disambiguated.jsonl.gz`: Variant IDs after disambiguation
+- `iter_corrected()` applies mapping dynamically to lemmatized tokens (no separate file)
 - Streaming readers for memory efficiency
 - Parallel iteration methods (e.g., `iter_sentences_with_lemmatized()`)
 
@@ -285,17 +287,21 @@ The `translations.json` structure (if enabled):
 
 ### SentenceStore Structure (if enabled)
 
-The SentenceStore creates a cache directory with compressed JSONL files:
+The SentenceStore creates a cache directory with compressed files:
 ```
 cache/{corpus_name}/
 └── sentence_store/
-    ├── sentences.jsonl.gz      # Original tokens: {"sid": 0, "tokens": ["El", "gato", ...]}
-    ├── lemmatized.jsonl.gz     # Lemmas: {"sid": 0, "tokens": [["el","DET"], ["gato","NOUN"], ...]}
-    ├── corrected.jsonl.gz      # Corrected (if llm_correction enabled)
-    └── disambiguated.jsonl.gz  # Variant IDs (if disambiguation enabled)
+    ├── sentences.jsonl.gz         # Original tokens: {"sid": 0, "tokens": ["El", "gato", ...]}
+    ├── lemmatized.jsonl.gz        # Lemmas: {"sid": 0, "tokens": [["el","DET"], ["gato","NOUN"], ...]}
+    ├── correction_mapping.pkl     # Correction mapping (if llm_correction enabled)
+    └── disambiguated.jsonl.gz     # Variant IDs (if disambiguation enabled)
 ```
 
-All files are index-aligned: same sentence ID, same token count, same order.
+**Efficiency Design:**
+- `correction_mapping.pkl` stores only the mapping, not full corrected sentences
+- `iter_corrected()` applies mapping dynamically when reading
+- Saves disk space: O(unique corrections) vs O(total sentences)
+- All files are index-aligned: same sentence ID, same token count, same order
 
 ### Memory Efficiency Design
 
@@ -345,7 +351,7 @@ The pipeline stages have the following dependencies:
 - Optional (enabled via `llm_correction.enabled`)
 - Requires: Frequency data from Stage 1-2
 - Outputs: `original_with_ids.csv`, `llm_corrections.csv`, corrected FrequencyCounter
-- If `sentence_store.enabled`: writes `corrected.jsonl.gz`
+- If `sentence_store.enabled`: saves `correction_mapping.pkl` (compact)
 
 **Stage 4: Translation**
 - Optional (enabled via `llm_translation.enabled`)
@@ -362,7 +368,7 @@ The pipeline stages have the following dependencies:
 - Requires:
   - `sentence_store.enabled` (must be true)
   - `translations.json` with embeddings from Stage 5
-  - `sentences.jsonl.gz` and `lemmatized.jsonl.gz` (or `corrected.jsonl.gz`) from SentenceStore
+  - `sentences.jsonl.gz` and `lemmatized.jsonl.gz` (or `correction_mapping.pkl`) from SentenceStore
 - Outputs: `disambiguated.jsonl.gz` in SentenceStore
 
 **Stage 7: Co-Occurrence Matrix**
