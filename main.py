@@ -5,29 +5,35 @@ Lemma Frequency Analysis Pipeline
 Analyzes text corpora, lemmatizes words in context, and generates frequency lists.
 """
 
-import yaml
+import hashlib
 import json
 import logging
 import os
+import pickle
 import shutil
-from pathlib import Path
 from datetime import datetime
-from typing import List, Optional
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
-from src.lemmatizer import Lemmatizer
-from src.output_writer import OutputWriter
-from src.single_corpus_processor import SingleCorpusProcessor
-from src.multi_corpus_processor import MultiCorpusProcessor
-from src.corpus_readers import LeipzigCorpusReader, OpusCorpusReader
-from src.llm_providers import create_provider
-from src.llm_corrector import LemmaCorrector
-from src.llm_translator import LemmaTranslator
-from src.lemma_cache import LemmaCache
-from src.meaning_embedding_generator import MeaningEmbeddingGenerator
+import yaml
+
 from src.batch_disambiguator import BatchDisambiguator
 from src.cooccurrence_builder import CoOccurrenceBuilder
+from src.corpus_processor import CorpusProcessor
+from src.corpus_readers import LeipzigCorpusReader, OpusCorpusReader
+from src.frequency_counter import FrequencyCounter
+from src.lemma_cache import LemmaCache
+from src.lemmatizer import Lemmatizer
+from src.llm_corrector import LemmaCorrector
+from src.llm_providers import create_provider
+from src.llm_translator import LemmaTranslator
+from src.meaning_embedding_generator import MeaningEmbeddingGenerator
+from src.output_writer import OutputWriter
+from src.post_processor import FrequencyPostProcessor
+from src.stores.disambiguated_store import DisambiguatedStore
+from src.stores.lemmatized_store import LemmatizedStore
+from src.stores.sentence_store import SentenceStore
 from src.vocab import Translation, Vocabulary
-
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +42,21 @@ def load_config(config_path: str = "config.yaml") -> dict:
     """Load configuration from YAML file."""
     with open(config_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def generate_vocabulary_hash(translations: List[Translation]) -> str:
+    """Generate hash from vocabulary for disambiguation cache key."""
+    hash_data = []
+    for t in sorted(translations, key=lambda x: (x.lemma, x.pos)):
+        hash_data.append(f"{t.lemma}|{t.pos}|{len(t.meanings)}")
+    content = "|".join(hash_data)
+    return hashlib.sha256(content.encode()).hexdigest()[:12]
+
+
+def generate_disambiguation_cache_key(vocab_hash: str, bert_model: str) -> str:
+    """Generate cache key for disambiguation."""
+    content = f"{vocab_hash}|{bert_model}"
+    return hashlib.sha256(content.encode()).hexdigest()[:12]
 
 
 if __name__ == "__main__":
@@ -69,10 +90,7 @@ if __name__ == "__main__":
 
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
-
-    # Clear any existing handlers to prevent duplicate logs
     root_logger.handlers.clear()
-
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 
@@ -94,12 +112,19 @@ if __name__ == "__main__":
         batch_size=lemma_config.get("batch_size", 1000),
     )
 
-    # Get corpora configurations
+    # =========================================================================
+    # STAGE 1-2: Process all corpora, collect stores
+    # =========================================================================
+    logger.info("=" * 60)
+    logger.info("STAGE 1-2: Processing corpora")
+    logger.info("=" * 60)
+
     corpora_configs = config["corpora"]
     logger.info(f"Processing {len(corpora_configs)} corpora")
 
-    # Create SingleCorpusProcessor for each corpus
-    processors = []
+    corpus_stores: Dict[str, Tuple[SentenceStore, LemmatizedStore, str]] = {}
+    merged_counter = FrequencyCounter()
+
     for corpus_config in corpora_configs:
         corpus_type = corpus_config.get("type", "leipzig").lower()
         max_sentences = corpus_config.get("max_sentences", None)
@@ -122,95 +147,139 @@ if __name__ == "__main__":
                 f"Unknown corpus type: {corpus_type}. Supported types: 'leipzig', 'opus'"
             )
 
-        processor = SingleCorpusProcessor(
+        processor = CorpusProcessor(
             corpus_config=corpus_config,
             reader=reader,
             lemmatizer=lemmatizer,
             processing_config=processing_config,
             cache_config=cache_config,
-            filter_config=filter_config,
         )
-        processors.append(processor)
 
-    # Process all corpora
-    multi_processor = MultiCorpusProcessor(processors=processors)
-    counter = multi_processor.process()
+        sentence_store, lemmatized_store, counter = processor.process()
+        cache_key = processor.get_cache_key()
 
-    # Initialize shared LLM cache once (used by both correction and translation)
-    llm_cache_config = config.get("llm_cache", {"enabled": True, "directory": "cache"})
-    llm_cache = (
-        LemmaCache(llm_cache_config) if llm_cache_config.get("enabled", True) else None
-    )
+        corpus_name = corpus_config.get("name", Path(corpus_config["file_path"]).stem)
+        corpus_stores[corpus_name] = (sentence_store, lemmatized_store, cache_key)
 
-    # Optional: LLM-based correction
-    correction_config = config.get("llm_correction", {})
+        merged_counter.merge(counter)
+        logger.info(f"Processed {corpus_name}: {counter.total_tokens:,} tokens")
+
+    # Apply post-processing to merged counter
+    if filter_config:
+        logger.info("Applying post-processing filters to merged data...")
+        processor = FrequencyPostProcessor(filter_config)
+        merged_counter = processor.process(merged_counter)
+
+    # =========================================================================
+    # STAGE 3: LLM Correction (global mapping)
+    # =========================================================================
+    correction_mapping_path = Path(output_dir) / "correction_mapping.pkl"
     correction_mapping = None
     deleted_tokens = None
+
+    correction_config = config.get("llm_correction", {})
     if correction_config.get("enabled", False):
-        logger.info("LLM correction enabled - applying corrections...")
+        logger.info("=" * 60)
+        logger.info("STAGE 3: LLM Correction")
+        logger.info("=" * 60)
 
-        try:
-            # Load system prompt from file
-            prompt_file = correction_config.get(
-                "system_prompt_file", "config/llm_system_prompt.txt"
+        # Initialize shared LLM cache
+        llm_cache_config = config.get(
+            "llm_cache", {"enabled": True, "directory": "cache"}
+        )
+        llm_cache = (
+            LemmaCache(llm_cache_config)
+            if llm_cache_config.get("enabled", True)
+            else None
+        )
+
+        # Load system prompt
+        prompt_file = correction_config.get(
+            "system_prompt_file", "config/llm_system_prompt.txt"
+        )
+        with open(prompt_file, "r", encoding="utf-8") as f:
+            system_prompt = f.read()
+
+        if not system_prompt or not system_prompt.strip():
+            raise ValueError(
+                f"System prompt is empty or could not be loaded from: {prompt_file}"
             )
-            with open(prompt_file, "r", encoding="utf-8") as f:
-                system_prompt = f.read()
 
-            if system_prompt:
-                # Get provider config
-                provider_type = correction_config["llm"]["type"]
-                provider_config = correction_config["llm"].get(provider_type, {})
+        # Create provider and corrector
+        provider_type = correction_config["llm"]["type"]
+        provider_config = correction_config["llm"].get(provider_type, {})
+        correction_provider = create_provider(provider_type, provider_config)
 
-                # Create provider
-                correction_provider = create_provider(provider_type, provider_config)
+        corrector_config = {
+            "batch_size": correction_config.get("batch_size", 50),
+            "system_prompt": system_prompt,
+            "output_dir": output_dir,
+            "slice": correction_config.get("slice", None),
+        }
+        corrector = LemmaCorrector(correction_provider, llm_cache, corrector_config)
 
-                # Create corrector
-                corrector_config = {
-                    "batch_size": correction_config.get("batch_size", 50),
-                    "system_prompt": system_prompt,
-                    "output_dir": output_dir,
-                    "slice": correction_config.get("slice", None),
-                }
-                corrector = LemmaCorrector(
-                    correction_provider, llm_cache, corrector_config
-                )
+        # Apply corrections
+        min_freq = processing_config.get("min_frequency", 1)
+        merged_counter, correction_mapping, deleted_tokens = corrector.correct(
+            merged_counter, min_frequency=min_freq
+        )
 
-                # Apply corrections - returns (counter, mapping, deleted)
-                min_freq = processing_config.get("min_frequency", 1)
-                counter, correction_mapping, deleted_tokens = corrector.correct(
-                    counter, min_frequency=min_freq
-                )
+        # Save global correction mapping
+        mapping_data = {
+            "correction_mapping": correction_mapping,
+            "deleted_tokens": deleted_tokens,
+        }
+        with open(correction_mapping_path, "wb") as f:
+            pickle.dump(mapping_data, f)
+        logger.info(f"Global correction mapping saved to: {correction_mapping_path}")
 
-                sentence_store = processors[0].get_sentence_store()
-                sentence_store.save_correction_mapping(
-                    correction_mapping, deleted_tokens
-                )
-                logger.info("Corrections saved to sentence store")
+        # Link correction mapping to ALL LemmatizedStores
+        for corpus_name, (
+            sent_store,
+            lemma_store,
+            cache_key,
+        ) in corpus_stores.items():
+            lemma_store.set_correction_mapping(
+                correction_mapping, deleted_tokens, correction_mapping_path
+            )
+        logger.info(
+            f"Correction mapping linked to {len(corpus_stores)} LemmatizedStores"
+        )
 
-                logger.info("LLM correction completed successfully")
-
-        except Exception as e:
-            logger.error(f"LLM correction failed: {e}")
-            logger.warning("Continuing with uncorrected data")
+        logger.info("LLM correction completed successfully")
 
     # Output lemma frequencies to CSV
-    stats = counter.get_statistics()
+    stats = merged_counter.get_statistics()
     logger.info(
         f"\nFinal statistics:\n"
         f"  Total tokens: {stats['total_tokens']:,}\n"
         f"  Unique lemmas: {stats['unique_lemmas']:,}"
     )
     min_freq = processing_config.get("min_frequency", 1)
-    frequencies = counter.get_sorted_frequencies(min_frequency=min_freq)
+    frequencies = merged_counter.get_sorted_frequencies(min_frequency=min_freq)
     output_path = os.path.join(output_dir, "output.csv")
     OutputWriter.write_csv(frequencies, output_path)
 
-    # Optional: LLM-based translation
+    # =========================================================================
+    # STAGE 4: Translation
+    # =========================================================================
     translations: Optional[List[Translation]] = None
     translation_config = config.get("llm_translation", {})
     if translation_config.get("enabled", False):
-        logger.info("LLM translation enabled - translating lemmas...")
+        logger.info("=" * 60)
+        logger.info("STAGE 4: Translation")
+        logger.info("=" * 60)
+
+        # Initialize shared LLM cache if not already done
+        if "llm_cache" not in locals():
+            llm_cache_config = config.get(
+                "llm_cache", {"enabled": True, "directory": "cache"}
+            )
+            llm_cache = (
+                LemmaCache(llm_cache_config)
+                if llm_cache_config.get("enabled", True)
+                else None
+            )
 
         provider_type = translation_config["llm"]["type"]
         provider_config = translation_config["llm"].get(provider_type, {})
@@ -227,71 +296,106 @@ if __name__ == "__main__":
         translator = LemmaTranslator(translation_provider, llm_cache, translator_config)
         min_freq = processing_config.get("min_frequency", 1)
         translations, usage_stats = translator.translate(
-            counter, min_frequency=min_freq
+            merged_counter, min_frequency=min_freq
         )
 
         logger.info("LLM translation completed")
 
+    # =========================================================================
+    # STAGE 5: Meaning Embeddings
+    # =========================================================================
+    if translations is not None and disambiguation_config.get("enabled", False):
+        logger.info("=" * 60)
+        logger.info("STAGE 5: Meaning Embeddings")
+        logger.info("=" * 60)
+
+        model_name = disambiguation_config.get(
+            "model", "dccuchile/bert-base-spanish-wwm-cased"
+        )
+        meaning_emb_generator = MeaningEmbeddingGenerator(
+            model_name=model_name,
+            batch_size=disambiguation_config.get("batch_size", 32),
+        )
+        translations = meaning_emb_generator.generate(translations)
+        logger.info("Meaning embeddings generated")
+
     # Save translations to JSON (if available)
     if translations is not None:
-        # Generate meaning embeddings for disambiguation (if enabled)
-        if disambiguation_config.get("enabled", False):
-            logger.info("Generating meaning embeddings for disambiguation...")
-            model_name = disambiguation_config.get(
-                "model", "dccuchile/bert-base-spanish-wwm-cased"
-            )
-            meaning_emb_generator = MeaningEmbeddingGenerator(
-                model_name=model_name,
-                batch_size=disambiguation_config.get("batch_size", 32),
-            )
-            translations = meaning_emb_generator.generate(translations)
-            logger.info("Meaning embeddings generated")
-
-        # Save translations as JSON (convert Translation objects to dicts)
         translations_path = os.path.join(output_dir, "translations.json")
         translations_dicts = [t.to_dict() for t in translations]
         with open(translations_path, "w", encoding="utf-8") as f:
             json.dump(translations_dicts, f, ensure_ascii=False, indent=2)
         logger.info(f"Translations saved to: {translations_path}")
 
-    # Disambiguation and Co-Occurrence Matrix (if enabled)
+    # =========================================================================
+    # STAGE 6: Disambiguation (ALL corpora)
+    # =========================================================================
+    disambiguated_stores: List[DisambiguatedStore] = []
+
     if translations is not None and disambiguation_config.get("enabled", False):
-        logger.info("Starting batch disambiguation...")
+        logger.info("=" * 60)
+        logger.info("STAGE 6: Disambiguation")
+        logger.info("=" * 60)
 
-        # Get sentence store from first processor
-        # (TODO: support multi-corpus by combining stores)
-        sentence_store = processors[0].get_sentence_store()
-        if sentence_store is not None and sentence_store.has_sentences():
-            # Create Vocabulary from translations
-            vocabulary = Vocabulary.from_translations_list(translations)
+        vocabulary = Vocabulary.from_translations_list(translations)
+        vocab_hash = generate_vocabulary_hash(translations)
+        bert_model = disambiguation_config.get(
+            "model", "dccuchile/bert-base-spanish-wwm-cased"
+        )
+        disambiguation_cache_key = generate_disambiguation_cache_key(
+            vocab_hash, bert_model
+        )
 
-            # Run disambiguation
-            model_name = disambiguation_config.get(
-                "model", "dccuchile/bert-base-spanish-wwm-cased"
-            )
-            disambiguator = BatchDisambiguator(
-                vocabulary=vocabulary,
-                model_name=model_name,
-                batch_size=disambiguation_config.get("batch_size", 32),
-            )
+        disambiguator = BatchDisambiguator(
+            vocabulary=vocabulary,
+            model_name=bert_model,
+            batch_size=disambiguation_config.get("batch_size", 32),
+        )
 
-            # Disambiguation writes directly to SentenceStore
-            disambiguator.process(sentence_store)
-            logger.info("Disambiguation completed and saved to SentenceStore")
+        for corpus_name, (sent_store, lemma_store, cache_key) in corpus_stores.items():
+            logger.info(f"Disambiguating: {corpus_name}")
 
-            # Build co-occurrence matrix (if enabled)
-            if cooccurrence_config.get("enabled", False):
-                logger.info("Building co-occurrence matrix...")
-                builder = CoOccurrenceBuilder(vocabulary)
-                matrix = builder.build(sentence_store)
-
-                matrix_path = Path(output_dir) / "cooccurrence_matrix.npz"
-                builder.save(matrix, matrix_path)
-                logger.info(f"Co-occurrence matrix saved to: {matrix_path}")
-        else:
-            logger.warning(
-                "SentenceStore not available - skipping disambiguation. "
-                "Clear cache to regenerate."
+            # Cache path for this corpus's disambiguation
+            cache_base = Path(cache_config.get("directory", "cache"))
+            corpus_cache_dir = cache_base / corpus_name / cache_key
+            output_path = (
+                corpus_cache_dir
+                / disambiguation_cache_key
+                / "DisambiguatedStore.jsonl.gz"
             )
 
+            # Check if already cached
+            if output_path.exists():
+                logger.info(f"  Loading from cache: {output_path}")
+                dis_store = DisambiguatedStore(output_path)
+            else:
+                logger.info(f"  Processing...")
+                dis_store = disambiguator.process(
+                    sent_store,
+                    lemma_store,
+                    output_path,
+                    use_corrections=correction_mapping_path.exists(),
+                )
+
+            disambiguated_stores.append(dis_store)
+
+        logger.info(f"Disambiguation complete for {len(disambiguated_stores)} corpora")
+
+    # =========================================================================
+    # STAGE 7: Co-Occurrence Matrix (ALL corpora)
+    # =========================================================================
+    if disambiguated_stores and cooccurrence_config.get("enabled", False):
+        logger.info("=" * 60)
+        logger.info("STAGE 7: Co-Occurrence Matrix")
+        logger.info("=" * 60)
+
+        builder = CoOccurrenceBuilder(vocabulary)
+        matrix = builder.build(disambiguated_stores)
+
+        matrix_path = Path(output_dir) / "cooccurrence_matrix.npz"
+        builder.save(matrix, matrix_path)
+        logger.info(f"Co-occurrence matrix saved to: {matrix_path}")
+
+    logger.info("=" * 60)
     logger.info("Pipeline completed!")
+    logger.info("=" * 60)

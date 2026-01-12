@@ -8,13 +8,13 @@ Matrix dimensions are num_word_variants x num_word_variants.
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Any, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 import numpy as np
 from scipy import sparse
 
+from src.stores.disambiguated_store import DisambiguatedStore
 from src.vocab import Vocabulary
-from src.sentence_store import SentenceStore
 
 logger = logging.getLogger(__name__)
 
@@ -61,67 +61,78 @@ class CoOccurrenceBuilder:
 
         logger.info(f"Built variant index with {len(self.variant_ids)} word variants")
 
-    def build(self, sentence_store: SentenceStore) -> sparse.csr_matrix:
+    def build(self, disambiguated_stores: List[DisambiguatedStore]) -> sparse.csr_matrix:
         """
-        Build co-occurrence matrix from disambiguated sentences in store.
+        Build co-occurrence matrix from multiple disambiguated stores.
 
         Args:
-            sentence_store: SentenceStore with disambiguated data
+            disambiguated_stores: List of DisambiguatedStore objects (one per corpus)
 
         Returns:
             Sparse co-occurrence matrix (symmetric)
         """
-        if not sentence_store.has_disambiguated():
-            raise ValueError("SentenceStore has no disambiguation data")
-
         n = len(self.variant_ids)
-        logger.info(f"Building {n}x{n} co-occurrence matrix...")
+        logger.info(f"Building {n}x{n} co-occurrence matrix from {len(disambiguated_stores)} corpora...")
 
         # Use lil_matrix for efficient incremental construction
         matrix = sparse.lil_matrix((n, n), dtype=np.float32)
 
-        sentence_count = 0
-        pair_count = 0
+        total_sentence_count = 0
+        total_pair_count = 0
 
-        for sid, variants in sentence_store.iter_disambiguated():
-            # Filter out None values (tokens not in vocabulary)
-            variant_ids_in_sentence = [v for v in variants if v is not None]
+        # Process all stores
+        for store_idx, store in enumerate(disambiguated_stores, 1):
+            logger.info(f"Processing store {store_idx}/{len(disambiguated_stores)}")
 
-            # Count co-occurrences (all pairs)
-            seen_pairs: Set[Tuple[int, int]] = set()
-            for i, vid_i in enumerate(variant_ids_in_sentence):
-                if vid_i not in self.variant_to_idx:
-                    continue
-                idx_i = self.variant_to_idx[vid_i]
+            sentence_count = 0
+            pair_count = 0
 
-                for j, vid_j in enumerate(variant_ids_in_sentence):
-                    if i >= j:  # Skip self and duplicates (symmetric)
+            for sid, variants in store:
+                # Filter out None values (tokens not in vocabulary)
+                variant_ids_in_sentence = [v for v in variants if v is not None]
+
+                # Count co-occurrences (all pairs)
+                seen_pairs: Set[Tuple[int, int]] = set()
+                for i, vid_i in enumerate(variant_ids_in_sentence):
+                    if vid_i not in self.variant_to_idx:
                         continue
-                    if vid_j not in self.variant_to_idx:
-                        continue
-                    idx_j = self.variant_to_idx[vid_j]
+                    idx_i = self.variant_to_idx[vid_i]
 
-                    # Ensure consistent ordering for symmetric matrix
-                    if idx_i > idx_j:
-                        idx_i, idx_j = idx_j, idx_i
+                    for j, vid_j in enumerate(variant_ids_in_sentence):
+                        if i >= j:  # Skip self and duplicates (symmetric)
+                            continue
+                        if vid_j not in self.variant_to_idx:
+                            continue
+                        idx_j = self.variant_to_idx[vid_j]
 
-                    pair_key = (idx_i, idx_j)
-                    if pair_key not in seen_pairs:
-                        matrix[idx_i, idx_j] += 1
-                        matrix[idx_j, idx_i] += 1  # Symmetric
-                        seen_pairs.add(pair_key)
-                        pair_count += 1
+                        # Ensure consistent ordering for symmetric matrix
+                        if idx_i > idx_j:
+                            idx_i, idx_j = idx_j, idx_i
 
-            sentence_count += 1
-            if sentence_count % 50000 == 0:
-                logger.info(
-                    f"Processed {sentence_count:,} sentences, "
-                    f"{pair_count:,} co-occurrence pairs"
-                )
+                        pair_key = (idx_i, idx_j)
+                        if pair_key not in seen_pairs:
+                            matrix[idx_i, idx_j] += 1
+                            matrix[idx_j, idx_i] += 1  # Symmetric
+                            seen_pairs.add(pair_key)
+                            pair_count += 1
+
+                sentence_count += 1
+                if sentence_count % 50000 == 0:
+                    logger.info(
+                        f"  Store {store_idx}: {sentence_count:,} sentences, "
+                        f"{pair_count:,} pairs"
+                    )
+
+            total_sentence_count += sentence_count
+            total_pair_count += pair_count
+            logger.info(
+                f"  Store {store_idx} complete: {sentence_count:,} sentences, "
+                f"{pair_count:,} pairs"
+            )
 
         logger.info(
-            f"Matrix construction complete: {sentence_count:,} sentences, "
-            f"{pair_count:,} unique co-occurrence pairs"
+            f"Matrix construction complete: {total_sentence_count:,} total sentences from "
+            f"{len(disambiguated_stores)} corpora, {total_pair_count:,} unique co-occurrence pairs"
         )
 
         # Convert to CSR for efficient storage and operations

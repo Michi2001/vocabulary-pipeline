@@ -3,18 +3,21 @@ Batch Word Sense Disambiguator.
 
 Disambiguates polysemous words in sentences using pre-computed meaning embeddings.
 Processes sentences in batches for efficiency with large corpora.
-Uses index-aligned SentenceStore for efficient token lookup.
+Uses index-aligned stores for efficient token lookup.
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple, Set
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
-import torch
 import numpy as np
-from transformers import AutoTokenizer, AutoModel
+import torch
+from transformers import AutoModel, AutoTokenizer
 
-from src.vocab import Vocabulary, LemmaToken
-from src.sentence_store import SentenceStore
+from src.stores.disambiguated_store import DisambiguatedStore
+from src.stores.lemmatized_store import LemmatizedStore
+from src.stores.sentence_store import SentenceStore
+from src.vocab import LemmaToken, Vocabulary
 
 logger = logging.getLogger(__name__)
 
@@ -233,32 +236,41 @@ class BatchDisambiguator:
 
         return best_variant_id
 
-    def process(self, sentence_store: SentenceStore) -> None:
+    def process(
+        self,
+        sentence_store: SentenceStore,
+        lemmatized_store: LemmatizedStore,
+        output_path: Path,
+        use_corrections: bool = True,
+    ) -> DisambiguatedStore:
         """
-        Process all sentences and write disambiguation results to store.
-
-        Reads corrected tokens (if available) or lemmatized tokens,
-        disambiguates each token, and writes results to disambiguated.jsonl.gz.
+        Process sentences and write disambiguation results.
 
         Args:
-            sentence_store: SentenceStore with sentence and lemma data
+            sentence_store: Store with original tokens
+            lemmatized_store: Store with lemmatized tokens
+            output_path: Path for DisambiguatedStore output file
+            use_corrections: Whether to use corrected lemmas (if available)
+
+        Returns:
+            DisambiguatedStore pointing to the created file
         """
         logger.info("Starting batch disambiguation...")
 
         # Determine which lemma source to use
-        if sentence_store.has_corrected():
+        if use_corrections and lemmatized_store.has_corrections():
             logger.info("Using corrected lemmas for disambiguation")
-            lemma_iterator = sentence_store.iter_sentences_with_corrected()
+            lemma_iterator = lemmatized_store.iter_corrected_with_sentences(sentence_store)
         else:
-            logger.info(
-                "Using original lemmas for disambiguation (no corrections found)"
-            )
-            lemma_iterator = sentence_store.iter_sentences_with_lemmatized()
+            logger.info("Using original lemmas for disambiguation")
+            lemma_iterator = lemmatized_store.iter_with_sentences(sentence_store)
 
         total_sentences = 0
         total_disambiguated = 0
 
-        with sentence_store.open_disambiguated_writer() as writer:
+        disambiguated_store = DisambiguatedStore(output_path)
+
+        with disambiguated_store.open_writer() as writer:
             for sid, original_tokens, lemma_tokens in lemma_iterator:
                 # Reconstruct sentence text from original tokens
                 sentence_text = " ".join(original_tokens)
@@ -286,3 +298,5 @@ class BatchDisambiguator:
             f"Disambiguation complete: {total_sentences:,} sentences, "
             f"{total_disambiguated:,} tokens disambiguated"
         )
+
+        return disambiguated_store

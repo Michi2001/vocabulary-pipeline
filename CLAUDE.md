@@ -55,11 +55,11 @@ The pipeline follows a multi-stage architecture with stream-based processing:
 
 **Stage 1: Frequency Analysis (with caching)**
 1. **CorpusReader** (src/corpus_readers/) → yields sentence batches
-2. **SentenceStore** (src/sentence_store.py) → stores original tokens in `sentences.jsonl.gz` (if enabled)
+2. **SentenceStore** (src/stores/sentence_store.py) → stores original tokens in `SentenceStore.jsonl.gz`
 3. **Lemmatizer** (src/lemmatizer.py) → yields ALL tokens with original POS tags and lemmas
-4. **SentenceStore** → stores lemmatized tokens in `lemmatized.jsonl.gz` (if enabled)
+4. **LemmatizedStore** (src/stores/lemmatized_store.py) → stores lemmatized tokens in `LemmatizedStore.jsonl.gz`
 5. **FrequencyCounter** (src/frequency_counter.py) → aggregates raw frequencies (lemma|ORIGINAL_POS)
-6. **Cache** → stores raw, unfiltered frequency data in pickle format
+6. **Cache** → stores raw, unfiltered frequency data in `FrequencyCounter.pkl`
 
 **Stage 2: Post-Processing (after cache)**
 7. **PostProcessor** (src/post_processor.py) → applies POS filtering, mapping, lemma cleaning
@@ -70,10 +70,11 @@ The pipeline follows a multi-stage architecture with stream-based processing:
    - Identifies lemmatization errors (e.g., incorrect conjugations)
    - Supports three operations: KEEP, DELETE, MERGE
    - Applies corrections to FrequencyCounter (removes deleted, merges variants)
-   - Saves correction mapping to SentenceStore → `correction_mapping.pkl`
+   - Saves global correction mapping to output directory → `correction_mapping.pkl`
+   - Mapping linked to all LemmatizedStores (no duplication)
    - Corrected tokens generated dynamically via `iter_corrected()`
    - Cache key includes model config + system prompt hash
-   - Outputs: `original_with_ids.csv`, `llm_corrections.csv`
+   - Outputs: `original_with_ids.csv`, `llm_corrections.csv`, `correction_mapping.pkl`
 
 **Stage 4: Translation (optional, with caching)**
 10. **LemmaTranslator** (src/llm_translator.py) → translates Spanish lemmas to German
@@ -89,37 +90,42 @@ The pipeline follows a multi-stage architecture with stream-based processing:
     - Uses target word masking to extract context embeddings
     - Adds `meaning_embedding` field to each meaning in `translations.json`
 
-**Stage 6: Word Sense Disambiguation (optional, requires embeddings + sentence_store)**
+**Stage 6: Word Sense Disambiguation (optional, requires embeddings + stores)**
 12. **Vocabulary** (src/vocab.py) → builds from translations
     - Creates WordVariant objects (one per meaning)
     - Provides lookup structures for disambiguation
 13. **BatchDisambiguator** (src/batch_disambiguator.py) → disambiguates corpus tokens
+    - Processes ALL corpora (multi-corpus support)
     - Compares runtime token embeddings with pre-computed meaning embeddings
     - Uses cosine similarity to select best meaning variant
     - Processes corrected lemmas if available, otherwise uses original lemmas
-    - Writes variant IDs to SentenceStore → `disambiguated.jsonl.gz`
+    - Writes variant IDs to DisambiguatedStore → `DisambiguatedStore.jsonl.gz` (per corpus)
+    - Includes caching: checks if disambiguation already exists for vocabulary + BERT model
 
 **Stage 7: Co-Occurrence Matrix (optional, requires disambiguation)**
 14. **CoOccurrenceBuilder** (src/cooccurrence_builder.py) → builds co-occurrence matrix
-    - Uses disambiguated variant IDs from SentenceStore
-    - Creates sparse co-occurrence matrix across corpus
+    - Processes ALL disambiguated stores from all corpora
+    - Creates sparse co-occurrence matrix across all corpora
     - Outputs: `cooccurrence_matrix.npz`
 
 This separation enables cache reusability across different configurations and progressive enhancement of the data through the pipeline stages.
 
 ### Key Components
 
-**SingleCorpusProcessor** (src/single_corpus_processor.py)
+**CorpusProcessor** (src/corpus_processor.py)
 - Orchestrates processing for one corpus
 - Implements caching using pickle with hash-based keys (corpus filename, mtime, model, max_sentences)
-- Integrates PostProcessor for filtering after cache load
-- Creates and manages SentenceStore (if `sentence_store.enabled`)
-- Cache structure: `cache/{corpus_name}/{hash}.pkl` (frequency data)
-- SentenceStore structure: `cache/{corpus_name}/sentence_store/` (sentence data)
+- Returns tuple: (SentenceStore, LemmatizedStore, FrequencyCounter)
+- Cache structure: `cache/{corpus_name}/{cache_key}/` with:
+  - `SentenceStore.jsonl.gz` (sentence tokens)
+  - `LemmatizedStore.jsonl.gz` (lemmatized tokens)
+  - `FrequencyCounter.pkl` (frequency data)
 
-**MultiCorpusProcessor** (src/multi_corpus_processor.py)
+**Main Pipeline** (main.py)
 - Processes multiple corpora sequentially
 - Merges frequency counts across all corpora using `FrequencyCounter.merge()`
+- Manages global correction mapping (stored once in output directory)
+- Orchestrates disambiguation across ALL corpora
 
 **Lemmatizer** (src/lemmatizer.py)
 - Uses spaCy for contextual lemmatization
@@ -168,17 +174,31 @@ This separation enables cache reusability across different configurations and pr
 - Separate prompt hashes for correction vs translation
 - In-memory buffer with periodic disk writes (`save_all()`)
 
-**SentenceStore** (src/sentence_store.py)
-- Stores sentence data in separate compressed JSONL files
-- Index-aligned architecture: all token lists have same length/order per sentence
-- Four file types:
-  - `sentences.jsonl.gz`: Original sentence tokens
-  - `lemmatized.jsonl.gz`: Lemmatized tokens (lemma, pos) tuples
-  - `correction_mapping.pkl`: Correction mapping and deleted tokens (compact)
-  - `disambiguated.jsonl.gz`: Variant IDs after disambiguation
-- `iter_corrected()` applies mapping dynamically to lemmatized tokens (no separate file)
-- Streaming readers for memory efficiency
-- Parallel iteration methods (e.g., `iter_sentences_with_lemmatized()`)
+**BaseStore** (src/stores/base_store.py)
+- Abstract base class for all store types
+- Provides common interface: `__iter__()`, `iter_batched()`, `open_writer()`, `exists()`, `count()`
+- Uses generic type parameter for type safety
+- All stores use compressed JSONL format (.jsonl.gz)
+
+**SentenceStore** (src/stores/sentence_store.py)
+- Stores original sentence tokens
+- Format: `{"sid": int, "tokens": ["El", "gato", ...]}`
+
+**LemmatizedStore** (src/stores/lemmatized_store.py)
+- Stores lemmatized tokens (lemma, pos) tuples
+- Format: `{"sid": int, "tokens": [["el", "DET"], ["gato", "NOUN"], ...]}`
+- Supports correction mapping (loaded from global file in output directory)
+- `iter_corrected()` applies mapping dynamically (no separate file needed)
+- Parallel iteration methods: `iter_with_sentences()`, `iter_corrected_with_sentences()`
+
+**DisambiguatedStore** (src/stores/disambiguated_store.py)
+- Stores word variant IDs after disambiguation
+- Format: `{"sid": int, "variants": ["000123_0", null, "000456_1", ...]}`
+
+**Index-Aligned Architecture:**
+- All stores maintain same sentence ID order
+- Token lists have identical length and order per sentence
+- Enables efficient parallel iteration without re-indexing
 
 **Vocabulary** (src/vocab.py)
 - Central storage for translation data
@@ -202,12 +222,15 @@ This separation enables cache reusability across different configurations and pr
 - Compares runtime token embeddings with pre-computed meaning embeddings
 - Uses cosine similarity for meaning selection
 - Handles mono-semantic and polysemous lemmas separately
-- Writes results directly to SentenceStore
+- Takes SentenceStore and LemmatizedStore as input
+- Returns DisambiguatedStore
+- Supports caching: checks if disambiguation already exists
 
 **CoOccurrenceBuilder** (src/cooccurrence_builder.py)
-- Builds co-occurrence matrix from disambiguated corpus
+- Builds co-occurrence matrix from multiple disambiguated stores
+- Takes List[DisambiguatedStore] (supports multi-corpus)
 - Uses sparse matrix format for memory efficiency
-- Counts variant co-occurrences within sentences
+- Counts variant co-occurrences within sentences across all corpora
 - Outputs: `cooccurrence_matrix.npz`
 
 
@@ -285,23 +308,29 @@ The `translations.json` structure (if enabled):
 ]
 ```
 
-### SentenceStore Structure (if enabled)
+### Store Structure
 
-The SentenceStore creates a cache directory with compressed files:
+The pipeline creates separate store files per corpus:
 ```
-cache/{corpus_name}/
-└── sentence_store/
-    ├── sentences.jsonl.gz         # Original tokens: {"sid": 0, "tokens": ["El", "gato", ...]}
-    ├── lemmatized.jsonl.gz        # Lemmas: {"sid": 0, "tokens": [["el","DET"], ["gato","NOUN"], ...]}
-    ├── correction_mapping.pkl     # Correction mapping (if llm_correction enabled)
-    └── disambiguated.jsonl.gz     # Variant IDs (if disambiguation enabled)
+cache/{corpus_name}/{cache_key}/
+├── SentenceStore.jsonl.gz         # Original tokens: {"sid": 0, "tokens": ["El", "gato", ...]}
+├── LemmatizedStore.jsonl.gz       # Lemmas: {"sid": 0, "tokens": [["el","DET"], ["gato","NOUN"], ...]}
+├── FrequencyCounter.pkl           # Raw frequency data (pickled dict)
+└── {disambiguation_cache_key}/
+    └── DisambiguatedStore.jsonl.gz  # Variant IDs: {"sid": 0, "variants": ["000123_0", null, ...]}
+```
+
+**Global Correction Mapping** (if llm_correction enabled):
+```
+output/spanish_lemma_frequencies/YYYYMMDD_HHMMSS/
+└── correction_mapping.pkl         # Stored once, referenced by all LemmatizedStores
 ```
 
 **Efficiency Design:**
-- `correction_mapping.pkl` stores only the mapping, not full corrected sentences
-- `iter_corrected()` applies mapping dynamically when reading
-- Saves disk space: O(unique corrections) vs O(total sentences)
-- All files are index-aligned: same sentence ID, same token count, same order
+- `correction_mapping.pkl` stored globally (not per corpus)
+- `iter_corrected()` applies mapping dynamically when reading (no separate file)
+- Saves disk space: O(unique corrections) vs O(total sentences × num_corpora)
+- All stores are index-aligned: same sentence ID, same token count, same order
 
 ### Memory Efficiency Design
 
@@ -309,8 +338,8 @@ The entire pipeline uses generators and streaming to process arbitrarily large c
 - CorpusReader yields sentence batches
 - Lemmatizer yields token tuples via `nlp.pipe()`
 - FrequencyCounter updates incrementally (logs every 100k tokens)
-- SentenceStore uses streaming writers (compressed JSONL)
-- SentenceStore readers are generators (no full load into memory)
+- All stores use streaming writers (compressed JSONL via BaseStoreWriter)
+- All store readers are generators (no full load into memory)
 - BatchDisambiguator processes sentences in batches
 
 ### Cache Key Generation
@@ -336,6 +365,19 @@ Cache key does NOT include:
 - Batch sizes (performance-only parameters)
 - Frequency data (only lemma and POS are key)
 
+**Disambiguation Cache**:
+Cache key format: `SHA256(vocabulary_hash | bert_model_name)[:12]`
+
+Vocabulary hash includes:
+- Lemma, POS, and number of meanings for each translation
+- Sorted for deterministic ordering
+
+Cache invalidation occurs when:
+- Vocabulary changes (different translations or meanings)
+- BERT model changes
+
+This enables efficient caching: same vocabulary + BERT model = reuse disambiguation results
+
 This design enables cache reuse across different configurations and runs.
 
 ### Pipeline Stage Dependencies
@@ -351,7 +393,7 @@ The pipeline stages have the following dependencies:
 - Optional (enabled via `llm_correction.enabled`)
 - Requires: Frequency data from Stage 1-2
 - Outputs: `original_with_ids.csv`, `llm_corrections.csv`, corrected FrequencyCounter
-- If `sentence_store.enabled`: saves `correction_mapping.pkl` (compact)
+- Saves global `correction_mapping.pkl` in output directory (referenced by all LemmatizedStores)
 
 **Stage 4: Translation**
 - Optional (enabled via `llm_translation.enabled`)
@@ -366,23 +408,25 @@ The pipeline stages have the following dependencies:
 **Stage 6: Word Sense Disambiguation**
 - Optional (enabled via `disambiguation.enabled`)
 - Requires:
-  - `sentence_store.enabled` (must be true)
   - `translations.json` with embeddings from Stage 5
-  - `sentences.jsonl.gz` and `lemmatized.jsonl.gz` (or `correction_mapping.pkl`) from SentenceStore
-- Outputs: `disambiguated.jsonl.gz` in SentenceStore
+  - SentenceStore and LemmatizedStore from all corpora
+- Processes ALL corpora (multi-corpus support)
+- Outputs: `DisambiguatedStore.jsonl.gz` per corpus in `cache/{corpus_name}/{cache_key}/{disambiguation_cache_key}/`
+- Includes caching based on vocabulary hash + BERT model
 
 **Stage 7: Co-Occurrence Matrix**
 - Optional (enabled via `cooccurrence.enabled`)
 - Requires:
   - `disambiguation.enabled` (must be true)
-  - `disambiguated.jsonl.gz` from Stage 6
-- Outputs: `cooccurrence_matrix.npz`
+  - DisambiguatedStore from ALL corpora
+- Builds matrix across all corpora
+- Outputs: `cooccurrence_matrix.npz` in output directory
 
 **Dependency Chain Summary:**
 ```
 Stage 1-2 (always) → Stage 3 (optional) → Stage 4 (optional) → Stage 5 (optional, auto-enabled with Stage 6)
                                                                         ↓
-                                            sentence_store.enabled → Stage 6 (optional) → Stage 7 (optional)
+                          SentenceStore + LemmatizedStore (always created) → Stage 6 (optional, multi-corpus) → Stage 7 (optional, multi-corpus)
 ```
 
 ## Data Expectations
@@ -394,8 +438,19 @@ Stage 1-2 (always) → Stage 3 (optional) → Stage 4 (optional) → Stage 5 (op
 
 # Claude Code Rules
 
-* Keep the code as simple as possible.
-* Inline comments: Add comments only for non-obvious lines or logic. Avoid unnecessary inline comments.
-* Docstrings:
+## Code Style & Structure
+* **Keep it Simple:** Keep the code as simple as possible. Avoid over-engineering.
+* **Imports:** Always place imports at the very top of the file.
+* **Inline Comments:** Add comments only for non-obvious lines or logic. Avoid unnecessary inline comments.
+* **Docstrings:**
     * Use a short one-line docstring for most functions.
-    + Only explain parameters or behavior when they are not immediately obvious from the code itself.
+    * Only explain parameters or behavior when they are not immediately obvious from the code itself.
+
+## Error Handling
+* **Minimalist Approach:** Use error handling very sparingly.
+* **Warnings over Catches:** In most cases, prefer logging a warning over catching an error.
+* **Fail Fast:** Never catch errors that indicate a fundamental problem in the pipeline. In these cases, it is preferable to let the program crash/exit to surface the underlying issue.
+
+## Logging
+* **Sparse Logging:** Be very selective with logging commands.
+* **Necessity:** Only log the absolute minimum required for understanding the core flow or debugging critical issues.
