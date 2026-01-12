@@ -55,57 +55,47 @@ class BatchDisambiguator:
 
     def _build_lookups(self):
         """
-        Build lookup tables from Vocabulary.word_variants.
+        Build lookup tables using Vocabulary.variants_by_lemma_token.
 
-        Uses WordVariant objects directly instead of reconstructing IDs.
+        Uses integer variant IDs for direct array access.
         """
-        # All lemma tokens in vocabulary (for O(1) membership checks)
-        self.vocab_lemma_tokens: Set[LemmaToken] = set()
-
-        # Polysemous lemmas: LemmaToken -> [(meaning_idx, variant_id, embedding), ...]
-        self.meaning_embeddings: Dict[LemmaToken, List[Tuple[int, str, np.ndarray]]] = (
-            {}
+        # Use vocabulary's existing lookup: LemmaToken
+        self.vocab_lemma_tokens: Set[LemmaToken] = set(
+            self.vocabulary.variants_by_lemma_token.keys()
         )
 
-        # Mono-semantic lemmas: LemmaToken -> variant_id
-        self.mono_variant_ids: Dict[LemmaToken, str] = {}
+        # Mono-semantic lemmas: LemmaToken -> variant_id (int)
+        self.mono_variant_idx: Dict[LemmaToken, int] = {}
 
-        # Temporary dict to collect variants per lemma token
-        variants_by_lemma: Dict[LemmaToken, List[Tuple[int, str, np.ndarray]]] = {}
+        # Polysemous lemmas: LemmaToken -> [(variant_id, embedding), ...]
+        self.poly_variants: Dict[LemmaToken, List[Tuple[int, np.ndarray]]] = {}
 
-        # Build from word_variants (single source of truth)
-        for variant in self.vocabulary.word_variants:
-            key = variant.lemma_token
-            self.vocab_lemma_tokens.add(key)
+        for lemma_token, variant_ids in self.vocabulary.variants_by_lemma_token.items():
+            # Collect variants with embeddings
+            variants_with_emb: List[Tuple[int, np.ndarray]] = []
+            first_variant_id = None
 
-            # Only process if we have an embedding
-            if variant.meaning.bert_embedding is not None:
-                if key not in variants_by_lemma:
-                    variants_by_lemma[key] = []
+            for vid in variant_ids:
+                if first_variant_id is None:
+                    first_variant_id = vid
+                variant = self.vocabulary.word_variants[vid]
+                emb = variant.bert_embedding
+                if emb is not None:
+                    variants_with_emb.append((vid, emb))
 
-                variants_by_lemma[key].append(
-                    (variant.meaning_idx, variant.id, variant.meaning.bert_embedding)
-                )
-
-        # Classify as mono-semantic or polysemous based on embedding count
-        for key, variants in variants_by_lemma.items():
-            if len(variants) > 1:
-                # Polysemous: multiple meanings with embeddings
-                self.meaning_embeddings[key] = variants
-            elif len(variants) == 1:
+            if len(variants_with_emb) == 1:
                 # Mono-semantic: single meaning with embedding
-                self.mono_variant_ids[key] = variants[0][1]
-
-        # Handle lemmas without embeddings but still in vocabulary
-        for variant in self.vocabulary.word_variants:
-            key = variant.lemma_token
-            if key not in variants_by_lemma and key not in self.mono_variant_ids:
+                self.mono_variant_idx[lemma_token] = variants_with_emb[0][0]
+            elif len(variants_with_emb) > 1:
+                # Polysemous: multiple meanings with embeddings
+                self.poly_variants[lemma_token] = variants_with_emb
+            elif first_variant_id is not None:
                 # No embedding but still in vocab - treat as mono-semantic
-                self.mono_variant_ids[key] = variant.id
+                self.mono_variant_idx[lemma_token] = first_variant_id
 
         logger.info(
-            f"Built disambiguation lookups: {len(self.meaning_embeddings)} polysemous lemmas, "
-            f"{len(self.mono_variant_ids)} mono-semantic lemmas, "
+            f"Built disambiguation lookups: {len(self.poly_variants)} polysemous lemmas, "
+            f"{len(self.mono_variant_idx)} mono-semantic lemmas, "
             f"{len(self.vocab_lemma_tokens)} total lemma tokens"
         )
 
@@ -186,7 +176,7 @@ class BatchDisambiguator:
         original_tokens: List[str],
         token_idx: int,
         lemma_token: LemmaToken,
-    ) -> Optional[str]:
+    ) -> Optional[int]:
         """
         Disambiguate a single token (mono-semantic or polysemous).
 
@@ -197,7 +187,7 @@ class BatchDisambiguator:
             lemma_token: (lemma, pos) tuple
 
         Returns:
-            Word variant ID or None if token not in vocabulary
+            Word variant ID (int) or None if token not in vocabulary
         """
         # Skip deleted tokens
         if lemma_token[0] == "_DELETED_":
@@ -208,11 +198,11 @@ class BatchDisambiguator:
             return None
 
         # Check if mono-semantic
-        if lemma_token in self.mono_variant_ids:
-            return self.mono_variant_ids[lemma_token]
+        if lemma_token in self.mono_variant_idx:
+            return self.mono_variant_idx[lemma_token]
 
         # Check if polysemous
-        if lemma_token not in self.meaning_embeddings:
+        if lemma_token not in self.poly_variants:
             return None
 
         # Get embedding for this token in context
@@ -223,12 +213,10 @@ class BatchDisambiguator:
             return None
 
         # Compare with all meaning embeddings
-        best_variant_id = ""
+        best_variant_id: Optional[int] = None
         best_score = -1.0
 
-        for meaning_idx, variant_id, meaning_emb in self.meaning_embeddings[
-            lemma_token
-        ]:
+        for variant_id, meaning_emb in self.poly_variants[lemma_token]:
             score = self._cosine_similarity(token_embedding, meaning_emb)
             if score > best_score:
                 best_score = score
@@ -260,7 +248,9 @@ class BatchDisambiguator:
         # Determine which lemma source to use
         if use_corrections and lemmatized_store.has_corrections():
             logger.info("Using corrected lemmas for disambiguation")
-            lemma_iterator = lemmatized_store.iter_corrected_with_sentences(sentence_store)
+            lemma_iterator = lemmatized_store.iter_corrected_with_sentences(
+                sentence_store
+            )
         else:
             logger.info("Using original lemmas for disambiguation")
             lemma_iterator = lemmatized_store.iter_with_sentences(sentence_store)
@@ -276,7 +266,7 @@ class BatchDisambiguator:
                 sentence_text = " ".join(original_tokens)
 
                 # Disambiguate each token
-                variants: List[Optional[str]] = []
+                variants: List[Optional[int]] = []
                 for idx, lemma_token in enumerate(lemma_tokens):
                     variant_id = self._disambiguate_token(
                         sentence_text, original_tokens, idx, lemma_token

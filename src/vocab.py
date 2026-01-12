@@ -1,10 +1,14 @@
 """Vocabulary data structures for translations."""
 
 import json
+import pickle
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Optional, Dict, Any, Tuple
+
 import numpy as np
+from scipy import sparse
 
 # Type alias for lemma tokens - hashable, usable as dict key
 LemmaToken = Tuple[str, str]  # (lemma, pos)
@@ -52,7 +56,9 @@ class Meaning:
             structure=data.get("structure"),
             example_es=data.get("example_es"),
             flags=data.get("flags", []),
-            _bert_embedding=data.get("meaning_embedding"),  # JSON uses meaning_embedding
+            _bert_embedding=data.get(
+                "meaning_embedding"
+            ),  # JSON uses meaning_embedding
             _target_word=data.get("_target_word"),
             _target_start=data.get("_target_start"),
             _target_end=data.get("_target_end"),
@@ -125,15 +131,21 @@ class WordVariant:
     """
     A specific meaning variant of a lemma.
     Each Translation can have multiple meanings - each becomes a WordVariant.
+    The id is the index in Vocabulary.word_variants (integer for direct array access).
     """
 
-    id: str
+    id: int  # Index in Vocabulary.word_variants list
     lemma: str
     pos: str
     frequency: int  # Derived: translation.frequency * meaning.estimated_share
     meaning: Meaning
-    source_translation_id: str
+    source_translation_id: str  # Translation.id (stays string for JSON compatibility)
     meaning_idx: int  # Index within the source translation's meanings
+
+    @property
+    def string_id(self) -> str:
+        """String ID for JSON serialization (format: 'translation_id_meaning_idx')."""
+        return f"{self.source_translation_id}_{self.meaning_idx}"
 
     @property
     def lemma_token(self) -> LemmaToken:
@@ -153,30 +165,44 @@ class WordVariant:
     @classmethod
     def from_translations(cls, translations: List[Translation]) -> List["WordVariant"]:
         """Create WordVariants from Translations, sorted by derived frequency."""
-        variants = []
+        # First pass: create variants without final IDs
+        variants_unsorted = []
         for translation in translations:
             for idx, meaning in enumerate(translation.meanings):
                 derived_freq = int(translation.frequency * meaning.estimated_share)
-                # Create unique ID: translation_id + meaning_index
-                variant_id = f"{translation.id}_{idx}"
-                variants.append(
-                    cls(
-                        id=variant_id,
-                        lemma=translation.lemma,
-                        pos=translation.pos,
-                        frequency=derived_freq,
-                        meaning=meaning,
-                        source_translation_id=translation.id,
-                        meaning_idx=idx,
-                    )
+                variants_unsorted.append(
+                    {
+                        "lemma": translation.lemma,
+                        "pos": translation.pos,
+                        "frequency": derived_freq,
+                        "meaning": meaning,
+                        "source_translation_id": translation.id,
+                        "meaning_idx": idx,
+                    }
                 )
+
         # Sort by frequency descending
-        variants.sort(key=lambda v: v.frequency, reverse=True)
+        variants_unsorted.sort(key=lambda v: v["frequency"], reverse=True)
+
+        # Second pass: assign IDs based on sorted position
+        variants = []
+        for idx, v in enumerate(variants_unsorted):
+            variants.append(
+                cls(
+                    id=idx,  # Index in sorted list is the ID
+                    lemma=v["lemma"],
+                    pos=v["pos"],
+                    frequency=v["frequency"],
+                    meaning=v["meaning"],
+                    source_translation_id=v["source_translation_id"],
+                    meaning_idx=v["meaning_idx"],
+                )
+            )
         return variants
 
 
 class Vocabulary:
-    """Central storage for vocabulary data."""
+    """Central storage for vocabulary data with optional co-occurrence matrix."""
 
     def __init__(self, translations: List[Translation]):
         """Initialize from list of Translation objects."""
@@ -185,8 +211,20 @@ class Vocabulary:
         self.translation_by_lemma_token: Dict[LemmaToken, Translation] = {
             t.lemma_token: t for t in translations
         }
+
+        # word_variants list - index IS the variant ID
         self.word_variants = WordVariant.from_translations(translations)
-        self.word_variant_by_id = {v.id: v for v in self.word_variants}
+
+        # Lookup: LemmaToken → List of variant IDs (integers)
+        self.variants_by_lemma_token: Dict[LemmaToken, List[int]] = {}
+        for variant in self.word_variants:
+            key = variant.lemma_token
+            if key not in self.variants_by_lemma_token:
+                self.variants_by_lemma_token[key] = []
+            self.variants_by_lemma_token[key].append(variant.id)
+
+        # Optional co-occurrence matrix (set after disambiguation)
+        self.cooccurrence_matrix: Optional[sparse.csr_matrix] = None
 
     @classmethod
     def from_translations_list(cls, translations: List[Translation]) -> "Vocabulary":
@@ -201,17 +239,39 @@ class Vocabulary:
 
     @classmethod
     def from_file(cls, file_path: str) -> "Vocabulary":
-        """Load Vocabulary from translations.json file."""
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return cls.from_dicts(data)
+        """Load Vocabulary from file (pickle or JSON)."""
+        file_path = Path(file_path)
+
+        if file_path.suffix == ".pkl":
+            # Load from pickle (includes co-occurrence matrix)
+            with open(file_path, "rb") as f:
+                data = pickle.load(f)
+
+            translations = [Translation.from_dict(t) for t in data["translations"]]
+            vocab = cls(translations)
+            vocab.cooccurrence_matrix = data.get("cooccurrence_matrix")
+            return vocab
+        else:
+            # Load from JSON (legacy, no co-occurrence matrix)
+            with open(file_path, "r", encoding="utf-8") as f:
+                json_data = json.load(f)
+            return cls.from_dicts(json_data)
 
     def to_dicts(self) -> List[Dict[str, Any]]:
         """Convert to list of dictionaries for JSON serialization."""
         return [t.to_dict() for t in self.translations]
 
     def to_file(self, file_path: str) -> None:
-        """Save Vocabulary to JSON file."""
+        """Save Vocabulary to pickle file (includes co-occurrence matrix)."""
+        data = {
+            "translations": self.to_dicts(),
+            "cooccurrence_matrix": self.cooccurrence_matrix,
+        }
+        with open(file_path, "wb") as f:
+            pickle.dump(data, f)
+
+    def to_json_file(self, file_path: str) -> None:
+        """Save Vocabulary to JSON file (without co-occurrence matrix)."""
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(self.to_dicts(), f, ensure_ascii=False, indent=2)
 
@@ -219,9 +279,13 @@ class Vocabulary:
         """Get Translation by lemma token."""
         return self.translation_by_lemma_token.get(lemma_token)
 
-    def get_word_variant(self, variant_id: str) -> Optional[WordVariant]:
-        """Get WordVariant by ID."""
-        return self.word_variant_by_id.get(variant_id)
+    def get_word_variant(self, variant_id: int) -> WordVariant:
+        """Get WordVariant by ID (direct array access, O(1))."""
+        return self.word_variants[variant_id]
+
+    def get_variant_ids_for_lemma(self, lemma_token: LemmaToken) -> List[int]:
+        """Get list of variant IDs for a lemma token."""
+        return self.variants_by_lemma_token.get(lemma_token, [])
 
     def get_all_word_variants(self) -> List[WordVariant]:
         """Get all word variants sorted by frequency (descending)."""
@@ -298,8 +362,41 @@ class Vocabulary:
 
         return result
 
+    def get_cooccurrences(
+        self, variant_id: int, top_k: int = 20
+    ) -> List[Tuple[int, float]]:
+        """
+        Get top co-occurring variants for a given variant.
+
+        Args:
+            variant_id: Word variant ID (integer index)
+            top_k: Number of top co-occurrences to return
+
+        Returns:
+            List of (variant_id, count) tuples, sorted by count descending
+        """
+        if self.cooccurrence_matrix is None:
+            raise ValueError("No co-occurrence matrix available")
+
+        if variant_id < 0 or variant_id >= len(self.word_variants):
+            return []
+
+        row = self.cooccurrence_matrix.getrow(variant_id).toarray().flatten()
+        top_indices = np.argsort(row)[-top_k:][::-1]
+
+        results = []
+        for i in top_indices:
+            if row[i] > 0:
+                results.append((i, float(row[i])))
+
+        return results
+
     def __len__(self) -> int:
         return len(self.word_variants)
 
     def __repr__(self) -> str:
-        return f"Vocabulary(translations={len(self.translations)}, variants={len(self.word_variants)})"
+        matrix_info = ""
+        if self.cooccurrence_matrix is not None:
+            nnz = self.cooccurrence_matrix.nnz
+            matrix_info = f", cooccurrence={nnz:,} entries"
+        return f"Vocabulary(translations={len(self.translations)}, variants={len(self.word_variants)}{matrix_info})"

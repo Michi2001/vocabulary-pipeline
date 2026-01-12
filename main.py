@@ -331,6 +331,7 @@ if __name__ == "__main__":
     # STAGE 6: Disambiguation (ALL corpora)
     # =========================================================================
     disambiguated_stores: List[DisambiguatedStore] = []
+    vocabulary: Optional[Vocabulary] = None
 
     if translations is not None and disambiguation_config.get("enabled", False):
         logger.info("=" * 60)
@@ -384,17 +385,30 @@ if __name__ == "__main__":
     # =========================================================================
     # STAGE 7: Co-Occurrence Matrix (ALL corpora)
     # =========================================================================
+    cooccurrence_matrix = None
     if disambiguated_stores and cooccurrence_config.get("enabled", False):
         logger.info("=" * 60)
         logger.info("STAGE 7: Co-Occurrence Matrix")
         logger.info("=" * 60)
 
-        builder = CoOccurrenceBuilder(vocabulary)
-        matrix = builder.build(disambiguated_stores)
+        if vocabulary is None:
+            raise RuntimeError("Vocabulary required for co-occurrence matrix")
 
-        matrix_path = Path(output_dir) / "cooccurrence_matrix.npz"
-        builder.save(matrix, matrix_path)
-        logger.info(f"Co-occurrence matrix saved to: {matrix_path}")
+        builder = CoOccurrenceBuilder(vocabulary)
+        cooccurrence_matrix = builder.build(disambiguated_stores)
+        logger.info("Co-occurrence matrix built successfully")
+
+    # =========================================================================
+    # Save Vocabulary (with co-occurrence matrix if available)
+    # =========================================================================
+    if vocabulary is not None:
+        # Attach co-occurrence matrix if available
+        if cooccurrence_matrix is not None:
+            vocabulary.cooccurrence_matrix = cooccurrence_matrix
+
+        vocab_path = Path(output_dir) / "vocabulary.pkl"
+        vocabulary.to_file(str(vocab_path))
+        logger.info(f"Vocabulary saved to: {vocab_path}")
 
     logger.info("=" * 60)
     logger.info("Pipeline completed!")
