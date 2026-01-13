@@ -8,6 +8,7 @@ Variant IDs (integers) are used directly as matrix indices.
 
 import logging
 from typing import List, Set, Tuple
+import numpy as np
 
 from scipy import sparse
 
@@ -37,9 +38,13 @@ class CoOccurrenceBuilder:
         """
         self.vocabulary = vocabulary
         self.n_variants = len(vocabulary.word_variants)
-        logger.info(f"CoOccurrenceBuilder initialized with {self.n_variants} word variants")
+        logger.info(
+            f"CoOccurrenceBuilder initialized with {self.n_variants} word variants"
+        )
 
-    def build(self, disambiguated_stores: List[DisambiguatedStore]) -> sparse.csr_matrix:
+    def build(
+        self, disambiguated_stores: List[DisambiguatedStore]
+    ) -> sparse.csr_matrix:
         """
         Build co-occurrence matrix from multiple disambiguated stores.
 
@@ -50,7 +55,9 @@ class CoOccurrenceBuilder:
             Sparse co-occurrence matrix (symmetric)
         """
         n = self.n_variants
-        logger.info(f"Building {n}x{n} co-occurrence matrix from {len(disambiguated_stores)} corpora...")
+        logger.info(
+            f"Building {n}x{n} co-occurrence matrix from {len(disambiguated_stores)} corpora..."
+        )
 
         # Use lil_matrix for efficient incremental construction
         matrix = sparse.lil_matrix((n, n), dtype=np.float32)

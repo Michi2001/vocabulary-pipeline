@@ -350,7 +350,7 @@ if __name__ == "__main__":
         disambiguator = BatchDisambiguator(
             vocabulary=vocabulary,
             model_name=bert_model,
-            batch_size=disambiguation_config.get("batch_size", 32),
+            bert_batch_tokens=disambiguation_config.get("bert_batch_tokens", 4096),
         )
 
         for corpus_name, (sent_store, lemma_store, cache_key) in corpus_stores.items():

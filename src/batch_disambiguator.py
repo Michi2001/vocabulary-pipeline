@@ -1,14 +1,14 @@
 """
 Batch Word Sense Disambiguator.
 
-Disambiguates polysemous words in sentences using pre-computed meaning embeddings.
-Processes sentences in batches for efficiency with large corpora.
-Uses index-aligned stores for efficient token lookup.
+Disambiguates polysemous words using BERT embeddings and pre-computed meaning embeddings.
+Uses two-pass processing with token-based batching for efficiency.
 """
 
 import logging
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Iterator, List, Optional, Set, Tuple
 
 import numpy as np
 import torch
@@ -22,207 +22,256 @@ from src.vocab import LemmaToken, Vocabulary
 logger = logging.getLogger(__name__)
 
 
-class BatchDisambiguator:
-    """
-    Disambiguates polysemous words using BERT embeddings.
+# =============================================================================
+# Data Structures
+# =============================================================================
 
-    Uses pre-computed meaning embeddings from Vocabulary and compares
-    them with runtime embeddings extracted from corpus sentences.
-    """
+
+@dataclass
+class PolyTokenInfo:
+    """Polysemous token identified during sentence classification."""
+
+    token_idx: int
+    char_start: int
+    char_end: int
+    lemma_token: LemmaToken
+
+
+@dataclass
+class BertTask:
+    """A sentence queued for BERT processing."""
+
+    sid: int
+    text: str
+    token_count: int
+    variants: List[Optional[int]]  # Pre-filled mono-semantic results
+    poly_infos: List[PolyTokenInfo] = field(default_factory=list)
+
+
+# =============================================================================
+# Ordered Write Buffer
+# =============================================================================
+
+
+class OrderedWriteBuffer:
+    """Maintains sentence order when writing results."""
+
+    def __init__(self, writer):
+        self._writer = writer
+        self._buffer: Dict[int, List[Optional[int]]] = {}
+        self._next_sid = 0
+        self.total_disambiguated = 0
+
+    def add(self, sid: int, variants: List[Optional[int]]) -> None:
+        """Add result to buffer."""
+        self._buffer[sid] = variants
+        self._flush()
+
+    def _flush(self) -> None:
+        """Write all consecutive sentences from buffer."""
+        while self._next_sid in self._buffer:
+            variants = self._buffer.pop(self._next_sid)
+            self._writer.write(self._next_sid, variants)
+            self.total_disambiguated += sum(1 for v in variants if v is not None)
+            self._next_sid += 1
+
+
+# =============================================================================
+# BERT Batch Processor
+# =============================================================================
+
+
+class BertBatchProcessor:
+    """Handles BERT encoding and embedding extraction."""
+
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+        self._model = None
+        self._tokenizer = None
+
+    def _load_model(self) -> None:
+        if self._model is not None:
+            return
+        logger.info(f"Loading BERT model: {self.model_name}")
+        self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self._model = AutoModel.from_pretrained(self.model_name)
+        self._model.eval()
+        if torch.cuda.is_available():
+            self._model = self._model.cuda()
+            logger.info("Using CUDA for disambiguation")
+
+    def extract_embeddings(
+        self, tasks: List[BertTask]
+    ) -> Dict[Tuple[int, int], np.ndarray]:
+        """
+        Extract embeddings for all polysemous tokens in tasks.
+
+        Returns:
+            Dict mapping (task_idx, token_idx) -> embedding
+        """
+        if not tasks:
+            return {}
+
+        self._load_model()
+
+        texts = [t.text for t in tasks]
+        inputs = self._tokenizer(
+            texts,
+            return_tensors="pt",
+            truncation=True,
+            max_length=512,
+            padding=True,
+        )
+
+        if torch.cuda.is_available():
+            inputs = {k: v.cuda() for k, v in inputs.items()}
+
+        with torch.no_grad():
+            outputs = self._model(**inputs, output_hidden_states=True)
+            hidden_states = outputs.hidden_states[-2]  # (batch, seq, hidden)
+
+        result: Dict[Tuple[int, int], np.ndarray] = {}
+
+        for task_idx, task in enumerate(tasks):
+            for pi in task.poly_infos:
+                # Map character positions to BERT subword positions
+                bert_positions = []
+                for char_pos in range(pi.char_start, pi.char_end):
+                    bert_idx = inputs.char_to_token(task_idx, char_pos)
+                    if bert_idx is not None and bert_idx not in bert_positions:
+                        bert_positions.append(bert_idx)
+
+                if bert_positions:
+                    emb = hidden_states[task_idx, bert_positions].mean(dim=0)
+                    result[(task_idx, pi.token_idx)] = emb.cpu().numpy()
+
+        return result
+
+
+# =============================================================================
+# Main Disambiguator
+# =============================================================================
+
+
+class BatchDisambiguator:
+    """Disambiguates polysemous words using BERT embeddings."""
 
     def __init__(
         self,
         vocabulary: Vocabulary,
         model_name: str = "dccuchile/bert-base-spanish-wwm-cased",
-        batch_size: int = 32,
+        bert_batch_tokens: int = 4096,
     ):
-        """
-        Initialize disambiguator.
-
-        Args:
-            vocabulary: Vocabulary with word variants and embeddings
-            model_name: BERT model (must match MeaningEmbeddingGenerator)
-            batch_size: Sentences per BERT batch
-        """
         self.vocabulary = vocabulary
-        self.model_name = model_name
-        self.batch_size = batch_size
-        self._model = None
-        self._tokenizer = None
+        self.bert_batch_tokens = bert_batch_tokens
+        self._bert = BertBatchProcessor(model_name)
 
-        # Build lookup structures
+        self._mono_variants: Dict[LemmaToken, int] = {}
+        self._poly_variants: Dict[LemmaToken, List[Tuple[int, np.ndarray]]] = {}
+        self._vocab_tokens: Set[LemmaToken] = set()
+
         self._build_lookups()
 
-    def _build_lookups(self):
-        """
-        Build lookup tables using Vocabulary.variants_by_lemma_token.
-
-        Uses integer variant IDs for direct array access.
-        """
-        # Use vocabulary's existing lookup: LemmaToken
-        self.vocab_lemma_tokens: Set[LemmaToken] = set(
-            self.vocabulary.variants_by_lemma_token.keys()
-        )
-
-        # Mono-semantic lemmas: LemmaToken -> variant_id (int)
-        self.mono_variant_idx: Dict[LemmaToken, int] = {}
-
-        # Polysemous lemmas: LemmaToken -> [(variant_id, embedding), ...]
-        self.poly_variants: Dict[LemmaToken, List[Tuple[int, np.ndarray]]] = {}
-
+    def _build_lookups(self) -> None:
+        """Build mono/poly variant lookup tables from vocabulary."""
         for lemma_token, variant_ids in self.vocabulary.variants_by_lemma_token.items():
-            # Collect variants with embeddings
-            variants_with_emb: List[Tuple[int, np.ndarray]] = []
-            first_variant_id = None
+            self._vocab_tokens.add(lemma_token)
+
+            variants_with_emb = []
+            first_id = None
 
             for vid in variant_ids:
-                if first_variant_id is None:
-                    first_variant_id = vid
+                if first_id is None:
+                    first_id = vid
                 variant = self.vocabulary.word_variants[vid]
-                emb = variant.bert_embedding
-                if emb is not None:
-                    variants_with_emb.append((vid, emb))
+                if variant.bert_embedding is not None:
+                    variants_with_emb.append((vid, variant.bert_embedding))
 
             if len(variants_with_emb) == 1:
-                # Mono-semantic: single meaning with embedding
-                self.mono_variant_idx[lemma_token] = variants_with_emb[0][0]
+                self._mono_variants[lemma_token] = variants_with_emb[0][0]
             elif len(variants_with_emb) > 1:
-                # Polysemous: multiple meanings with embeddings
-                self.poly_variants[lemma_token] = variants_with_emb
-            elif first_variant_id is not None:
-                # No embedding but still in vocab - treat as mono-semantic
-                self.mono_variant_idx[lemma_token] = first_variant_id
+                self._poly_variants[lemma_token] = variants_with_emb
+            elif first_id is not None:
+                self._mono_variants[lemma_token] = first_id
 
         logger.info(
-            f"Built disambiguation lookups: {len(self.poly_variants)} polysemous lemmas, "
-            f"{len(self.mono_variant_idx)} mono-semantic lemmas, "
-            f"{len(self.vocab_lemma_tokens)} total lemma tokens"
+            f"Lookups: {len(self._poly_variants)} polysemous, "
+            f"{len(self._mono_variants)} mono-semantic"
         )
 
-    def _load_model(self):
-        """Lazy load BERT model."""
-        if self._model is None:
-            logger.info(f"Loading BERT model for disambiguation: {self.model_name}")
-            self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            self._model = AutoModel.from_pretrained(self.model_name)
-            self._model.eval()
-
-    def _get_embedding_for_token_by_index(
-        self,
-        sentence_text: str,
-        original_tokens: List[str],
-        token_idx: int,
-    ) -> Optional[np.ndarray]:
+    def _classify_token(self, lemma_token: LemmaToken) -> Tuple[Optional[int], bool]:
         """
-        Extract BERT embedding for a token by its index.
-
-        Uses the original tokens to reconstruct character positions.
-
-        Args:
-            sentence_text: Reconstructed sentence text
-            original_tokens: List of original tokens
-            token_idx: Index of target token in original_tokens
+        Classify a single token.
 
         Returns:
-            Embedding array or None if extraction fails
+            (variant_id, is_polysemous) - variant_id is None if poly or unknown
         """
-        self._load_model()
-
-        # Calculate character position from tokens
-        # Tokens are joined by space, so we calculate position
-        char_start = 0
-        for i in range(token_idx):
-            char_start += len(original_tokens[i]) + 1  # +1 for space
-
-        target_token = original_tokens[token_idx]
-        char_end = char_start + len(target_token)
-
-        inputs = self._tokenizer(
-            sentence_text,
-            return_tensors="pt",
-            truncation=True,
-            max_length=512,
-        )
-
-        # Map character positions to token positions
-        target_positions = []
-        for char_pos in range(char_start, char_end):
-            bert_token_idx = inputs.char_to_token(0, char_pos)
-            if bert_token_idx is not None and bert_token_idx not in target_positions:
-                target_positions.append(bert_token_idx)
-
-        if not target_positions:
-            return None
-
-        with torch.no_grad():
-            outputs = self._model(**inputs, output_hidden_states=True)
-            hidden_states = outputs.hidden_states
-            embeddings = hidden_states[-2][0]  # Second-to-last layer
-
-        word_embedding = embeddings[target_positions].mean(dim=0)
-        return word_embedding.numpy()
-
-    def _cosine_similarity(self, vec1: np.ndarray, vec2: np.ndarray) -> float:
-        """Calculate cosine similarity between two vectors."""
-        norm1 = np.linalg.norm(vec1)
-        norm2 = np.linalg.norm(vec2)
-        if norm1 == 0 or norm2 == 0:
-            return 0.0
-        return float(np.dot(vec1, vec2) / (norm1 * norm2))
-
-    def _disambiguate_token(
-        self,
-        sentence_text: str,
-        original_tokens: List[str],
-        token_idx: int,
-        lemma_token: LemmaToken,
-    ) -> Optional[int]:
-        """
-        Disambiguate a single token (mono-semantic or polysemous).
-
-        Args:
-            sentence_text: Reconstructed sentence text
-            original_tokens: List of original tokens
-            token_idx: Token index in sentence
-            lemma_token: (lemma, pos) tuple
-
-        Returns:
-            Word variant ID (int) or None if token not in vocabulary
-        """
-        # Skip deleted tokens
         if lemma_token[0] == "_DELETED_":
-            return None
+            return None, False
+        if lemma_token not in self._vocab_tokens:
+            return None, False
+        if lemma_token in self._mono_variants:
+            return self._mono_variants[lemma_token], False
+        if lemma_token in self._poly_variants:
+            return None, True
+        return None, False
 
-        # Check if in vocabulary at all
-        if lemma_token not in self.vocab_lemma_tokens:
-            return None
+    def _classify_sentence(
+        self, original_tokens: List[str], lemma_tokens: List[LemmaToken]
+    ) -> Tuple[List[Optional[int]], List[PolyTokenInfo]]:
+        """Classify all tokens, returning variants and polysemous token info."""
+        variants: List[Optional[int]] = []
+        poly_infos: List[PolyTokenInfo] = []
 
-        # Check if mono-semantic
-        if lemma_token in self.mono_variant_idx:
-            return self.mono_variant_idx[lemma_token]
+        char_pos = 0
+        for idx, (orig, lemma) in enumerate(zip(original_tokens, lemma_tokens)):
+            variant_id, is_poly = self._classify_token(lemma)
+            variants.append(variant_id)
 
-        # Check if polysemous
-        if lemma_token not in self.poly_variants:
-            return None
+            if is_poly:
+                poly_infos.append(
+                    PolyTokenInfo(
+                        token_idx=idx,
+                        char_start=char_pos,
+                        char_end=char_pos + len(orig),
+                        lemma_token=lemma,
+                    )
+                )
 
-        # Get embedding for this token in context
-        token_embedding = self._get_embedding_for_token_by_index(
-            sentence_text, original_tokens, token_idx
-        )
-        if token_embedding is None:
-            return None
+            char_pos += len(orig) + 1  # +1 for space
 
-        # Compare with all meaning embeddings
-        best_variant_id: Optional[int] = None
+        return variants, poly_infos
+
+    def _find_best_variant(self, lemma_token: LemmaToken, embedding: np.ndarray) -> int:
+        """Find best matching variant using cosine similarity."""
+        candidates = self._poly_variants[lemma_token]
+        best_id = candidates[0][0]
         best_score = -1.0
 
-        for variant_id, meaning_emb in self.poly_variants[lemma_token]:
-            score = self._cosine_similarity(token_embedding, meaning_emb)
-            if score > best_score:
-                best_score = score
-                best_variant_id = variant_id
+        emb_norm = np.linalg.norm(embedding)
+        if emb_norm == 0:
+            return best_id
 
-        return best_variant_id
+        for variant_id, meaning_emb in candidates:
+            meaning_norm = np.linalg.norm(meaning_emb)
+            if meaning_norm > 0:
+                score = np.dot(embedding, meaning_emb) / (emb_norm * meaning_norm)
+                if score > best_score:
+                    best_score = score
+                    best_id = variant_id
+
+        return best_id
+
+    def _process_bert_tasks(self, tasks: List[BertTask]) -> None:
+        """Run BERT on tasks and fill in polysemous variant IDs."""
+        embeddings = self._bert.extract_embeddings(tasks)
+
+        for (task_idx, token_idx), emb in embeddings.items():
+            task = tasks[task_idx]
+            lemma_token = next(
+                pi.lemma_token for pi in task.poly_infos if pi.token_idx == token_idx
+            )
+            task.variants[token_idx] = self._find_best_variant(lemma_token, emb)
 
     def process(
         self,
@@ -231,62 +280,90 @@ class BatchDisambiguator:
         output_path: Path,
         use_corrections: bool = True,
     ) -> DisambiguatedStore:
-        """
-        Process sentences and write disambiguation results.
+        """Process all sentences and write disambiguation results."""
+        logger.info(
+            f"Starting disambiguation (bert_batch_tokens={self.bert_batch_tokens})"
+        )
 
-        Args:
-            sentence_store: Store with original tokens
-            lemmatized_store: Store with lemmatized tokens
-            output_path: Path for DisambiguatedStore output file
-            use_corrections: Whether to use corrected lemmas (if available)
-
-        Returns:
-            DisambiguatedStore pointing to the created file
-        """
-        logger.info("Starting batch disambiguation...")
-
-        # Determine which lemma source to use
+        # Select lemma source
         if use_corrections and lemmatized_store.has_corrections():
-            logger.info("Using corrected lemmas for disambiguation")
-            lemma_iterator = lemmatized_store.iter_corrected_with_sentences(
-                sentence_store
-            )
+            logger.info("Using corrected lemmas")
+            sentences = lemmatized_store.iter_corrected_with_sentences(sentence_store)
         else:
-            logger.info("Using original lemmas for disambiguation")
-            lemma_iterator = lemmatized_store.iter_with_sentences(sentence_store)
-
-        total_sentences = 0
-        total_disambiguated = 0
+            logger.info("Using original lemmas")
+            sentences = lemmatized_store.iter_with_sentences(sentence_store)
 
         disambiguated_store = DisambiguatedStore(output_path)
 
         with disambiguated_store.open_writer() as writer:
-            for sid, original_tokens, lemma_tokens in lemma_iterator:
-                # Reconstruct sentence text from original tokens
-                sentence_text = " ".join(original_tokens)
-
-                # Disambiguate each token
-                variants: List[Optional[int]] = []
-                for idx, lemma_token in enumerate(lemma_tokens):
-                    variant_id = self._disambiguate_token(
-                        sentence_text, original_tokens, idx, lemma_token
-                    )
-                    variants.append(variant_id)
-                    if variant_id is not None:
-                        total_disambiguated += 1
-
-                writer.write(sid, variants)
-                total_sentences += 1
-
-                if total_sentences % 10000 == 0:
-                    logger.info(
-                        f"Processed {total_sentences:,} sentences, "
-                        f"{total_disambiguated:,} tokens disambiguated"
-                    )
+            stats = self._process_sentences(sentences, writer)
 
         logger.info(
-            f"Disambiguation complete: {total_sentences:,} sentences, "
-            f"{total_disambiguated:,} tokens disambiguated"
+            f"Done: {stats['total']:,} sentences, "
+            f"{stats['poly']:,} with polysemous ({stats['poly']*100/max(1,stats['total']):.1f}%), "
+            f"{stats['disambiguated']:,} tokens disambiguated"
         )
 
         return disambiguated_store
+
+    def _process_sentences(
+        self,
+        sentences: Iterator[Tuple[int, List[str], List[LemmaToken]]],
+        writer,
+    ) -> Dict[str, int]:
+        """Main processing loop with batching logic."""
+        buffer = OrderedWriteBuffer(writer)
+        bert_queue: List[BertTask] = []
+        queue_tokens = 0
+
+        stats = {"total": 0, "poly": 0, "disambiguated": 0}
+
+        for sid, original_tokens, lemma_tokens in sentences:
+            variants, poly_infos = self._classify_sentence(
+                original_tokens, lemma_tokens
+            )
+
+            if not poly_infos:
+                # No polysemous tokens - write directly
+                buffer.add(sid, variants)
+            else:
+                # Queue for BERT processing
+                bert_queue.append(
+                    BertTask(
+                        sid=sid,
+                        text=" ".join(original_tokens),
+                        token_count=len(original_tokens),
+                        variants=variants,
+                        poly_infos=poly_infos,
+                    )
+                )
+                queue_tokens += len(original_tokens)
+                stats["poly"] += 1
+
+                # Flush if batch is full
+                if queue_tokens >= self.bert_batch_tokens:
+                    self._flush_bert_queue(bert_queue, buffer)
+                    bert_queue = []
+                    queue_tokens = 0
+
+            stats["total"] += 1
+            if stats["total"] % 50000 == 0:
+                logger.info(
+                    f"Processed {stats['total']:,} sentences, "
+                    f"{stats['poly']:,} with polysemous"
+                )
+
+        # Final flush
+        if bert_queue:
+            self._flush_bert_queue(bert_queue, buffer)
+
+        stats["disambiguated"] = buffer.total_disambiguated
+        return stats
+
+    def _flush_bert_queue(
+        self, tasks: List[BertTask], buffer: OrderedWriteBuffer
+    ) -> None:
+        """Process BERT queue and add results to write buffer."""
+        self._process_bert_tasks(tasks)
+        for task in tasks:
+            buffer.add(task.sid, task.variants)

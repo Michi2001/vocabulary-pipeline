@@ -11,7 +11,6 @@ from src.frequency_counter import FrequencyCounter
 from src.llm_providers.base_provider import BaseLLMProvider
 from src.lemma_cache import LemmaCache
 from src.vocab import LemmaToken
-from src.sentence_store import SentenceStore
 
 logger = logging.getLogger(__name__)
 
