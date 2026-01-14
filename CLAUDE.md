@@ -445,6 +445,7 @@ Stage 1-2 (always) → Stage 3 (optional) → Stage 4 (optional) → Stage 5 (op
 * **Docstrings:**
     * Use a short one-line docstring for most functions.
     * Only explain parameters or behavior when they are not immediately obvious from the code itself.
+* **Python dictionaries** For dictionaries, always explain what the keys and values are in an inline comment, e.g. translation_id, meaning_id -> count 
 
 ## Error Handling
 * **Minimalist Approach:** Use error handling very sparingly.

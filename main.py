@@ -34,6 +34,7 @@ from src.stores.disambiguated_store import DisambiguatedStore
 from src.stores.lemmatized_store import LemmatizedStore
 from src.stores.sentence_store import SentenceStore
 from src.vocab import Translation, Vocabulary
+from src.share_updater import ShareUpdater
 
 logger = logging.getLogger(__name__)
 
@@ -381,6 +382,29 @@ if __name__ == "__main__":
             disambiguated_stores.append(dis_store)
 
         logger.info(f"Disambiguation complete for {len(disambiguated_stores)} corpora")
+
+    # =========================================================================
+    # STAGE 6.5: Update estimated_share from corpus usage
+    # =========================================================================
+    if disambiguated_stores and vocabulary is not None and translations is not None:
+        logger.info("=" * 60)
+        logger.info("STAGE 6.5: Updating estimated shares from corpus usage")
+        logger.info("=" * 60)
+
+        share_updater = ShareUpdater()
+        translations = share_updater.update(
+            disambiguated_stores, translations, vocabulary
+        )
+
+        vocabulary = Vocabulary.from_translations_list(translations)
+        logger.info("Estimated shares updated based on corpus usage")
+
+        # Re-save translations.json with updated estimated_share values
+        translations_path = os.path.join(output_dir, "translations.json")
+        translations_dicts = [t.to_dict() for t in translations]
+        with open(translations_path, "w", encoding="utf-8") as f:
+            json.dump(translations_dicts, f, ensure_ascii=False, indent=2)
+        logger.info(f"Updated translations saved to: {translations_path}")
 
     # =========================================================================
     # STAGE 7: Co-Occurrence Matrix (ALL corpora)
