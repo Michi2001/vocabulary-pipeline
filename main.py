@@ -423,16 +423,15 @@ if __name__ == "__main__":
         logger.info("Co-occurrence matrix built successfully")
 
     # =========================================================================
-    # Save Vocabulary (with co-occurrence matrix if available)
+    # Save Vocabulary
     # =========================================================================
     if vocabulary is not None:
-        # Attach co-occurrence matrix if available
         if cooccurrence_matrix is not None:
             vocabulary.cooccurrence_matrix = cooccurrence_matrix
 
-        vocab_path = Path(output_dir) / "vocabulary.pkl"
-        vocabulary.to_file(str(vocab_path))
-        logger.info(f"Vocabulary saved to: {vocab_path}")
+        vocab_dir = Path(output_dir) / "vocabulary"
+        vocabulary.save(str(vocab_dir))
+        logger.info(f"Vocabulary saved to: {vocab_dir}")
 
     logger.info("=" * 60)
     logger.info("Pipeline completed!")

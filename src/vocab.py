@@ -1,7 +1,7 @@
 """Vocabulary data structures for translations."""
 
 import json
-import pickle
+import logging
 import random
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,6 +9,8 @@ from typing import List, Optional, Dict, Any, Tuple
 
 import numpy as np
 from scipy import sparse
+
+logger = logging.getLogger(__name__)
 
 # Type alias for lemma tokens - hashable, usable as dict key
 LemmaToken = Tuple[str, str]  # (lemma, pos)
@@ -237,43 +239,42 @@ class Vocabulary:
         translations = [Translation.from_dict(item) for item in data]
         return cls(translations)
 
+    # File names for directory-based storage
+    TRANSLATIONS_FILE = "translations.json"
+    COOCCURRENCE_FILE = "cooccurrence_matrix.npz"
+
     @classmethod
-    def from_file(cls, file_path: str) -> "Vocabulary":
-        """Load Vocabulary from file (pickle or JSON)."""
-        file_path = Path(file_path)
+    def from_dir(cls, dir_path: str) -> "Vocabulary":
+        """Load Vocabulary from directory."""
+        dir_path = Path(dir_path)
 
-        if file_path.suffix == ".pkl":
-            # Load from pickle (includes co-occurrence matrix)
-            with open(file_path, "rb") as f:
-                data = pickle.load(f)
+        translations_path = dir_path / cls.TRANSLATIONS_FILE
+        with open(translations_path, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+        vocab = cls.from_dicts(json_data)
 
-            translations = [Translation.from_dict(t) for t in data["translations"]]
-            vocab = cls(translations)
-            vocab.cooccurrence_matrix = data.get("cooccurrence_matrix")
-            return vocab
-        else:
-            # Load from JSON (legacy, no co-occurrence matrix)
-            with open(file_path, "r", encoding="utf-8") as f:
-                json_data = json.load(f)
-            return cls.from_dicts(json_data)
+        cooccurrence_path = dir_path / cls.COOCCURRENCE_FILE
+        if cooccurrence_path.exists():
+            vocab.cooccurrence_matrix = sparse.load_npz(cooccurrence_path)
+
+        return vocab
 
     def to_dicts(self) -> List[Dict[str, Any]]:
         """Convert to list of dictionaries for JSON serialization."""
         return [t.to_dict() for t in self.translations]
 
-    def to_file(self, file_path: str) -> None:
-        """Save Vocabulary to pickle file (includes co-occurrence matrix)."""
-        data = {
-            "translations": self.to_dicts(),
-            "cooccurrence_matrix": self.cooccurrence_matrix,
-        }
-        with open(file_path, "wb") as f:
-            pickle.dump(data, f)
+    def save(self, dir_path: str) -> None:
+        """Save Vocabulary to directory."""
+        dir_path = Path(dir_path)
+        dir_path.mkdir(parents=True, exist_ok=True)
 
-    def to_json_file(self, file_path: str) -> None:
-        """Save Vocabulary to JSON file (without co-occurrence matrix)."""
-        with open(file_path, "w", encoding="utf-8") as f:
+        translations_path = dir_path / self.TRANSLATIONS_FILE
+        with open(translations_path, "w", encoding="utf-8") as f:
             json.dump(self.to_dicts(), f, ensure_ascii=False, indent=2)
+
+        if self.cooccurrence_matrix is not None:
+            cooccurrence_path = dir_path / self.COOCCURRENCE_FILE
+            sparse.save_npz(cooccurrence_path, self.cooccurrence_matrix, compressed=True)
 
     def get_translation(self, lemma_token: LemmaToken) -> Optional[Translation]:
         """Get Translation by lemma token."""
