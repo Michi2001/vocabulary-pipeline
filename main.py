@@ -11,11 +11,13 @@ import logging
 import os
 import pickle
 import shutil
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import yaml
+from scipy import sparse
 
 from src.batch_disambiguator import BatchDisambiguator
 from src.cooccurrence_builder import CoOccurrenceBuilder
@@ -39,6 +41,20 @@ from src.share_updater import ShareUpdater
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class PipelineResult:
+    """Result container for pipeline execution."""
+
+    output_dir: str
+    vocabulary: Optional["Vocabulary"] = None
+    translations: Optional[List["Translation"]] = None
+    cooccurrence_matrix: Optional[sparse.csr_matrix] = None
+    merged_counter: Optional["FrequencyCounter"] = None
+    corpus_stores: Dict[str, Tuple["SentenceStore", "LemmatizedStore", str]] = field(
+        default_factory=dict
+    )
+
+
 def load_config(config_path: str = "config.yaml") -> dict:
     """Load configuration from YAML file."""
     with open(config_path, "r", encoding="utf-8") as f:
@@ -60,19 +76,28 @@ def generate_disambiguation_cache_key(vocab_hash: str, bert_model: str) -> str:
     return hashlib.sha256(content.encode()).hexdigest()[:12]
 
 
-if __name__ == "__main__":
-    """Main pipeline execution."""
+def run_pipeline(
+    config: dict,
+    config_path: Optional[str] = None,
+    translations_override: Optional[List[Translation]] = None,
+) -> PipelineResult:
+    """
+    Run the full lemma frequency analysis pipeline.
 
-    config_path = "config.yaml"
-    config = load_config(config_path)
+    Args:
+        config: Configuration dictionary
+        config_path: Optional path to config file (for backup copy to output dir)
+        translations_override: Optional pre-built translations (skips LLM stages 3-5)
 
+    Returns:
+        PipelineResult with all outputs
+    """
     lemma_config = config["lemmatization"]
     processing_config = config["processing"]
     output_config = config["output"]
-    cache_config = config.get("cache", {"enabled": False})
+    cache_config = config.get("cache", {})
     filter_config = config.get("filtering", {})
     disambiguation_config = config.get("disambiguation", {"enabled": False})
-    cooccurrence_config = config.get("cooccurrence", {"enabled": False})
 
     # Create timestamped output directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -95,17 +120,16 @@ if __name__ == "__main__":
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 
-    # Copy config file to output directory
-    config_backup_path = os.path.join(output_dir, "config.yaml")
-    shutil.copy2(config_path, config_backup_path)
-    logger.info(f"Config copied to: {config_backup_path}")
+    # Copy config file to output directory (if path provided)
+    if config_path is not None:
+        config_backup_path = os.path.join(output_dir, "config.yaml")
+        shutil.copy2(config_path, config_backup_path)
+        logger.info(f"Config copied to: {config_backup_path}")
     logger.info(f"Log file: {log_file_path}")
 
     logger.info("Starting pipeline...")
     logger.info(f"Output directory: {output_dir}")
     logger.info(f"Model: {lemma_config['model']}")
-    logger.info(f"Cache: {'enabled' if cache_config.get('enabled') else 'disabled'}")
-    logger.info(f"Filtering: {'enabled' if filter_config else 'disabled'}")
 
     # Initialize lemmatizer
     lemmatizer = Lemmatizer(
@@ -184,20 +208,12 @@ if __name__ == "__main__":
         logger.info("STAGE 3: LLM Correction")
         logger.info("=" * 60)
 
-        # Initialize shared LLM cache
-        llm_cache_config = config.get(
-            "llm_cache", {"enabled": True, "directory": "cache"}
-        )
-        llm_cache = (
-            LemmaCache(llm_cache_config)
-            if llm_cache_config.get("enabled", True)
-            else None
-        )
+        # Initialize LLM cache
+        llm_cache_dir = cache_config.get("llm_directory", "cache/llm_results")
+        llm_cache = LemmaCache({"directory": llm_cache_dir})
 
         # Load system prompt
-        prompt_file = correction_config.get(
-            "system_prompt_file", "config/llm_system_prompt.txt"
-        )
+        prompt_file = correction_config.get("prompt_file", "prompts/corrector.txt")
         with open(prompt_file, "r", encoding="utf-8") as f:
             system_prompt = f.read()
 
@@ -262,63 +278,67 @@ if __name__ == "__main__":
     OutputWriter.write_csv(frequencies, output_path)
 
     # =========================================================================
-    # STAGE 4: Translation
+    # STAGE 4-5: Translation and Meaning Embeddings
+    # (Skip if translations_override provided)
     # =========================================================================
     translations: Optional[List[Translation]] = None
-    translation_config = config.get("llm_translation", {})
-    if translation_config.get("enabled", False):
-        logger.info("=" * 60)
-        logger.info("STAGE 4: Translation")
-        logger.info("=" * 60)
 
-        # Initialize shared LLM cache if not already done
-        if "llm_cache" not in locals():
-            llm_cache_config = config.get(
-                "llm_cache", {"enabled": True, "directory": "cache"}
+    if translations_override is not None:
+        logger.info("=" * 60)
+        logger.info("STAGE 4-5: Using provided translations (skipping LLM stages)")
+        logger.info("=" * 60)
+        translations = translations_override
+    else:
+        translation_config = config.get("llm_translation", {})
+        if translation_config.get("enabled", False):
+            logger.info("=" * 60)
+            logger.info("STAGE 4: Translation")
+            logger.info("=" * 60)
+
+            # Initialize LLM cache if not already done
+            if "llm_cache" not in locals():
+                llm_cache_dir = cache_config.get("llm_directory", "cache/llm_results")
+                llm_cache = LemmaCache({"directory": llm_cache_dir})
+
+            provider_type = translation_config["llm"]["type"]
+            provider_config = translation_config["llm"].get(provider_type, {})
+            translation_provider = create_provider(provider_type, provider_config)
+
+            translator_config = {
+                "batch_size": translation_config.get("batch_size", 25),
+                "prompts_dir": translation_config.get(
+                    "prompt_directory", "prompts/translation"
+                ),
+                "output_dir": output_dir,
+            }
+
+            translator = LemmaTranslator(
+                translation_provider, llm_cache, translator_config
             )
-            llm_cache = (
-                LemmaCache(llm_cache_config)
-                if llm_cache_config.get("enabled", True)
-                else None
+            min_freq = processing_config.get("min_frequency", 1)
+            translations, _ = translator.translate(
+                merged_counter, min_frequency=min_freq
             )
 
-        provider_type = translation_config["llm"]["type"]
-        provider_config = translation_config["llm"].get(provider_type, {})
-        translation_provider = create_provider(provider_type, provider_config)
+            logger.info("LLM translation completed")
 
-        translator_config = {
-            "batch_size": translation_config.get("batch_size", 25),
-            "prompts_dir": translation_config.get(
-                "prompt_directory", "prompts/translation"
-            ),
-            "output_dir": output_dir,
-        }
+        # =========================================================================
+        # STAGE 5: Meaning Embeddings
+        # =========================================================================
+        if translations is not None and disambiguation_config.get("enabled", False):
+            logger.info("=" * 60)
+            logger.info("STAGE 5: Meaning Embeddings")
+            logger.info("=" * 60)
 
-        translator = LemmaTranslator(translation_provider, llm_cache, translator_config)
-        min_freq = processing_config.get("min_frequency", 1)
-        translations, usage_stats = translator.translate(
-            merged_counter, min_frequency=min_freq
-        )
-
-        logger.info("LLM translation completed")
-
-    # =========================================================================
-    # STAGE 5: Meaning Embeddings
-    # =========================================================================
-    if translations is not None and disambiguation_config.get("enabled", False):
-        logger.info("=" * 60)
-        logger.info("STAGE 5: Meaning Embeddings")
-        logger.info("=" * 60)
-
-        model_name = disambiguation_config.get(
-            "model", "dccuchile/bert-base-spanish-wwm-cased"
-        )
-        meaning_emb_generator = MeaningEmbeddingGenerator(
-            model_name=model_name,
-            batch_size=disambiguation_config.get("batch_size", 32),
-        )
-        translations = meaning_emb_generator.generate(translations)
-        logger.info("Meaning embeddings generated")
+            model_name = disambiguation_config.get(
+                "model", "dccuchile/bert-base-spanish-wwm-cased"
+            )
+            meaning_emb_generator = MeaningEmbeddingGenerator(
+                model_name=model_name,
+                batch_size=disambiguation_config.get("batch_size", 32),
+            )
+            translations = meaning_emb_generator.generate(translations)
+            logger.info("Meaning embeddings generated")
 
     # Save translations to JSON (if available)
     if translations is not None:
@@ -410,13 +430,10 @@ if __name__ == "__main__":
     # STAGE 7: Co-Occurrence Matrix (ALL corpora)
     # =========================================================================
     cooccurrence_matrix = None
-    if disambiguated_stores and cooccurrence_config.get("enabled", False):
+    if disambiguated_stores and vocabulary is not None:
         logger.info("=" * 60)
         logger.info("STAGE 7: Co-Occurrence Matrix")
         logger.info("=" * 60)
-
-        if vocabulary is None:
-            raise RuntimeError("Vocabulary required for co-occurrence matrix")
 
         builder = CoOccurrenceBuilder(vocabulary)
         cooccurrence_matrix = builder.build(disambiguated_stores)
@@ -436,3 +453,18 @@ if __name__ == "__main__":
     logger.info("=" * 60)
     logger.info("Pipeline completed!")
     logger.info("=" * 60)
+
+    return PipelineResult(
+        output_dir=output_dir,
+        vocabulary=vocabulary,
+        translations=translations,
+        cooccurrence_matrix=cooccurrence_matrix,
+        merged_counter=merged_counter,
+        corpus_stores=corpus_stores,
+    )
+
+
+if __name__ == "__main__":
+    config_path = "config.yaml"
+    config = load_config(config_path)
+    run_pipeline(config, config_path=config_path)

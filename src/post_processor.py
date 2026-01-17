@@ -18,25 +18,17 @@ class FrequencyPostProcessor:
     - POS mapping (e.g., AUX→VERB, CCONJ/SCONJ→CONJ)
     - Lemma cleaning (removing enclitic pronouns)
     - Frequency merging (combining mapped POS categories)
+
+    Config options (in config.yaml under 'filtering'):
+        accepted_pos: List of POS tags to include (e.g., ["VERB", "NOUN", "ADJ"])
+        pos_mappings: Dict mapping POS tags (e.g., {"AUX": "VERB", "SCONJ": "CONJ"})
+        include_countries: If true, include country names as allowed PROPNs
     """
 
     def __init__(self, filter_config: Dict[str, Any]):
-        """
-        Initialize post-processor with filter configuration.
-
-        Args:
-            filter_config: {
-                'accepted_pos': list of POS tags to include (None = accept all)
-                'pos_mappings': dict mapping original POS to target POS
-                'main_pos_categories': list for final grouping
-                'clean_lemmas': bool to enable/disable lemma cleaning
-                'include_countries': bool to automatically include all country names from babel
-            }
-        """
+        """Initialize post-processor with filter configuration."""
         self.accepted_pos = set(filter_config.get("accepted_pos", []))
         self.pos_mappings = filter_config.get("pos_mappings", {})
-        self.main_pos_categories = set(filter_config.get("main_pos_categories", []))
-        self.clean_lemmas = filter_config.get("clean_lemmas", True)
 
         self.allowed_propns = set()
         if filter_config.get("include_countries", False):
@@ -48,8 +40,6 @@ class FrequencyPostProcessor:
             f"PostProcessor initialized: "
             f"{len(self.accepted_pos)} accepted POS, "
             f"{len(self.pos_mappings)} mappings, "
-            f"{len(self.main_pos_categories)} main categories, "
-            f"cleaning={'enabled' if self.clean_lemmas else 'disabled'}, "
             f"{len(self.allowed_propns)} allowed country PROPNs"
         )
 
@@ -62,75 +52,24 @@ class FrequencyPostProcessor:
         return set(country_names)
 
     def _clean_lemma(self, lemma: str) -> str:
-        """
-        Clean lemma by removing multi-word artifacts.
-
-        Args:
-            lemma: Raw lemma
-
-        Returns:
-            Cleaned single-word lemma
-        """
-        if not self.clean_lemmas:
-            return lemma
-
-        # Only clean if it's a multi-word lemma
+        """Clean lemma by removing enclitic pronouns from multi-word lemmas."""
         if " " in lemma:
-            # Remove enclitic pronouns that spaCy sometimes adds
             lemma = re.sub(
                 r"\s+(yo|tú|él|ella|nosotros|vosotros|ellos|ellas|lo|la|los|las|le|les|me|te|se)$",
                 "",
                 lemma,
             )
-
         return lemma
 
-    def _normalize_pos(self, pos: str) -> str:
-        """
-        Normalize POS to main category or OTHER.
-
-        Args:
-            pos: POS tag
-
-        Returns:
-            Normalized POS (main category or "OTHER")
-        """
-        if pos in self.main_pos_categories:
-            return pos
-        else:
-            return "OTHER"
-
     def process(self, raw_counter: FrequencyCounter) -> FrequencyCounter:
-        """
-        Apply post-processing filters to raw frequency data.
-
-        Steps:
-        1. Iterate through raw_counter.lemma_counts (all original POS)
-        2. Apply POS filtering (skip if not in accepted_pos)
-        3. Apply POS mapping (e.g., AUX→VERB)
-        4. Apply lemma cleaning if enabled
-        5. Create new key with cleaned lemma and mapped POS
-        6. Normalize POS to main categories
-        7. Aggregate frequencies in new FrequencyCounter
-
-        Args:
-            raw_counter: FrequencyCounter with raw, unfiltered data
-
-        Returns:
-            New FrequencyCounter with filtered/transformed data
-        """
+        """Apply post-processing filters to raw frequency data."""
         logger.info("Starting post-processing of raw frequency data...")
 
-        # Create new counter for filtered data
         filtered_counter = FrequencyCounter()
-
-        # Process known words
         total_raw_lemmas = len(raw_counter.lemma_counts)
-        filtered_count = 0
         skipped_count = 0
 
         for raw_key, count in raw_counter.lemma_counts.items():
-            # Parse raw key: "lemma|POS" (split from right to handle pipes in lemma)
             parts = raw_key.rsplit("|", 1)
             if len(parts) != 2:
                 logger.warning(f"Invalid key format: {raw_key}")
@@ -146,17 +85,14 @@ class FrequencyPostProcessor:
                     skipped_count += 1
                     continue
 
-            # Step 2: Apply POS mapping
+            # Step 2: Apply POS mapping (e.g., AUX→VERB)
             mapped_pos = self.pos_mappings.get(original_pos, original_pos)
 
             # Step 3: Apply lemma cleaning
             cleaned_lemma = self._clean_lemma(lemma)
 
-            # Step 4: Normalize POS
-            normalized_pos = self._normalize_pos(mapped_pos)
-
-            # Step 5: Create new key and add to filtered counter
-            new_key = f"{cleaned_lemma}|{normalized_pos}"
+            # Step 4: Create new key and add to filtered counter
+            new_key = f"{cleaned_lemma}|{mapped_pos}"
 
             # Add to filtered counter
             filtered_counter.lemma_counts[new_key] += count
@@ -170,8 +106,6 @@ class FrequencyPostProcessor:
                 filtered_counter.lemma_pos_details[new_key].update(
                     raw_counter.lemma_pos_details[raw_key]
                 )
-
-            filtered_count += 1
 
         logger.info(
             f"Post-processing complete: "

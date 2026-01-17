@@ -1,0 +1,44 @@
+# Test configuration for pipeline integration test
+
+corpora:
+  - name: "sample"
+    file_path: "test/data/sample_corpus.txt"
+    type: "opus"
+    encoding: "utf-8"
+
+lemmatization:
+  model: "es_core_news_lg"
+  batch_size: 100
+
+processing:
+  sentence_batch_size: 100
+  min_frequency: 1
+
+output:
+  directory: "test/outputs"
+
+cache:
+  directory: "test/cache"
+  llm_directory: "test/cache/llm_results"
+
+filtering:
+  accepted_pos:
+    - NOUN
+    - VERB
+    - ADJ
+    - AUX
+  pos_mappings:
+    AUX: VERB
+  include_countries: false
+
+# Disabled - test uses translations_override
+llm_correction:
+  enabled: false
+
+llm_translation:
+  enabled: false
+
+disambiguation:
+  enabled: true
+  model: "dccuchile/bert-base-spanish-wwm-cased"
+  batch_size: 8

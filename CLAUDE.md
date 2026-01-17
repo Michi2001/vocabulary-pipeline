@@ -249,14 +249,11 @@ Abstract base class pattern (src/corpus_readers/base_reader.py) enables support 
 - `lemmatization`: spaCy model and batch_size
 - `processing`: sentence_batch_size, min_frequency
 - `output`: directory (timestamped subdirs created automatically)
-- `cache`: enabled, directory (for spaCy frequency cache)
-- `filtering`: accepted_pos, pos_mappings, main_pos_categories, clean_lemmas, include_countries
-- `llm_cache`: enabled, directory (for LLM correction/translation cache)
-- `llm_correction`: enabled, batch_size, system_prompt_file, slice, llm provider config
+- `cache`: directory, llm_directory
+- `filtering`: accepted_pos, pos_mappings, include_countries
+- `llm_correction`: enabled, batch_size, prompt_file, slice, llm provider config
 - `llm_translation`: enabled, batch_size, prompt_directory, llm provider config
-- `sentence_store`: enabled (required for disambiguation and co-occurrence)
 - `disambiguation`: enabled, model (BERT model name), batch_size
-- `cooccurrence`: enabled (requires disambiguation)
 
 ### Output Structure
 
@@ -269,7 +266,9 @@ output/spanish_lemma_frequencies/YYYYMMDD_HHMMSS/
 ├── original_with_ids.csv    # Original lemmas with IDs (if correction enabled)
 ├── llm_corrections.csv      # LLM correction operations (if correction enabled)
 ├── translations.json        # Translations with embeddings (if translation enabled)
-└── cooccurrence_matrix.npz  # Co-occurrence matrix (if cooccurrence enabled)
+└── vocabulary/              # Vocabulary directory (if disambiguation enabled)
+    ├── translations.json    # Vocabulary translations
+    └── cooccurrence_matrix.npz  # Co-occurrence matrix
 ```
 
 The `translations.json` structure (if enabled):
@@ -415,18 +414,16 @@ The pipeline stages have the following dependencies:
 - Includes caching based on vocabulary hash + BERT model
 
 **Stage 7: Co-Occurrence Matrix**
-- Optional (enabled via `cooccurrence.enabled`)
-- Requires:
-  - `disambiguation.enabled` (must be true)
-  - DisambiguatedStore from ALL corpora
+- Runs automatically when disambiguation is enabled
+- Requires DisambiguatedStore from ALL corpora
 - Builds matrix across all corpora
-- Outputs: `cooccurrence_matrix.npz` in output directory
+- Outputs: `vocabulary/cooccurrence_matrix.npz` in output directory
 
 **Dependency Chain Summary:**
 ```
-Stage 1-2 (always) → Stage 3 (optional) → Stage 4 (optional) → Stage 5 (optional, auto-enabled with Stage 6)
+Stage 1-2 (always) → Stage 3 (optional) → Stage 4 (optional) → Stage 5 (auto with Stage 6)
                                                                         ↓
-                          SentenceStore + LemmatizedStore (always created) → Stage 6 (optional, multi-corpus) → Stage 7 (optional, multi-corpus)
+                          SentenceStore + LemmatizedStore (always) → Stage 6 (optional) → Stage 7 (auto with Stage 6)
 ```
 
 ## Data Expectations
