@@ -3775,6 +3775,72 @@
         1
       ],
       "notes": "Hard: Impersonal 'hace frío' = it's cold (weather), not do/make"
+    },
+    {
+      "id": "gato_001",
+      "target": "El [gato] come pescado fresco.",
+      "meanings": [
+        {
+          "definition": "El [gato] es un animal mamífero doméstico de la familia de los felinos.",
+          "example": "Mi [gato] siempre duerme en el sofá."
+        },
+        {
+          "definition": "El [gato] es una máquina que sirve para levantar grandes pesos.",
+          "example": "Necesito el [gato] para cambiar la rueda del coche."
+        },
+        {
+          "definition": "El [gato] es una persona que ha nacido en Madrid.",
+          "example": "Para ser un auténtico [gato], hay que tener raíces madrileñas."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "Cat vs car jack vs person from Madrid - sentence about eating fish"
+    },
+    {
+      "id": "gato_002",
+      "target": "El [gato] y el perro juegan juntos.",
+      "meanings": [
+        {
+          "definition": "El [gato] es un animal mamífero doméstico de la familia de los felinos.",
+          "example": "Mi [gato] siempre duerme en el sofá."
+        },
+        {
+          "definition": "El [gato] es una máquina que sirve para levantar grandes pesos.",
+          "example": "Necesito el [gato] para cambiar la rueda del coche."
+        },
+        {
+          "definition": "El [gato] es una persona que ha nacido en Madrid.",
+          "example": "Para ser un auténtico [gato], hay que tener raíces madrileñas."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "Cat vs car jack vs person from Madrid - sentence about playing with dog"
+    },
+    {
+      "id": "gato_003",
+      "target": "El [gato] duerme en la casa.",
+      "meanings": [
+        {
+          "definition": "El [gato] es un animal mamífero doméstico de la familia de los felinos.",
+          "example": "Mi [gato] siempre duerme en el sofá."
+        },
+        {
+          "definition": "El [gato] es una máquina que sirve para levantar grandes pesos.",
+          "example": "Necesito el [gato] para cambiar la rueda del coche."
+        },
+        {
+          "definition": "El [gato] es una persona que ha nacido en Madrid.",
+          "example": "Para ser un auténtico [gato], hay que tener raíces madrileñas."
+        }
+      ],
+      "correct_meaning_indices": [
+        0
+      ],
+      "notes": "Cat vs car jack vs person from Madrid - sentence about sleeping in house"
     }
   ],
   "metadata": {
