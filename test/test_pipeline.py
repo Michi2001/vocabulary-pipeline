@@ -1,17 +1,12 @@
-"""
-Integration test for the full pipeline.
+"""Integration test for the full pipeline."""
 
-Tests the pipeline with a sample corpus, running translation and disambiguation
-to verify the complete flow and co-occurrence matrix generation.
-"""
-
+import datetime
 import sys
 import unittest
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-import datetime
 
 from main import load_config, run_pipeline
 from test_utils import Tee
@@ -31,20 +26,16 @@ class TestPipelineIntegration(unittest.TestCase):
     def test_full_pipeline(self):
         """Test full pipeline with LLM translation and disambiguation."""
         config = load_config(str(self.config_path))
-
-        # Override output directory
         config["output"]["directory"] = str(OUTPUT_DIR)
 
         result = run_pipeline(config)
 
-        # Basic assertions
         self.assertIsNotNone(result)
         self.assertIsNotNone(result.vocabulary)
         self.assertIsNotNone(result.cooccurrence_matrix)
         self.assertGreater(len(result.vocabulary.translations), 0)
         self.assertGreater(len(result.vocabulary.word_variants), 0)
 
-        # Verify output files exist
         output_path = Path(result.output_dir)
         self.assertTrue((output_path / "translations.json").exists())
         self.assertTrue((output_path / "vocabulary" / "translations.json").exists())
@@ -52,11 +43,10 @@ class TestPipelineIntegration(unittest.TestCase):
             (output_path / "vocabulary" / "cooccurrence_matrix.npz").exists()
         )
 
-        # Generate co-occurrence matrix visualization
         self._visualize_cooccurrence_matrix(result)
-
-        # Print co-occurrence details for each variant
         self._print_cooccurrences(result)
+        self._print_store_contents(result)
+        self._print_word_variants(result)
 
         print(f"\nPipeline completed successfully!")
         print(f"Output directory: {result.output_dir}")
@@ -68,22 +58,19 @@ class TestPipelineIntegration(unittest.TestCase):
         vocab = result.vocabulary
         matrix = result.cooccurrence_matrix
 
-        # Sort variants by translation_id then meaning_idx (group meanings together)
         sorted_variants = sorted(
             vocab.word_variants,
             key=lambda v: (v.source_translation_id, v.meaning_idx),
         )
-        # old_id -> new_index mapping
-        reorder_map = {v.id: new_idx for new_idx, v in enumerate(sorted_variants)}
+        reorder_map = {
+            v.id: new_idx for new_idx, v in enumerate(sorted_variants)
+        }  # old_id -> new_idx
 
-        # Get labels for word variants (with German translation and frequency)
         labels = []
         for variant in sorted_variants:
             translation = variant.primary_translation or "?"
-            label = f"{variant.lemma} - {translation} ({variant.frequency})"
-            labels.append(label)
+            labels.append(f"{variant.lemma} - {translation} ({variant.frequency})")
 
-        # Convert sparse matrix to dense and reorder to match sorted variants
         dense_matrix = matrix.toarray()
         n = len(labels)
         reordered_matrix = np.zeros((n, n))
@@ -94,19 +81,14 @@ class TestPipelineIntegration(unittest.TestCase):
                 reordered_matrix[new_i, new_j] = dense_matrix[old_i, old_j]
         dense_matrix = reordered_matrix
 
-        # Create figure
         _, ax = plt.subplots(figsize=(12, 10))
-
-        # Plot heatmap
         im = ax.imshow(dense_matrix, cmap="YlOrRd", aspect="auto")
 
-        # Add grid lines between cells
         ax.set_xticks(np.arange(-0.5, n, 1), minor=True)
         ax.set_yticks(np.arange(-0.5, n, 1), minor=True)
         ax.grid(which="minor", color="gray", linestyle="-", linewidth=0.5)
         ax.tick_params(which="minor", size=0)
 
-        # Add cell values
         for i in range(n):
             for j in range(n):
                 value = dense_matrix[i, j]
@@ -122,23 +104,17 @@ class TestPipelineIntegration(unittest.TestCase):
                         fontsize=7,
                     )
 
-        # Add colorbar
         cbar = ax.figure.colorbar(im, ax=ax)
         cbar.ax.set_ylabel("Co-occurrence count", rotation=-90, va="bottom")
 
-        # Set ticks and labels
         ax.set_xticks(np.arange(n))
         ax.set_yticks(np.arange(n))
         ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
         ax.set_yticklabels(labels, fontsize=8)
-
-        # Add title
         ax.set_title("Word Variant Co-occurrence Matrix", fontsize=14, pad=20)
 
-        # Adjust layout
         plt.tight_layout()
 
-        # Save to output directory
         output_path = Path(result.output_dir) / "cooccurrence_matrix.png"
         plt.savefig(output_path, dpi=150, bbox_inches="tight")
         plt.close()
@@ -153,21 +129,16 @@ class TestPipelineIntegration(unittest.TestCase):
         print("CO-OCCURRENCE DETAILS")
         print("=" * 80)
 
-        # Sort variants by frequency descending
         sorted_variants = sorted(vocab.word_variants, key=lambda v: -v.frequency)
 
         for variant in sorted_variants:
-            # Get co-occurrences for this variant
             cooccurrences = vocab.get_cooccurrences(variant.id, top_k=50)
-
-            # Format variant label with frequency
             variant_label = f"{variant.lemma} ({variant.primary_translation}) [{variant.frequency}x]"
 
             if not cooccurrences:
                 print(f"{variant_label}: (no co-occurrences)")
                 continue
 
-            # Format co-occurrence list
             cooc_parts = []
             for other_id, count in cooccurrences:
                 other = vocab.get_word_variant(other_id)
@@ -178,6 +149,45 @@ class TestPipelineIntegration(unittest.TestCase):
             print(f"{variant_label}: {' - '.join(cooc_parts)}")
 
         print("=" * 80)
+
+    def _print_store_contents(self, result):
+        """Print contents of all stores."""
+        print("\n" + "=" * 80)
+        print("STORE CONTENTS")
+        print("=" * 80)
+
+        for corpus_name, (sent_store, lemma_store, _) in result.corpus_stores.items():
+            print(f"\n--- Corpus: {corpus_name} ---")
+
+            dis_store = result.disambiguated_stores.get(corpus_name)
+
+            sentences = list(sent_store)
+            lemmas = list(lemma_store)
+            disambiguated = list(dis_store) if dis_store else None
+
+            for i, (sid, tokens) in enumerate(sentences):
+                _, lemma_tokens = lemmas[i]
+                variants = disambiguated[i][1] if disambiguated else None
+
+                print(f"\n  Sentence {sid}:")
+                print(f"    Tokens:  {tokens}")
+                print(f"    Lemmas:  {lemma_tokens}")
+                if variants is not None:
+                    print(f"    Variants: {variants}")
+
+    def _print_word_variants(self, result):
+        """Print all WordVariants with their IDs."""
+        print("\n" + "=" * 80)
+        print("WORD VARIANTS")
+        print("=" * 80)
+
+        for variant in result.vocabulary.word_variants:
+            print(
+                f"  ID {variant.id}: {variant.lemma}|{variant.pos} "
+                f"-> {variant.primary_translation} "
+                f"(meaning_idx={variant.meaning_idx}, freq={variant.frequency}, "
+                f"string_id={variant.string_id})"
+            )
 
 
 if __name__ == "__main__":

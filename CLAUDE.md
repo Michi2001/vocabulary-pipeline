@@ -2,6 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## IMPORTANT: Code Rules (MUST follow)
+
+### Code Style
+- **Imports:** ALWAYS at the TOP of the file. NEVER inside functions/methods.
+- **Keep it Simple:** Avoid over-engineering. Minimal code for the task.
+- **Comments:** Only for non-obvious logic.
+- **Docstrings:** One-line for most functions. Only elaborate when truly needed.
+- **Dicts:** Comment key→value types if not obvious, e.g. `# lemma -> frequency`
+
+### Error Handling
+- **Fail Fast:** Let errors crash. NO unnecessary try/except.
+- **Warnings over Catches:** Prefer logging warnings over catching errors.
+
+### Logging
+- **Sparse:** Only log what's essential for understanding the flow.
+
+---
+
 ## Project Overview
 
 Spanish vocabulary frequency analyzer and word sense disambiguation system that processes large text corpora using spaCy for contextual lemmatization. The pipeline transforms raw Spanish text into a disambiguated, semantically-enriched vocabulary dataset through seven stages:
@@ -445,25 +465,3 @@ Stage 1-2 (always) → Stage 3 (optional) → Stage 4 (optional) → Stage 5 (au
 
 **Leipzig Corpora:** Place files in `data/Leipzig_Wortschatz/{corpus_name}/{corpus_name}-sentences.txt` format.
 **OPUS Corpora:** Place .txt files with one sentence per line anywhere (path specified in config.yaml).
-
-
-
-# Claude Code Rules
-
-## Code Style & Structure
-* **Keep it Simple:** Keep the code as simple as possible. Avoid over-engineering.
-* **Imports:** Always place imports at the very top of the file.
-* **Inline Comments:** Add comments only for non-obvious lines or logic. Avoid unnecessary inline comments.
-* **Docstrings:**
-    * Use a short one-line docstring for most functions.
-    * Only explain parameters or behavior when they are not immediately obvious from the code itself.
-* **Python dictionaries** For dictionaries, always explain what the keys and values are in an inline comment, e.g. translation_id, meaning_id -> count 
-
-## Error Handling
-* **Minimalist Approach:** Use error handling very sparingly.
-* **Warnings over Catches:** In most cases, prefer logging a warning over catching an error.
-* **Fail Fast:** Never catch errors that indicate a fundamental problem in the pipeline. In these cases, it is preferable to let the program crash/exit to surface the underlying issue.
-
-## Logging
-* **Sparse Logging:** Be very selective with logging commands.
-* **Necessity:** Only log the absolute minimum required for understanding the core flow or debugging critical issues.

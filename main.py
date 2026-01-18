@@ -50,9 +50,12 @@ class PipelineResult:
     translations: Optional[List["Translation"]] = None
     cooccurrence_matrix: Optional[sparse.csr_matrix] = None
     merged_counter: Optional["FrequencyCounter"] = None
+    # corpus_name -> (SentenceStore, LemmatizedStore, cache_key)
     corpus_stores: Dict[str, Tuple["SentenceStore", "LemmatizedStore", str]] = field(
         default_factory=dict
     )
+    # corpus_name -> DisambiguatedStore
+    disambiguated_stores: Dict[str, "DisambiguatedStore"] = field(default_factory=dict)
 
 
 def load_config(config_path: str = "config.yaml") -> dict:
@@ -351,7 +354,7 @@ def run_pipeline(
     # =========================================================================
     # STAGE 6: Disambiguation (ALL corpora)
     # =========================================================================
-    disambiguated_stores: List[DisambiguatedStore] = []
+    disambiguated_stores: Dict[str, DisambiguatedStore] = {}  # corpus_name -> store
     vocabulary: Optional[Vocabulary] = None
 
     if translations is not None and disambiguation_config.get("enabled", False):
@@ -399,7 +402,7 @@ def run_pipeline(
                     use_corrections=correction_mapping_path.exists(),
                 )
 
-            disambiguated_stores.append(dis_store)
+            disambiguated_stores[corpus_name] = dis_store
 
         logger.info(f"Disambiguation complete for {len(disambiguated_stores)} corpora")
 
@@ -413,7 +416,7 @@ def run_pipeline(
 
         share_updater = ShareUpdater()
         translations = share_updater.update(
-            disambiguated_stores, translations, vocabulary
+            list(disambiguated_stores.values()), translations, vocabulary
         )
         # Note: Do NOT recreate vocabulary here - IDs must stay stable for
         # DisambiguatedStores and Co-Occurrence Matrix consistency
@@ -436,7 +439,7 @@ def run_pipeline(
         logger.info("=" * 60)
 
         builder = CoOccurrenceBuilder(vocabulary)
-        cooccurrence_matrix = builder.build(disambiguated_stores)
+        cooccurrence_matrix = builder.build(list(disambiguated_stores.values()))
         logger.info("Co-occurrence matrix built successfully")
 
     # =========================================================================
@@ -462,6 +465,7 @@ def run_pipeline(
         cooccurrence_matrix=cooccurrence_matrix,
         merged_counter=merged_counter,
         corpus_stores=corpus_stores,
+        disambiguated_stores=disambiguated_stores,
     )
 
 
