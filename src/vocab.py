@@ -135,23 +135,36 @@ class Translation:
 @dataclass
 class WordVariant:
     """
-    A specific meaning variant of a lemma.
-    Each Translation can have multiple meanings - each becomes a WordVariant.
-    The id is the index in Vocabulary.word_variants (integer for direct array access).
+    An indexed view into a specific meaning of a Translation.
+    The id is the index in Vocabulary.word_variants (integer for direct array/matrix access).
     """
 
     id: int  # Index in Vocabulary.word_variants list
-    lemma: str
-    pos: str
-    translation_frequency: int  # Total frequency of the parent translation
-    meaning: Meaning
-    source_translation_id: str  # Translation.id (stays string for JSON compatibility)
-    meaning_idx: int  # Index within the source translation's meanings
+    translation: Translation  # Reference to parent Translation
+    meaning_idx: int  # Index within translation.meanings
+
+    @property
+    def meaning(self) -> Meaning:
+        """Returns the Meaning object (shared reference)."""
+        return self.translation.meanings[self.meaning_idx]
+
+    @property
+    def lemma(self) -> str:
+        return self.translation.lemma
+
+    @property
+    def pos(self) -> str:
+        return self.translation.pos
 
     @property
     def frequency(self) -> int:
         """Derived frequency based on translation frequency and meaning's estimated share."""
-        return int(self.translation_frequency * self.meaning.estimated_share)
+        return int(self.translation.frequency * self.meaning.estimated_share)
+
+    @property
+    def source_translation_id(self) -> str:
+        """Translation.id for JSON compatibility."""
+        return self.translation.id
 
     @property
     def string_id(self) -> str:
@@ -161,7 +174,7 @@ class WordVariant:
     @property
     def lemma_token(self) -> LemmaToken:
         """Returns (lemma, pos) tuple."""
-        return (self.lemma, self.pos)
+        return self.translation.lemma_token
 
     @property
     def primary_translation(self) -> str:
@@ -176,43 +189,25 @@ class WordVariant:
     @classmethod
     def from_translations(cls, translations: List[Translation]) -> List["WordVariant"]:
         """Create WordVariants from Translations, sorted by derived frequency."""
-        # First pass: create variants without final IDs
         variants_unsorted = []
         for translation in translations:
             for idx, meaning in enumerate(translation.meanings):
                 derived_freq = int(translation.frequency * meaning.estimated_share)
-                variants_unsorted.append(
-                    {
-                        "lemma": translation.lemma,
-                        "pos": translation.pos,
-                        "translation_frequency": translation.frequency,
-                        "derived_freq": derived_freq,
-                        "meaning": meaning,
-                        "source_translation_id": translation.id,
-                        "meaning_idx": idx,
-                    }
-                )
+                variants_unsorted.append({
+                    "translation": translation,
+                    "meaning_idx": idx,
+                    "derived_freq": derived_freq,
+                })
 
         # Sort by frequency descending, then by translation_id and meaning_idx for determinism
         variants_unsorted.sort(
-            key=lambda v: (-v["derived_freq"], v["source_translation_id"], v["meaning_idx"])
+            key=lambda v: (-v["derived_freq"], v["translation"].id, v["meaning_idx"])
         )
 
-        # Second pass: assign IDs based on sorted position
-        variants = []
-        for idx, v in enumerate(variants_unsorted):
-            variants.append(
-                cls(
-                    id=idx,  # Index in sorted list is the ID
-                    lemma=v["lemma"],
-                    pos=v["pos"],
-                    translation_frequency=v["translation_frequency"],
-                    meaning=v["meaning"],
-                    source_translation_id=v["source_translation_id"],
-                    meaning_idx=v["meaning_idx"],
-                )
-            )
-        return variants
+        return [
+            cls(id=idx, translation=v["translation"], meaning_idx=v["meaning_idx"])
+            for idx, v in enumerate(variants_unsorted)
+        ]
 
 
 class Vocabulary:
