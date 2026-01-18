@@ -20,6 +20,7 @@ from src.frequency_counter import FrequencyCounter
 from src.llm_providers import create_provider
 from src.llm_translator import LemmaTranslator
 from src.vocab import Vocabulary
+from test_utils import Tee
 
 
 def load_translation_input(csv_path):

@@ -5,29 +5,35 @@ Tests the pipeline with a sample corpus, running translation and disambiguation
 to verify the complete flow and co-occurrence matrix generation.
 """
 
+import sys
 import unittest
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 from main import load_config, run_pipeline
+from test_utils import Tee
+
+TEST_DIR = Path("test")
+TIMESTAMP = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+OUTPUT_DIR = TEST_DIR / "outputs" / "test_pipeline" / TIMESTAMP
+OUTPUT_LOG_PATH = OUTPUT_DIR / "pipeline.log"
 
 
 class TestPipelineIntegration(unittest.TestCase):
     """Integration test for the full pipeline with LLM translation."""
 
-    test_dir = Path(__file__).parent
-    config_path = test_dir / "test_config.yaml"
-    cache_dir = test_dir / "cache"
-    output_dir = test_dir / "outputs" / "test_pipeline"
+    config_path = TEST_DIR / "test_config.yaml"
+    cache_dir = TEST_DIR / "cache"
 
     def test_full_pipeline(self):
         """Test full pipeline with LLM translation and disambiguation."""
         config = load_config(str(self.config_path))
 
-        # Override output directory to fixed path (no timestamp)
-        config["output"]["directory"] = str(self.output_dir)
+        # Override output directory
+        config["output"]["directory"] = str(OUTPUT_DIR)
 
         result = run_pipeline(config)
 
@@ -48,6 +54,9 @@ class TestPipelineIntegration(unittest.TestCase):
 
         # Generate co-occurrence matrix visualization
         self._visualize_cooccurrence_matrix(result)
+
+        # Print co-occurrence details for each variant
+        self._print_cooccurrences(result)
 
         print(f"\nPipeline completed successfully!")
         print(f"Output directory: {result.output_dir}")
@@ -136,6 +145,50 @@ class TestPipelineIntegration(unittest.TestCase):
 
         print(f"\nCo-occurrence matrix visualization saved to: {output_path}")
 
+    def _print_cooccurrences(self, result):
+        """Print co-occurrence details for each word variant."""
+        vocab = result.vocabulary
+
+        print("\n" + "=" * 80)
+        print("CO-OCCURRENCE DETAILS")
+        print("=" * 80)
+
+        # Sort variants by frequency descending
+        sorted_variants = sorted(vocab.word_variants, key=lambda v: -v.frequency)
+
+        for variant in sorted_variants:
+            # Get co-occurrences for this variant
+            cooccurrences = vocab.get_cooccurrences(variant.id, top_k=50)
+
+            # Format variant label with frequency
+            variant_label = f"{variant.lemma} ({variant.primary_translation}) [{variant.frequency}x]"
+
+            if not cooccurrences:
+                print(f"{variant_label}: (no co-occurrences)")
+                continue
+
+            # Format co-occurrence list
+            cooc_parts = []
+            for other_id, count in cooccurrences:
+                other = vocab.get_word_variant(other_id)
+                cooc_parts.append(
+                    f"{other.lemma} ({other.primary_translation}) [{int(count)}]"
+                )
+
+            print(f"{variant_label}: {' - '.join(cooc_parts)}")
+
+        print("=" * 80)
+
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    log_file = open(OUTPUT_LOG_PATH, "w", encoding="utf-8")
+    original_stdout = sys.stdout
+    sys.stdout = Tee(original_stdout, log_file)
+
+    try:
+        unittest.main(verbosity=2)
+    finally:
+        sys.stdout = original_stdout
+        log_file.close()
