@@ -67,11 +67,11 @@ class TestPipelineIntegration(unittest.TestCase):
         # old_id -> new_index mapping
         reorder_map = {v.id: new_idx for new_idx, v in enumerate(sorted_variants)}
 
-        # Get labels for word variants (with German translation)
+        # Get labels for word variants (with German translation and frequency)
         labels = []
         for variant in sorted_variants:
             translation = variant.primary_translation or "?"
-            label = f"{variant.lemma} - {translation}"
+            label = f"{variant.lemma} - {translation} ({variant.frequency})"
             labels.append(label)
 
         # Convert sparse matrix to dense and reorder to match sorted variants

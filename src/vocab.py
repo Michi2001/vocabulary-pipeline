@@ -143,10 +143,15 @@ class WordVariant:
     id: int  # Index in Vocabulary.word_variants list
     lemma: str
     pos: str
-    frequency: int  # Derived: translation.frequency * meaning.estimated_share
+    translation_frequency: int  # Total frequency of the parent translation
     meaning: Meaning
     source_translation_id: str  # Translation.id (stays string for JSON compatibility)
     meaning_idx: int  # Index within the source translation's meanings
+
+    @property
+    def frequency(self) -> int:
+        """Derived frequency based on translation frequency and meaning's estimated share."""
+        return int(self.translation_frequency * self.meaning.estimated_share)
 
     @property
     def string_id(self) -> str:
@@ -180,7 +185,8 @@ class WordVariant:
                     {
                         "lemma": translation.lemma,
                         "pos": translation.pos,
-                        "frequency": derived_freq,
+                        "translation_frequency": translation.frequency,
+                        "derived_freq": derived_freq,
                         "meaning": meaning,
                         "source_translation_id": translation.id,
                         "meaning_idx": idx,
@@ -189,7 +195,7 @@ class WordVariant:
 
         # Sort by frequency descending, then by translation_id and meaning_idx for determinism
         variants_unsorted.sort(
-            key=lambda v: (-v["frequency"], v["source_translation_id"], v["meaning_idx"])
+            key=lambda v: (-v["derived_freq"], v["source_translation_id"], v["meaning_idx"])
         )
 
         # Second pass: assign IDs based on sorted position
@@ -200,7 +206,7 @@ class WordVariant:
                     id=idx,  # Index in sorted list is the ID
                     lemma=v["lemma"],
                     pos=v["pos"],
-                    frequency=v["frequency"],
+                    translation_frequency=v["translation_frequency"],
                     meaning=v["meaning"],
                     source_translation_id=v["source_translation_id"],
                     meaning_idx=v["meaning_idx"],
