@@ -415,8 +415,8 @@ def run_pipeline(
         translations = share_updater.update(
             disambiguated_stores, translations, vocabulary
         )
-
-        vocabulary = Vocabulary.from_translations_list(translations)
+        # Note: Do NOT recreate vocabulary here - IDs must stay stable for
+        # DisambiguatedStores and Co-Occurrence Matrix consistency
         logger.info("Estimated shares updated based on corpus usage")
 
         # Re-save translations.json with updated estimated_share values

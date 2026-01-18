@@ -26,6 +26,7 @@ class Meaning:
     structure: Optional[str] = None
     example_es: Optional[str] = None
     flags: Optional[List[str]] = None
+    gender: Optional[str] = None  # Spanish grammatical gender ("m" or "f")
     # Embedding metadata (internal, prefixed with _)
     _bert_embedding: Optional[List[float]] = None
     _target_word: Optional[str] = None
@@ -58,6 +59,7 @@ class Meaning:
             structure=data.get("structure"),
             example_es=data.get("example_es"),
             flags=data.get("flags", []),
+            gender=data.get("gender"),
             _bert_embedding=data.get(
                 "meaning_embedding"
             ),  # JSON uses meaning_embedding
@@ -77,8 +79,10 @@ class Meaning:
             result["structure"] = self.structure
         if self.example_es is not None:
             result["example_es"] = self.example_es
-        if self.flags:
+        if self.flags is not None:
             result["flags"] = self.flags
+        if self.gender is not None:
+            result["gender"] = self.gender
         if include_embeddings and self._bert_embedding is not None:
             result["meaning_embedding"] = self._bert_embedding
         if self._target_word is not None:
@@ -183,8 +187,10 @@ class WordVariant:
                     }
                 )
 
-        # Sort by frequency descending
-        variants_unsorted.sort(key=lambda v: v["frequency"], reverse=True)
+        # Sort by frequency descending, then by translation_id and meaning_idx for determinism
+        variants_unsorted.sort(
+            key=lambda v: (-v["frequency"], v["source_translation_id"], v["meaning_idx"])
+        )
 
         # Second pass: assign IDs based on sorted position
         variants = []

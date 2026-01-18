@@ -59,17 +59,31 @@ class TestPipelineIntegration(unittest.TestCase):
         vocab = result.vocabulary
         matrix = result.cooccurrence_matrix
 
-        # Get labels for word variants
+        # Sort variants by translation_id then meaning_idx (group meanings together)
+        sorted_variants = sorted(
+            vocab.word_variants,
+            key=lambda v: (v.source_translation_id, v.meaning_idx),
+        )
+        # old_id -> new_index mapping
+        reorder_map = {v.id: new_idx for new_idx, v in enumerate(sorted_variants)}
+
+        # Get labels for word variants (with German translation)
         labels = []
-        for variant in vocab.word_variants:
-            label = f"{variant.lemma} ({variant.pos})"
-            if len(vocab.get_variant_ids_for_lemma(variant.lemma_token)) > 1:
-                label += f" [{variant.meaning_idx}]"
+        for variant in sorted_variants:
+            translation = variant.primary_translation or "?"
+            label = f"{variant.lemma} - {translation}"
             labels.append(label)
 
-        # Convert sparse matrix to dense for visualization
+        # Convert sparse matrix to dense and reorder to match sorted variants
         dense_matrix = matrix.toarray()
         n = len(labels)
+        reordered_matrix = np.zeros((n, n))
+        for old_i in range(n):
+            for old_j in range(n):
+                new_i = reorder_map[old_i]
+                new_j = reorder_map[old_j]
+                reordered_matrix[new_i, new_j] = dense_matrix[old_i, old_j]
+        dense_matrix = reordered_matrix
 
         # Create figure
         _, ax = plt.subplots(figsize=(12, 10))

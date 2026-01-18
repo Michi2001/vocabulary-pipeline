@@ -30,6 +30,14 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
   - Beispiel: `visibilidad` → "Sichtbarkeit" (physisch im Wetter UND metaphorisch für Bekanntheit - beides ist "Sichtbarkeit", keine separaten meanings nötig)
   - Das deutsche Wort deckt beide Verwendungen ab, genau wie im Spanischen
 - **Nur stilistische oder graduelle Unterschiede**: Wenn es nur um Nuancen oder Register geht, nicht um grundsätzlich verschiedene Bedeutungen
+- **Subkategorien desselben Konzepts**: Wenn beide Bedeutungen Varianten desselben Grundkonzepts sind
+  - ❌ FALSCH: `pescado` → "Fisch (Lebensmittel)" vs. "Speisefisch" (beides = Fisch zum Essen, EINE meaning!)
+  - ❌ FALSCH: `comer` → "essen" vs. "zu Mittag essen" (beides = Nahrung aufnehmen, EINE meaning!)
+
+**WICHTIG - Entscheidungshilfe:**
+Frage dich: "Würde ein deutscher Muttersprachler hier zwei verschiedene Wörter verwenden?"
+- JA → separate meanings (z.B. `gato`: Katze vs. Wagenheber)
+- NEIN → eine meaning (z.B. `pescado`: immer "Fisch")
 
 ### 2. Definition (definition_es)
 - **Pflichtfeld**: Jede Bedeutung muss eine kurze spanische Definition enthalten

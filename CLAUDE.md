@@ -18,16 +18,31 @@ The system supports multiple corpora, aggressive caching at each stage, and stre
 
 ## Development Commands
 
+### Conda Environment
+The project uses a conda environment called `LanguageApp-new`. Run commands with:
+```bash
+# Run a Python script
+~/anaconda3/bin/conda run -n LanguageApp-new python3 script.py
+
+# Run inline Python code (set PYTHONPATH for imports from project root)
+~/anaconda3/bin/conda run -n LanguageApp-new python3 -c "
+import sys
+sys.path.insert(0, '.')
+from src.vocab import Vocabulary
+# ... your code
+"
+```
+
 ### Running the Pipeline
 ```bash
 # Main execution - processes corpora and generates frequency lists
-python main.py
+~/anaconda3/bin/conda run -n LanguageApp-new python3 main.py
 ```
 
 ### Testing
 ```bash
 # Test lemmatization functionality
-python test_lemmatization.py
+~/anaconda3/bin/conda run -n LanguageApp-new python3 test_lemmatization.py
 ```
 
 ### Dependencies

@@ -51,6 +51,11 @@ PROVIDER_CONFIG = {  # best settings for Google Gemini
     "thinking_level": "minimal",
     "temperature": 1.0,
 }
+# PROVIDER_CONFIG = {
+#     "model": "gemini-3-pro-preview",
+#     "thinking_level": "low",
+#     "temperature": 1.0,
+# }
 BATCH_SIZE = 20  # Number of items to process per batch
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_DIR = Path(f"test/outputs/test_translation/{TIMESTAMP}")
