@@ -16,6 +16,7 @@ processing:
 
 output:
   directory: "test/outputs"
+  include_embeddings: false
 
 cache:
   directory: "test/cache"
@@ -31,12 +32,22 @@ filtering:
     AUX: VERB
   include_countries: false
 
-# Disabled - test uses translations_override
 llm_correction:
   enabled: false
 
 llm_translation:
-  enabled: false
+  enabled: true
+  batch_size: 20
+  prompt_directory: "prompts/translation"
+  llm:
+    type: "google"
+    google:
+      model: "gemini-3-flash-preview"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 360
+      temperature: 1.0
+      thinking_level: "minimal"
 
 disambiguation:
   enabled: true

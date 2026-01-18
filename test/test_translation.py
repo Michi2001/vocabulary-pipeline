@@ -5,21 +5,21 @@ This test validates that LLM providers correctly translate Spanish lemmas to Ger
 The test data is loaded from CSV files.
 
 Run with: python -m unittest test.test_translation
-Requires: OPENAI_API_KEY environment variable
+Requires: GOOGLE_API_KEY or OPENAI_API_KEY environment variable
 """
 
-import unittest
-import os
 import csv
-import sys
 import json
 import logging
+import sys
+import unittest
+from datetime import datetime
 from pathlib import Path
-from collections import defaultdict
+
+from src.frequency_counter import FrequencyCounter
 from src.llm_providers import create_provider
 from src.llm_translator import LemmaTranslator
-from src.frequency_counter import FrequencyCounter
-from datetime import datetime
+from src.vocab import Vocabulary
 
 
 def load_translation_input(csv_path):
@@ -82,33 +82,22 @@ class TestLemmaTranslation(unittest.TestCase):
             "batch_size": BATCH_SIZE,
             "prompts_dir": str(PROMPT_FOLDER),
             "output_dir": str(OUTPUT_DIR),
-            "cache_config": {
-                "enabled": False,
-                "directory": "cache/test_llm_translations",
-            },
-            "llm_model": PROVIDER_CONFIG["model"],
         }
 
-        # Create translator
-        translator = LemmaTranslator(self.provider, translator_config)
+        # Create translator (cache=None disables caching)
+        translator = LemmaTranslator(
+            self.provider, cache=None, config=translator_config
+        )
 
         # Run translation
         print(f"\nStarting translation with batch size {BATCH_SIZE}...")
-        translator.translate(self.counter, min_frequency=1)
-
-        # Check that output file was created
-        output_file = OUTPUT_DIR / "translations.json"
-        self.assertTrue(
-            output_file.exists(), f"Translation output file not created: {output_file}"
-        )
-
-        # Load and validate output
-        with open(output_file, "r", encoding="utf-8") as f:
-            translations = json.load(f)
+        translations, usage_stats = translator.translate(self.counter, min_frequency=1)
 
         print(f"\nTranslation complete!")
         print(f"Total translations: {len(translations)}")
-        print(f"Output saved to: {output_file}")
+        print(
+            f"API calls: {usage_stats['api_calls']}, Cache hits: {usage_stats['cache_hits']}"
+        )
 
         # Basic validation
         self.assertIsInstance(translations, list, "Translations must be a list")
@@ -116,14 +105,31 @@ class TestLemmaTranslation(unittest.TestCase):
             len(translations), 0, "Translations list should not be empty"
         )
 
-        # Validate structure of first translation
+        # Validate structure of first translation (Translation objects have these attributes)
         if translations:
             first = translations[0]
-            required_fields = ["id", "lemma", "pos", "meanings", "frequency"]
-            for field in required_fields:
-                self.assertIn(
-                    field, first, f"Translation missing required field: {field}"
+            required_attrs = ["id", "lemma", "pos", "meanings", "frequency"]
+            for attr in required_attrs:
+                self.assertTrue(
+                    hasattr(first, attr),
+                    f"Translation missing required attribute: {attr}",
                 )
+
+        # Create Vocabulary and save to output directory
+        vocab = Vocabulary.from_translations_list(translations)
+        vocab_dir = OUTPUT_DIR / "vocabulary"
+        vocab.save(str(vocab_dir))
+
+        print(f"\nVocabulary saved to: {vocab_dir}")
+        print(f"  Translations: {len(vocab.translations)}")
+        print(f"  Word variants: {len(vocab.word_variants)}")
+
+        # Verify vocabulary file was created
+        translations_file = vocab_dir / "translations.json"
+        self.assertTrue(
+            translations_file.exists(),
+            f"Vocabulary translations file not created: {translations_file}",
+        )
 
 
 class Tee:

@@ -66,7 +66,7 @@ class Meaning:
             _target_end=data.get("_target_end"),
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self, include_embeddings: bool = True) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         result = {
             "definition_es": self.definition_es,
@@ -79,7 +79,7 @@ class Meaning:
             result["example_es"] = self.example_es
         if self.flags:
             result["flags"] = self.flags
-        if self._bert_embedding is not None:
+        if include_embeddings and self._bert_embedding is not None:
             result["meaning_embedding"] = self._bert_embedding
         if self._target_word is not None:
             result["_target_word"] = self._target_word
@@ -117,14 +117,14 @@ class Translation:
             meanings=meanings,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self, include_embeddings: bool = True) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": self.id,
             "lemma": self.lemma,
             "pos": self.pos,
             "frequency": self.frequency,
-            "meanings": [m.to_dict() for m in self.meanings],
+            "meanings": [m.to_dict(include_embeddings) for m in self.meanings],
         }
 
 
@@ -259,18 +259,18 @@ class Vocabulary:
 
         return vocab
 
-    def to_dicts(self) -> List[Dict[str, Any]]:
+    def to_dicts(self, include_embeddings: bool = True) -> List[Dict[str, Any]]:
         """Convert to list of dictionaries for JSON serialization."""
-        return [t.to_dict() for t in self.translations]
+        return [t.to_dict(include_embeddings) for t in self.translations]
 
-    def save(self, dir_path: str) -> None:
+    def save(self, dir_path: str, include_embeddings: bool = True) -> None:
         """Save Vocabulary to directory."""
         dir_path = Path(dir_path)
         dir_path.mkdir(parents=True, exist_ok=True)
 
         translations_path = dir_path / self.TRANSLATIONS_FILE
         with open(translations_path, "w", encoding="utf-8") as f:
-            json.dump(self.to_dicts(), f, ensure_ascii=False, indent=2)
+            json.dump(self.to_dicts(include_embeddings), f, ensure_ascii=False, indent=2)
 
         if self.cooccurrence_matrix is not None:
             cooccurrence_path = dir_path / self.COOCCURRENCE_FILE

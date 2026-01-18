@@ -40,3 +40,10 @@ Finetuned AFM (nur Story-Generierung)
 Semantische Embedding-Ähnlichkeit ≠ narrative Kompatibilität ("rot" und "Fuchs" haben unterschiedliche Embeddings, passen aber gut zusammen).
 
 **Lösung:** Bedeutungssensitive Co-Occurrence-Matrix via Word Sense Disambiguation auf Korpus-Ebene.
+
+
+# Designetnscheidung: Kein Batchweises Caching beim lesen der Sätze
+
+## Begründung
+- Zuerst werden zufällig Sätze gesampelt, dann gelesen -> Sampling Schritt müsste angepasst werden
+- Sentence Store: gzip unterstützt kein APPEND

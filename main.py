@@ -447,7 +447,8 @@ def run_pipeline(
             vocabulary.cooccurrence_matrix = cooccurrence_matrix
 
         vocab_dir = Path(output_dir) / "vocabulary"
-        vocabulary.save(str(vocab_dir))
+        include_embeddings = config.get("output", {}).get("include_embeddings", True)
+        vocabulary.save(str(vocab_dir), include_embeddings=include_embeddings)
         logger.info(f"Vocabulary saved to: {vocab_dir}")
 
     logger.info("=" * 60)
