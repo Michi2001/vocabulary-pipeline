@@ -33,11 +33,28 @@ Erstelle für das gegebene spanische Wort (`lemma`) vollständige Übersetzungse
 - **Subkategorien desselben Konzepts**: Wenn beide Bedeutungen Varianten desselben Grundkonzepts sind
   - ❌ FALSCH: `pescado` → "Fisch (Lebensmittel)" vs. "Speisefisch" (beides = Fisch zum Essen, EINE meaning!)
   - ❌ FALSCH: `comer` → "essen" vs. "zu Mittag essen" (beides = Nahrung aufnehmen, EINE meaning!)
+- **Kollokationen sind keine separaten Bedeutungen**: Wenn ein Wort in einer festen Wendung vorkommt, aber seine Grundbedeutung behält, ist das KEINE separate meaning
+  - ❌ FALSCH: `rojo` → "rot" + "rot werden" (ponerse rojo) = zwei meanings
+  - ✅ RICHTIG: `rojo` → "rot" = eine meaning (ponerse rojo ist nur eine Verwendung)
+  - ❌ FALSCH: `frío` → "kalt" + "kalt sein" (tener frío) = zwei meanings
+  - ✅ RICHTIG: `frío` → "kalt" = eine meaning
+  - **Regel:** Die Übersetzung muss zur Wortart (POS) passen. Ein Adjektiv wird mit einem Adjektiv übersetzt, nicht mit einer Verbkonstruktion.
 
-**WICHTIG - Entscheidungshilfe:**
+**KRITISCH - Entscheidungshilfe:**
 Frage dich: "Würde ein deutscher Muttersprachler hier zwei verschiedene Wörter verwenden?"
 - JA → separate meanings (z.B. `gato`: Katze vs. Wagenheber)
 - NEIN → eine meaning (z.B. `pescado`: immer "Fisch")
+
+**WICHTIG - Gleiche Übersetzung = Eine Meaning:**
+Wenn zwei Bedeutungen dieselbe deutsche Kernübersetzung haben, gehören sie in EINE meaning:
+- ❌ FALSCH: `hoja` → "Blatt" (Pflanze) + "Blatt" (Papier) = zwei meanings
+- ✅ RICHTIG: `hoja` → "Blatt" = eine meaning (Kontext ergibt sich aus Beispielsatz)
+- ❌ FALSCH: `estar` → "sein" (Ort) + "sein" (Zustand) = zwei meanings
+- ✅ RICHTIG: `estar` → "sein" = eine meaning
+
+**Faustregel:** Wenn du für die zweite Meaning dieselbe deutsche Übersetzung schreibst (oder nur eine Umschreibung/Spezialisierung davon), dann brauchst du keine zweite Meaning.
+
+**Ausnahme - Echte Homonyme:** Komplett unverbundene Konzepte dürfen getrennt werden, auch wenn die deutsche Übersetzung zufällig gleich ist. Beispiel: `banco` (Finanzinstitut) vs. `banco` (Sitzgelegenheit) - im Deutschen beides "Bank", aber semantisch völlig unverbunden.
 
 ### 2. Definition (definition_es)
 - **Pflichtfeld**: Jede Bedeutung muss eine kurze spanische Definition enthalten
