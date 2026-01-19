@@ -1,16 +1,12 @@
-"""
-Unit tests for word sense disambiguation implementations.
+"""Unit tests for word sense disambiguation implementations."""
 
-Tests multiple disambiguator approaches across different BERT models
-and generates comparison reports.
-"""
-
-import unittest
 import json
-import os
+import unittest
 from datetime import datetime
-from typing import List, Dict, Tuple
 from pathlib import Path
+from typing import Dict, List
+
+import numpy as np
 
 from disambiguators import (
     BertDefinitionDisambiguator,
@@ -48,14 +44,12 @@ class TestDisambiguation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Load test data and create output directory."""
-        # Load test data
         test_data_path = Path("test/data/disambiguation_test_data.json")
         with open(test_data_path, "r", encoding="utf-8") as f:
             data = json.load(f)
             cls.test_cases = data["test_cases"]
             cls.metadata = data["metadata"]
 
-        # Create output directory
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         cls.output_dir = Path("test") / "outputs" / "test_disambiguation" / timestamp
         cls.output_dir.mkdir(parents=True, exist_ok=True)
@@ -65,12 +59,7 @@ class TestDisambiguation(unittest.TestCase):
         print(f"Output directory: {cls.output_dir}\n")
 
     def _run_disambiguation_tests(self, disambiguator, method_name: str) -> Dict:
-        """
-        Run all test cases for one disambiguator.
-
-        Returns:
-            Dict with results
-        """
+        """Run all test cases for one disambiguator."""
         correct = 0
         errors = []
         per_case_results = []
@@ -147,12 +136,10 @@ class TestDisambiguation(unittest.TestCase):
                         f"expected {error['expected']} (conf: {error['confidence']:.3f})"
                     )
 
-        # Save detailed results
         results_file = self.output_dir / "results.json"
         with open(results_file, "w", encoding="utf-8") as f:
             json.dump(all_results, f, indent=2, ensure_ascii=False)
 
-        # Save errors
         all_errors = []
         for result in all_results:
             all_errors.extend(result["errors"])
@@ -161,10 +148,9 @@ class TestDisambiguation(unittest.TestCase):
         with open(errors_file, "w", encoding="utf-8") as f:
             json.dump(all_errors, f, indent=2, ensure_ascii=False)
 
-        # Generate comparison report (TXT)
         self._generate_comparison_report(all_results)
+        self._analyze_embedding_similarities(all_results)
 
-        # Assert: at least one disambiguator should achieve > 60% accuracy
         max_accuracy = max(r["accuracy"] for r in all_results)
         self.assertGreater(
             max_accuracy,
@@ -177,20 +163,17 @@ class TestDisambiguation(unittest.TestCase):
         report_file = self.output_dir / "comparison_report.txt"
 
         with open(report_file, "w", encoding="utf-8") as f:
-            # Header
             f.write("=" * 80 + "\n")
             f.write("Word Sense Disambiguation - Comparison Report\n")
             f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"Test Cases: {len(self.test_cases)}\n")
             f.write("=" * 80 + "\n\n")
 
-            # Table header
             f.write(
                 f"{'Method':<30} {'Accuracy':<12} {'Correct/Total':<15} {'Avg Confidence':<15}\n"
             )
             f.write("-" * 80 + "\n")
 
-            # Table rows
             for result in all_results:
                 f.write(
                     f"{result['method']:<30} "
@@ -201,13 +184,11 @@ class TestDisambiguation(unittest.TestCase):
 
             f.write("=" * 80 + "\n\n")
 
-            # Best overall
             best_result = max(all_results, key=lambda r: r["accuracy"])
             f.write(
                 f"Best Overall: {best_result['method']} ({best_result['accuracy']:.2f}%)\n\n"
             )
 
-            # Errors summary
             f.write("Errors Summary:\n")
             for result in all_results:
                 if result["errors"]:
@@ -218,12 +199,91 @@ class TestDisambiguation(unittest.TestCase):
 
             f.write("\nFull error details in: errors.json\n")
 
-        # Print report to console
         print("\n" + "=" * 80)
         with open(report_file, "r", encoding="utf-8") as f:
             print(f.read())
 
         print(f"\nResults saved to: {self.output_dir}")
+
+    def _analyze_embedding_similarities(self, all_results: List[Dict]):
+        """Analyze embedding similarities between meanings for each test case."""
+        disambiguator = DISAMBIGUATORS_TO_TEST[0][1]
+
+        analysis_results = []
+        for test_case in self.test_cases:
+            meanings = test_case["meanings"]
+            if len(meanings) < 2:
+                continue
+
+            embeddings = []
+            for meaning in meanings:
+                sentence = meaning["example"]
+                emb = disambiguator._get_contextual_embedding(sentence)
+                embeddings.append(emb.numpy())
+
+            similarities = []  # (meaning_idx_i, meaning_idx_j, similarity)
+            for i in range(len(embeddings)):
+                for j in range(i + 1, len(embeddings)):
+                    sim = np.dot(embeddings[i], embeddings[j]) / (
+                        np.linalg.norm(embeddings[i]) * np.linalg.norm(embeddings[j])
+                    )
+                    similarities.append((i, j, float(sim)))
+
+            avg_similarity = np.mean([s[2] for s in similarities])
+
+            is_correct = any(
+                r["id"] == test_case["id"] and r["is_correct"]
+                for r in all_results[0]["per_case_results"]
+            )
+
+            analysis_results.append(
+                {
+                    "id": test_case["id"],
+                    "num_meanings": len(meanings),
+                    "avg_similarity": avg_similarity,
+                    "similarities": similarities,
+                    "is_correct": is_correct,
+                }
+            )
+
+        self._print_embedding_analysis(analysis_results)
+        self._save_embedding_analysis(analysis_results)
+
+    def _print_embedding_analysis(self, analysis_results: List[Dict]):
+        """Print embedding similarity analysis."""
+        print("\n" + "=" * 80)
+        print("EMBEDDING SIMILARITY ANALYSIS")
+        print("=" * 80)
+
+        sorted_results = sorted(analysis_results, key=lambda x: x["avg_similarity"])
+
+        print(f"\n{'ID':<20} {'Avg Sim':<10} {'Result':<10} {'Similarities'}")
+        print("-" * 80)
+
+        for r in sorted_results:
+            status = "CORRECT" if r["is_correct"] else "WRONG"
+            sims_str = ", ".join(
+                [f"{s[0]}-{s[1]}:{s[2]:.3f}" for s in r["similarities"]]
+            )
+            print(f"{r['id']:<20} {r['avg_similarity']:<10.4f} {status:<10} {sims_str}")
+
+        correct = [r for r in analysis_results if r["is_correct"]]
+        wrong = [r for r in analysis_results if not r["is_correct"]]
+
+        if correct:
+            avg_correct = np.mean([r["avg_similarity"] for r in correct])
+            print(f"\nAvg similarity (correct): {avg_correct:.4f}")
+        if wrong:
+            avg_wrong = np.mean([r["avg_similarity"] for r in wrong])
+            print(f"Avg similarity (wrong):   {avg_wrong:.4f}")
+
+        print("=" * 80)
+
+    def _save_embedding_analysis(self, analysis_results: List[Dict]):
+        """Save embedding analysis to file."""
+        analysis_file = self.output_dir / "embedding_analysis.json"
+        with open(analysis_file, "w", encoding="utf-8") as f:
+            json.dump(analysis_results, f, indent=2, ensure_ascii=False)
 
 
 if __name__ == "__main__":

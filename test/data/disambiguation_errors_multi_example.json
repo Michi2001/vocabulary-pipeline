@@ -1,0 +1,573 @@
+{
+  "metadata": {
+    "description": "Error cases from disambiguation test with 5 diverse examples per meaning",
+    "source": "test/outputs/test_disambiguation/20260119_152737/errors.json",
+    "purpose": "Test whether averaging multiple example embeddings improves disambiguation"
+  },
+  "test_cases": [
+    {
+      "id": "bajo_000178_2",
+      "target": "El departamento funciona [bajo] la supervisión directa del director general.",
+      "meanings": [
+        {
+          "definition": "[Bajo] indica una posición inferior en el espacio o debajo de algo",
+          "examples": [
+            "El gato está durmiendo [bajo] la mesa del comedor.",
+            "Encontraron el tesoro enterrado [bajo] el árbol más antiguo del jardín.",
+            "Los niños se refugiaron [bajo] el puente durante la lluvia.",
+            "La serpiente se escondió [bajo] las piedras del camino.",
+            "Guardamos las herramientas [bajo] llave en el sótano."
+          ]
+        },
+        {
+          "definition": "[Bajo] indica dependencia, subordinación o cumplimiento de órdenes",
+          "examples": [
+            "El país prosperó [bajo] el nuevo gobierno democrático.",
+            "Los soldados marcharon [bajo] las órdenes del general.",
+            "La empresa creció [bajo] la dirección de su fundadora.",
+            "El proyecto avanza [bajo] la coordinación del comité técnico.",
+            "Los empleados trabajan [bajo] un estricto protocolo de seguridad."
+          ]
+        },
+        {
+          "definition": "[Bajo] indica que algo sucede durante un tiempo o circunstancia específica",
+          "examples": [
+            "Trabajamos [bajo] mucha presión durante el proyecto final.",
+            "Tomó esa decisión [bajo] los efectos del cansancio extremo.",
+            "[Bajo] estas condiciones climáticas, es imposible salir a navegar.",
+            "Actuaron [bajo] la influencia del pánico colectivo.",
+            "El contrato se firmó [bajo] circunstancias muy favorables."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "bajo: under/command vs position vs circumstance - target uses 'supervisión' indicating subordination"
+    },
+    {
+      "id": "equivocar_000006_1",
+      "target": "Si piensas que voy a rendirme, te [equivocas] por completo.",
+      "meanings": [
+        {
+          "definition": "[Equivocar] o equivocarse es cometer un error o no acertar en algo",
+          "examples": [
+            "Me [equivoqué] al calcular el presupuesto del proyecto.",
+            "Si crees que esto es fácil, te [equivocas] rotundamente.",
+            "El meteorólogo se [equivocó] con el pronóstico de lluvia.",
+            "Reconozco que me [equivoqué] al juzgarte tan rápido.",
+            "No te [equivoques]: esto requiere mucho esfuerzo y dedicación."
+          ]
+        },
+        {
+          "definition": "[Equivocar] es tomar una cosa por otra erróneamente",
+          "examples": [
+            "[Equivoqué] tu abrigo con el mío porque son del mismo color.",
+            "El camarero [equivocó] nuestro pedido con el de otra mesa.",
+            "Siempre [equivoco] a los gemelos porque son idénticos.",
+            "[Equivocaron] mi maleta con otra en el aeropuerto.",
+            "Es fácil [equivocar] estas dos especies de plantas tan similares."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "equivocar: make mistake (be wrong about assumption) vs confuse one thing with another"
+    },
+    {
+      "id": "librería_000056_1",
+      "target": "En esa [librería] de viejo encontré una primera edición muy rara.",
+      "meanings": [
+        {
+          "definition": "Una [librería] es una tienda donde se venden libros",
+          "examples": [
+            "La [librería] de la esquina tiene una gran selección de novelas.",
+            "Trabajo como dependiente en una [librería] del centro comercial.",
+            "Esa [librería] independiente organiza presentaciones de autores locales.",
+            "La [librería] cerró porque no podía competir con las ventas online.",
+            "Encontré ese manual técnico en una [librería] especializada."
+          ]
+        },
+        {
+          "definition": "Una [librería] es un mueble con estantes para colocar libros",
+          "examples": [
+            "Montamos la [librería] nueva en el estudio esta mañana.",
+            "La [librería] de roble ocupa toda la pared del salón.",
+            "Necesito otra [librería] porque ya no tengo espacio para más volúmenes.",
+            "Mi abuelo construyó esta [librería] con sus propias manos.",
+            "La [librería] del despacho tiene puertas de cristal para proteger los ejemplares."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "librería: bookstore (de viejo = secondhand) vs bookshelf furniture"
+    },
+    {
+      "id": "aproximar_000031_2",
+      "target": "Una tormenta se [aproxima] desde el oeste.",
+      "meanings": [
+        {
+          "definition": "[Aproximar] es poner algo o a alguien cerca de otro (transitivo)",
+          "examples": [
+            "[Aproxima] la silla a la mesa para que podamos cenar.",
+            "El grúa [aproximó] el contenedor al muelle de carga.",
+            "Por favor, [aproxima] el micrófono a tu boca para que se te oiga mejor.",
+            "El técnico [aproximó] la lente al objeto para examinarlo.",
+            "[Aproximaron] los dos barcos para realizar el trasbordo."
+          ]
+        },
+        {
+          "definition": "[Aproximarse] es acercarse en el tiempo o espacio (reflexivo/intransitivo)",
+          "examples": [
+            "Se [aproxima] la fecha límite para entregar el informe.",
+            "El tren se [aproxima] a la estación a gran velocidad.",
+            "Se [aproximan] las vacaciones de verano y todos están emocionados.",
+            "Un vehículo sospechoso se [aproximaba] lentamente por la carretera.",
+            "Se [aproxima] el momento de tomar una decisión importante."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "aproximar: transitive (move sth closer) vs reflexive (approach) - 'se aproxima' is clearly reflexive"
+    },
+    {
+      "id": "maquinaria_000120_1",
+      "target": "La [maquinaria] textil ha evolucionado mucho en los últimos años.",
+      "meanings": [
+        {
+          "definition": "La [maquinaria] es un conjunto de máquinas industriales para un fin determinado",
+          "examples": [
+            "La fábrica renovó toda su [maquinaria] pesada el año pasado.",
+            "La [maquinaria] agrícola moderna aumenta la productividad del campo.",
+            "Invertieron millones en [maquinaria] de última generación.",
+            "La [maquinaria] de construcción trabaja día y noche en la obra.",
+            "El sector necesita actualizar su [maquinaria] para ser competitivo."
+          ]
+        },
+        {
+          "definition": "La [maquinaria] es el mecanismo interno que hace funcionar un aparato",
+          "examples": [
+            "La [maquinaria] de este reloj suizo es una obra de ingeniería.",
+            "El relojero reparó la delicada [maquinaria] del cronómetro antiguo.",
+            "La [maquinaria] del piano necesita un ajuste profesional.",
+            "Admiramos la compleja [maquinaria] del autómata del siglo XVIII.",
+            "La [maquinaria] interna del juguete se había oxidado con el tiempo."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "maquinaria: industrial machines (textil = textile industry) vs internal mechanism"
+    },
+    {
+      "id": "hard_orden_002",
+      "target": "Necesito más [orden].",
+      "meanings": [
+        {
+          "definition": "La [orden] es un mandato o instrucción que debe cumplirse",
+          "examples": [
+            "El capitán dio la [orden] de atacar al amanecer.",
+            "Cumplieron la [orden] del juez sin protestar.",
+            "La [orden] de evacuación llegó demasiado tarde.",
+            "Desobedecer una [orden] directa tiene graves consecuencias.",
+            "El presidente firmó la [orden] ejecutiva esa misma noche."
+          ]
+        },
+        {
+          "definition": "El [orden] es la organización o disposición metódica de las cosas",
+          "examples": [
+            "Me gusta mantener el [orden] en mi escritorio de trabajo.",
+            "Sin [orden] es imposible encontrar nada en esta oficina.",
+            "El [orden] alfabético facilita la búsqueda de documentos.",
+            "Valoro mucho el [orden] y la limpieza en mi hogar.",
+            "Hay que poner [orden] en las finanzas de la empresa."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "Hard case: 'más orden' typically means organization/tidiness, not more commands"
+    },
+    {
+      "id": "hard_llevar_001",
+      "target": "¿Cuánto tiempo [llevas] aquí?",
+      "meanings": [
+        {
+          "definition": "[Llevar] es transportar algo de un lugar a otro",
+          "examples": [
+            "Voy a [llevar] estas cajas al almacén del sótano.",
+            "El mensajero [lleva] paquetes por toda la ciudad.",
+            "¿Puedes [llevar] esta carta a la oficina de correos?",
+            "Los porteadores [llevaban] el equipaje hasta el campamento.",
+            "El camión [lleva] mercancías desde el puerto hasta la fábrica."
+          ]
+        },
+        {
+          "definition": "[Llevar] es haber estado en un lugar o situación durante cierto tiempo",
+          "examples": [
+            "[Llevo] tres años trabajando en esta empresa tecnológica.",
+            "¿Cuánto tiempo [llevas] esperando en la cola del banco?",
+            "[Llevamos] dos horas intentando resolver este problema.",
+            "Mi abuela [lleva] viviendo en este barrio desde 1960.",
+            "[Llevo] toda la mañana buscando mis llaves sin éxito."
+          ]
+        },
+        {
+          "definition": "[Llevar] es vestir o tener puesta una prenda o accesorio",
+          "examples": [
+            "Hoy [llevo] una camisa azul que me regaló mi madre.",
+            "Siempre [lleva] gafas de sol aunque esté nublado.",
+            "El novio [llevaba] un traje negro muy elegante.",
+            "¿Por qué [llevas] ese sombrero tan extravagante?",
+            "Los jugadores [llevan] camisetas con sus nombres en la espalda."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "Hard case: 'cuánto tiempo llevas' is temporal duration, not carry/wear"
+    },
+    {
+      "id": "gato_001",
+      "target": "El [gato] come pescado fresco.",
+      "meanings": [
+        {
+          "definition": "El [gato] es un animal mamífero doméstico de la familia de los felinos",
+          "examples": [
+            "Mi [gato] siempre ronronea cuando le acaricio la cabeza.",
+            "El [gato] del vecino caza ratones en el jardín todas las noches.",
+            "Adoptamos un [gato] abandonado del refugio local.",
+            "El [gato] se subió al tejado y no quiere bajar.",
+            "Los [gatos] son animales muy independientes y curiosos."
+          ]
+        },
+        {
+          "definition": "El [gato] es una máquina que sirve para levantar grandes pesos",
+          "examples": [
+            "Necesito el [gato] para cambiar la rueda pinchada del coche.",
+            "El mecánico usó un [gato] hidráulico para levantar el vehículo.",
+            "Siempre llevo un [gato] de emergencia en el maletero.",
+            "El [gato] del taller puede levantar hasta dos toneladas.",
+            "Coloca el [gato] en un punto firme del chasis antes de usarlo."
+          ]
+        },
+        {
+          "definition": "El [gato] es una persona que ha nacido en Madrid (coloquial)",
+          "examples": [
+            "Para ser un auténtico [gato], hay que tener varias generaciones madrileñas.",
+            "Mi abuelo era [gato] de pura cepa, nacido en Lavapiés.",
+            "Los [gatos] presumen de conocer todos los rincones de la capital.",
+            "Como buen [gato], defiende a su equipo de fútbol con pasión.",
+            "Solo los verdaderos [gatos] conocen las tabernas más antiguas de Madrid."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Cat vs car jack vs person from Madrid - 'come pescado' strongly indicates animal"
+    },
+    {
+      "id": "pipeline_pescado_001",
+      "target": "El [pescado] es fresco y delicioso.",
+      "meanings": [
+        {
+          "definition": "El [pescado] es un pez que ha sido sacado del agua para usarse como alimento",
+          "examples": [
+            "Compré [pescado] en el mercado para preparar la cena.",
+            "El [pescado] debe conservarse en hielo para mantener su frescura.",
+            "En la costa se consigue [pescado] muy variado y económico.",
+            "Prefiero el [pescado] al horno que frito.",
+            "El médico recomienda comer [pescado] dos veces por semana."
+          ]
+        },
+        {
+          "definition": "El [pescado] es la acción de pescar o el resultado de una jornada de pesca",
+          "examples": [
+            "El [pescado] de hoy fue muy abundante gracias al buen tiempo.",
+            "Los marineros celebraron el éxito del [pescado] con una fiesta.",
+            "El [pescado] en estas aguas está regulado por cuotas estrictas.",
+            "Después de un [pescado] tan malo, decidieron cambiar de zona.",
+            "La temporada de [pescado] comienza en primavera."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Pipeline error: 'pescado fresco' clearly refers to fish as food, not fishing activity"
+    },
+    {
+      "id": "pipeline_carne_001",
+      "target": "La [carne] es roja y jugosa.",
+      "meanings": [
+        {
+          "definition": "La [carne] es la parte blanda del cuerpo de los animales que se usa como alimento",
+          "examples": [
+            "La [carne] de vacuno es muy popular en Argentina.",
+            "Cortó la [carne] en trozos pequeños para el guiso.",
+            "Esta [carne] está muy tierna porque es de primera calidad.",
+            "El carnicero vende [carne] de cerdo, pollo y ternera.",
+            "La [carne] a la parrilla tiene un sabor ahumado delicioso."
+          ]
+        },
+        {
+          "definition": "La [carne] es la pulpa o parte blanda de una fruta",
+          "examples": [
+            "La [carne] del mango es dulce y aromática.",
+            "Separé la [carne] del melocotón de su hueso con cuidado.",
+            "La [carne] de la sandía es refrescante en verano.",
+            "Esta variedad de manzana tiene una [carne] muy crujiente.",
+            "La [carne] del aguacate se oxida rápidamente al contacto con el aire."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Pipeline error: 'carne roja y jugosa' refers to meat, not fruit pulp"
+    },
+    {
+      "id": "pipeline_rojo_001",
+      "target": "El perro come [carne] roja.",
+      "meanings": [
+        {
+          "definition": "[Rojo] es el color similar al de la sangre o el tomate",
+          "examples": [
+            "Pintaron las paredes de un [rojo] intenso muy llamativo.",
+            "El semáforo estaba en [rojo] y tuve que frenar.",
+            "Llevaba un vestido [rojo] que destacaba entre la multitud.",
+            "Las fresas maduras tienen un color [rojo] brillante.",
+            "El atardecer tiñó el cielo de tonos [rojos] y naranjas."
+          ]
+        },
+        {
+          "definition": "[Rojo] describe el estado de ruborizarse o sonrojarse por vergüenza",
+          "examples": [
+            "Se puso [rojo] de vergüenza cuando le pillaron mintiendo.",
+            "Cada vez que le habla ella, él se pone [rojo] como un tomate.",
+            "El niño se puso [rojo] al recibir tantos elogios.",
+            "Me puse [rojo] cuando tropecé delante de todos.",
+            "Se ponía [rojo] cada vez que tenía que hablar en público."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Pipeline error: 'carne roja' describes the color of meat, not blushing"
+    },
+    {
+      "id": "pipeline_planta_001",
+      "target": "Trabajamos en la [planta] de producción durante el turno de noche.",
+      "meanings": [
+        {
+          "definition": "La [planta] es un ser vivo vegetal que nace y crece en la tierra",
+          "examples": [
+            "Riego mis [plantas] todas las mañanas antes de ir al trabajo.",
+            "Esta [planta] necesita mucha luz solar para crecer.",
+            "Las [plantas] de interior purifican el aire de la casa.",
+            "Compré una [planta] de albahaca para cultivar en la cocina.",
+            "Las [plantas] del jardín florecieron con la llegada de la primavera."
+          ]
+        },
+        {
+          "definition": "La [planta] es un piso de un edificio o una instalación industrial",
+          "examples": [
+            "La oficina del director está en la tercera [planta] del edificio.",
+            "La [planta] embotelladora procesa miles de unidades al día.",
+            "Tuvimos que evacuar toda la [planta] por una alarma de incendio.",
+            "La nueva [planta] de ensamblaje creará cientos de empleos.",
+            "El almacén ocupa toda la [planta] baja del complejo."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "Pipeline error: 'planta de producción' clearly refers to factory/facility, not vegetation"
+    },
+    {
+      "id": "pipeline_hoja_001",
+      "target": "El libro tiene muchas [hojas] con ilustraciones hermosas.",
+      "meanings": [
+        {
+          "definition": "La [hoja] es la parte plana y verde que crece en los árboles y plantas",
+          "examples": [
+            "Las [hojas] de los árboles cambian de color en otoño.",
+            "El viento arrancó varias [hojas] de la rama más alta.",
+            "Recogimos [hojas] secas para hacer una manualidad escolar.",
+            "Las [hojas] de menta dan un aroma fresco a la bebida.",
+            "La oruga se alimenta exclusivamente de [hojas] tiernas."
+          ]
+        },
+        {
+          "definition": "La [hoja] es cada una de las partes de papel que forman un libro o cuaderno",
+          "examples": [
+            "Arranqué una [hoja] del cuaderno para tomar notas.",
+            "Este diccionario tiene más de mil [hojas] de consulta.",
+            "La impresora se atascó porque había demasiadas [hojas] en la bandeja.",
+            "Pasé las [hojas] del álbum recordando viejas fotografías.",
+            "El contrato ocupa tres [hojas] escritas por ambas caras."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "Pipeline error: 'hojas del libro con ilustraciones' refers to paper pages, not leaves"
+    },
+    {
+      "id": "hard_short_muñeca_001",
+      "target": "Me duele la [muñeca].",
+      "meanings": [
+        {
+          "definition": "La [muñeca] es la parte del cuerpo que une la mano con el brazo",
+          "examples": [
+            "El tenista se lesionó la [muñeca] durante el partido.",
+            "Llevo un reloj en la [muñeca] izquierda desde hace años.",
+            "El médico le vendó la [muñeca] después de la caída.",
+            "Hago ejercicios para fortalecer la [muñeca] antes de escribir.",
+            "La pulsera le apretaba demasiado la [muñeca]."
+          ]
+        },
+        {
+          "definition": "La [muñeca] es un juguete con forma de persona, generalmente de niña",
+          "examples": [
+            "Mi hija colecciona [muñecas] de porcelana antiguas.",
+            "La [muñeca] tenía un vestido rosa con encajes blancos.",
+            "Guardaba su [muñeca] favorita en una caja especial.",
+            "Las [muñecas] de trapo eran muy populares hace décadas.",
+            "Le regalaron una [muñeca] que cierra los ojos al tumbarla."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard short: 'me duele' indicates body part, but sentence is very short"
+    },
+    {
+      "id": "hard_short_copa_001",
+      "target": "Dame la [copa].",
+      "meanings": [
+        {
+          "definition": "La [copa] es un recipiente con pie para beber líquidos, especialmente vino",
+          "examples": [
+            "Sirvió el champán en [copas] de cristal muy finas.",
+            "Brindamos chocando nuestras [copas] con alegría.",
+            "La [copa] se rompió al caer de la mesa.",
+            "Prefiero beber el vino en [copa] que en vaso.",
+            "Las [copas] de cóctel tienen formas muy variadas."
+          ]
+        },
+        {
+          "definition": "La [copa] es un trofeo que se entrega al ganador de una competición",
+          "examples": [
+            "El capitán levantó la [copa] ante miles de aficionados.",
+            "Ganaron la [copa] del mundo por primera vez en su historia.",
+            "La [copa] de oro está expuesta en el museo del club.",
+            "Disputarán la final de [copa] el próximo domingo.",
+            "Esa [copa] de plata tiene más de cien años de antigüedad."
+          ]
+        },
+        {
+          "definition": "La [copa] es la parte superior y frondosa de un árbol",
+          "examples": [
+            "Los pájaros anidaban en la [copa] del roble centenario.",
+            "La [copa] del pino proyectaba una sombra muy agradable.",
+            "Podaron la [copa] del árbol para que entrara más luz.",
+            "Desde arriba se veían las [copas] verdes del bosque.",
+            "La [copa] del olivo estaba cargada de aceitunas maduras."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard short: 'dame' suggests passing an object - most likely drinking glass in typical context"
+    },
+    {
+      "id": "hard_short_capital_001",
+      "target": "Necesitamos más [capital].",
+      "meanings": [
+        {
+          "definition": "El [capital] es el dinero o recursos económicos disponibles para invertir",
+          "examples": [
+            "La empresa necesita [capital] para expandirse al extranjero.",
+            "Invirtió todo su [capital] en acciones tecnológicas.",
+            "Sin [capital] suficiente, el proyecto no puede continuar.",
+            "Los inversores aportaron el [capital] inicial de la startup.",
+            "El [capital] de riesgo financia empresas innovadoras."
+          ]
+        },
+        {
+          "definition": "La [capital] es la ciudad principal de un país o región",
+          "examples": [
+            "Madrid es la [capital] de España desde hace siglos.",
+            "Visitamos tres [capitales] europeas en nuestro viaje.",
+            "La [capital] tiene más habitantes que cualquier otra ciudad.",
+            "El parlamento se reúne siempre en la [capital] del país.",
+            "Quito es la [capital] más alta del mundo."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard short: 'necesitamos más' strongly suggests money/resources, not cities"
+    },
+    {
+      "id": "hard_short_derecho_001",
+      "target": "Estudia [derecho].",
+      "meanings": [
+        {
+          "definition": "El [derecho] es la carrera universitaria o ciencia que estudia las leyes",
+          "examples": [
+            "Se licenció en [derecho] por la universidad de Salamanca.",
+            "El [derecho] penal es una rama muy compleja.",
+            "Quiere especializarse en [derecho] internacional tras graduarse.",
+            "Los estudiantes de [derecho] tienen muchos exámenes orales.",
+            "El [derecho] romano es la base de muchos sistemas legales."
+          ]
+        },
+        {
+          "definition": "[Derecho] significa recto, que no se tuerce ni se inclina",
+          "examples": [
+            "Camina [derecho] y con la espalda recta.",
+            "Traza una línea [derecha] con la regla.",
+            "El camino va [derecho] hasta llegar al cruce.",
+            "Mantén el volante [derecho] para no desviarte.",
+            "El poste quedó [derecho] después de cimentarlo bien."
+          ]
+        },
+        {
+          "definition": "El [derecho] es la facultad de hacer o exigir algo legítimamente",
+          "examples": [
+            "Todos tenemos [derecho] a la educación gratuita.",
+            "Ejerció su [derecho] al voto por primera vez.",
+            "Nadie puede quitarte el [derecho] a expresarte libremente.",
+            "Los trabajadores reclaman su [derecho] a vacaciones pagadas.",
+            "El [derecho] a la intimidad está protegido por ley."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard short: 'estudia derecho' typically means law studies, but could be posture instruction"
+    },
+    {
+      "id": "hard_short_radio_001",
+      "target": "Enciende la [radio].",
+      "meanings": [
+        {
+          "definition": "La [radio] es un aparato que recibe y reproduce emisiones sonoras",
+          "examples": [
+            "Escucho las noticias en la [radio] cada mañana.",
+            "La [radio] del coche tiene muy buena recepción.",
+            "Sintonizó su emisora favorita en la [radio] portátil.",
+            "La [radio] se ha quedado sin pilas otra vez.",
+            "Antes de internet, la [radio] era el medio de información más rápido."
+          ]
+        },
+        {
+          "definition": "El [radio] es la distancia desde el centro de un círculo hasta su borde",
+          "examples": [
+            "El [radio] de esta circunferencia mide cinco centímetros.",
+            "Calculamos el área multiplicando pi por el [radio] al cuadrado.",
+            "El [radio] de acción del dron es de varios kilómetros.",
+            "Dibuja un círculo con un [radio] de tres unidades.",
+            "La explosión afectó todo en un [radio] de cien metros."
+          ]
+        },
+        {
+          "definition": "El [radio] es un hueso del antebrazo paralelo al cúbito",
+          "examples": [
+            "Se fracturó el [radio] al caer de la bicicleta.",
+            "El [radio] y el cúbito permiten girar la muñeca.",
+            "La radiografía mostró una fisura en el [radio] izquierdo.",
+            "El [radio] es más corto que el cúbito en el brazo.",
+            "Después de la operación, el [radio] soldó perfectamente."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard short: 'enciende' clearly indicates the electronic device, but sentence is minimal"
+    }
+  ]
+}

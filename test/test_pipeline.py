@@ -8,7 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from main import load_config, run_pipeline
+from main import load_config, run_pipeline, PipelineResult
 from test_utils import Tee
 
 TEST_DIR = Path("test")
@@ -53,7 +53,7 @@ class TestPipelineIntegration(unittest.TestCase):
         print(f"Translations: {len(result.vocabulary.translations)}")
         print(f"Word variants: {len(result.vocabulary.word_variants)}")
 
-    def _visualize_cooccurrence_matrix(self, result):
+    def _visualize_cooccurrence_matrix(self, result: PipelineResult):
         """Create and save a visualization of the co-occurrence matrix."""
         vocab = result.vocabulary
         matrix = result.cooccurrence_matrix
@@ -121,7 +121,7 @@ class TestPipelineIntegration(unittest.TestCase):
 
         print(f"\nCo-occurrence matrix visualization saved to: {output_path}")
 
-    def _print_cooccurrences(self, result):
+    def _print_cooccurrences(self, result: PipelineResult):
         """Print co-occurrence details for each word variant."""
         vocab = result.vocabulary
 
@@ -202,3 +202,4 @@ if __name__ == "__main__":
     finally:
         sys.stdout = original_stdout
         log_file.close()
+9
