@@ -568,6 +568,226 @@
       ],
       "correct_meaning_indices": [0],
       "notes": "Hard short: 'enciende' clearly indicates the electronic device, but sentence is minimal"
+    },
+    {
+      "id": "pipeline_tiempo_001",
+      "target": "El [tiempo] vuela cuando estás disfrutando de la vida.",
+      "meanings": [
+        {
+          "definition": "El [tiempo] es la magnitud física que permite ordenar la secuencia de los sucesos",
+          "examples": [
+            "No tengo [tiempo] para terminar el informe hoy.",
+            "El [tiempo] pasa volando cuando te diviertes.",
+            "¿Cuánto [tiempo] tardas en llegar a la oficina?",
+            "Hace mucho [tiempo] que no nos vemos.",
+            "Perdimos mucho [tiempo] en el atasco."
+          ]
+        },
+        {
+          "definition": "El [tiempo] es el estado atmosférico en un momento y lugar determinados",
+          "examples": [
+            "¿Qué tal el [tiempo] en Londres hoy?",
+            "El buen [tiempo] anima a la gente a salir.",
+            "Mañana el [tiempo] será lluvioso.",
+            "Odio cuando el [tiempo] es tan inestable.",
+            "El pronóstico del [tiempo] anuncia nieve."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Pipeline error: 'el tiempo vuela' is an idiom meaning time flies quickly, not weather"
+    },
+    {
+      "id": "pipeline_fresco_001",
+      "target": "El pescado es [fresco] y delicioso.",
+      "meanings": [
+        {
+          "definition": "[Fresco] significa que tiene una temperatura moderadamente fría",
+          "examples": [
+            "El agua de la fuente está muy [fresca].",
+            "Prefiero salir a caminar cuando el aire está [fresco].",
+            "Esta mañana hace un tiempo [fresco] y agradable.",
+            "Guarda la leche en un lugar [fresco] y seco."
+          ]
+        },
+        {
+          "definition": "[Fresco] significa que un alimento se ha producido o recolectado recientemente",
+          "examples": [
+            "Siempre compramos pescado [fresco] en el mercado.",
+            "Me encanta el olor del pan [fresco] por la mañana.",
+            "Estas verduras son [frescas] del huerto de mi abuelo.",
+            "Prefiero el zumo natural con fruta [fresca].",
+            "¿Tienen huevos [frescos] hoy?"
+          ]
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "Pipeline error: 'pescado fresco y delicioso' clearly refers to fresh food, not cool temperature"
+    },
+    {
+      "id": "hard_tiempo_002",
+      "target": "Con el [tiempo] aprenderás a perdonar.",
+      "meanings": [
+        {
+          "definition": "El [tiempo] es la magnitud física que permite ordenar la secuencia de los sucesos",
+          "examples": [
+            "No tengo [tiempo] para terminar el informe hoy.",
+            "El [tiempo] pasa volando cuando te diviertes.",
+            "¿Cuánto [tiempo] tardas en llegar a la oficina?",
+            "Hace mucho [tiempo] que no nos vemos.",
+            "Perdimos mucho [tiempo] en el atasco."
+          ]
+        },
+        {
+          "definition": "El [tiempo] es el estado atmosférico en un momento y lugar determinados",
+          "examples": [
+            "¿Qué tal el [tiempo] en Londres hoy?",
+            "El buen [tiempo] anima a la gente a salir.",
+            "Mañana el [tiempo] será lluvioso.",
+            "Odio cuando el [tiempo] es tan inestable.",
+            "El pronóstico del [tiempo] anuncia nieve."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard: 'con el tiempo' = over time/eventually, not weather"
+    },
+    {
+      "id": "hard_tiempo_003",
+      "target": "El [tiempo] lo cura todo.",
+      "meanings": [
+        {
+          "definition": "El [tiempo] es la magnitud física que permite ordenar la secuencia de los sucesos",
+          "examples": [
+            "No tengo [tiempo] para terminar el informe hoy.",
+            "El [tiempo] pasa volando cuando te diviertes.",
+            "¿Cuánto [tiempo] tardas en llegar a la oficina?",
+            "Hace mucho [tiempo] que no nos vemos.",
+            "Perdimos mucho [tiempo] en el atasco."
+          ]
+        },
+        {
+          "definition": "El [tiempo] es el estado atmosférico en un momento y lugar determinados",
+          "examples": [
+            "¿Qué tal el [tiempo] en Londres hoy?",
+            "El buen [tiempo] anima a la gente a salir.",
+            "Mañana el [tiempo] será lluvioso.",
+            "Odio cuando el [tiempo] es tan inestable.",
+            "El pronóstico del [tiempo] anuncia nieve."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard: 'el tiempo lo cura todo' = time heals all wounds (idiom), not weather"
+    },
+    {
+      "id": "hard_tiempo_004",
+      "target": "Necesito [tiempo] para pensar.",
+      "meanings": [
+        {
+          "definition": "El [tiempo] es la magnitud física que permite ordenar la secuencia de los sucesos",
+          "examples": [
+            "No tengo [tiempo] para terminar el informe hoy.",
+            "El [tiempo] pasa volando cuando te diviertes.",
+            "¿Cuánto [tiempo] tardas en llegar a la oficina?",
+            "Hace mucho [tiempo] que no nos vemos.",
+            "Perdimos mucho [tiempo] en el atasco."
+          ]
+        },
+        {
+          "definition": "El [tiempo] es el estado atmosférico en un momento y lugar determinados",
+          "examples": [
+            "¿Qué tal el [tiempo] en Londres hoy?",
+            "El buen [tiempo] anima a la gente a salir.",
+            "Mañana el [tiempo] será lluvioso.",
+            "Odio cuando el [tiempo] es tan inestable.",
+            "El pronóstico del [tiempo] anuncia nieve."
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard short: 'necesito tiempo para' = need time to, very short sentence"
+    },
+    {
+      "id": "hard_fresco_002",
+      "target": "Guarda el salmón en un sitio [fresco].",
+      "meanings": [
+        {
+          "definition": "[Fresco] significa que tiene una temperatura moderadamente fría",
+          "examples": [
+            "El agua de la fuente está muy [fresca].",
+            "Prefiero salir a caminar cuando el aire está [fresco].",
+            "Esta mañana hace un tiempo [fresco] y agradable.",
+            "Guarda la leche en un lugar [fresco] y seco."
+          ]
+        },
+        {
+          "definition": "[Fresco] significa que un alimento se ha producido o recolectado recientemente",
+          "examples": [
+            "Siempre compramos pescado [fresco] en el mercado.",
+            "Me encanta el olor del pan [fresco] por la mañana.",
+            "Estas verduras son [frescas] del huerto de mi abuelo.",
+            "Prefiero el zumo natural con fruta [fresca].",
+            "¿Tienen huevos [frescos] hoy?"
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard: 'sitio fresco' = cool place (for storage), but 'salmón' (food) pulls toward fresh food meaning"
+    },
+    {
+      "id": "hard_fresco_003",
+      "target": "El yogur está muy [fresco], recién sacado de la nevera.",
+      "meanings": [
+        {
+          "definition": "[Fresco] significa que tiene una temperatura moderadamente fría",
+          "examples": [
+            "El agua de la fuente está muy [fresca].",
+            "Prefiero salir a caminar cuando el aire está [fresco].",
+            "Esta mañana hace un tiempo [fresco] y agradable.",
+            "Guarda la leche en un lugar [fresco] y seco."
+          ]
+        },
+        {
+          "definition": "[Fresco] significa que un alimento se ha producido o recolectado recientemente",
+          "examples": [
+            "Siempre compramos pescado [fresco] en el mercado.",
+            "Me encanta el olor del pan [fresco] por la mañana.",
+            "Estas verduras son [frescas] del huerto de mi abuelo.",
+            "Prefiero el zumo natural con fruta [fresca].",
+            "¿Tienen huevos [frescos] hoy?"
+          ]
+        }
+      ],
+      "correct_meaning_indices": [0],
+      "notes": "Hard: 'recién sacado de la nevera' = just from fridge, so cool temperature, but 'yogur' is food"
+    },
+    {
+      "id": "hard_fresco_004",
+      "target": "El atún no huele [fresco].",
+      "meanings": [
+        {
+          "definition": "[Fresco] significa que tiene una temperatura moderadamente fría",
+          "examples": [
+            "El agua de la fuente está muy [fresca].",
+            "Prefiero salir a caminar cuando el aire está [fresco].",
+            "Esta mañana hace un tiempo [fresco] y agradable.",
+            "Guarda la leche en un lugar [fresco] y seco."
+          ]
+        },
+        {
+          "definition": "[Fresco] significa que un alimento se ha producido o recolectado recientemente",
+          "examples": [
+            "Siempre compramos pescado [fresco] en el mercado.",
+            "Me encanta el olor del pan [fresco] por la mañana.",
+            "Estas verduras son [frescas] del huerto de mi abuelo.",
+            "Prefiero el zumo natural con fruta [fresca].",
+            "¿Tienen huevos [frescos] hoy?"
+          ]
+        }
+      ],
+      "correct_meaning_indices": [1],
+      "notes": "Hard: 'no huele fresco' = doesn't smell fresh (food freshness), but atún=pescado might confuse with examples"
     }
   ]
 }

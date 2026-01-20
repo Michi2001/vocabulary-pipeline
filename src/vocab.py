@@ -24,14 +24,14 @@ class Meaning:
     estimated_share: float
     translations: List[Dict[str, str]]
     structure: Optional[str] = None
-    example_es: Optional[str] = None
+    examples_es: Optional[List[str]] = None  # Multiple example sentences
     flags: Optional[List[str]] = None
     gender: Optional[str] = None  # Spanish grammatical gender ("m" or "f")
     # Embedding metadata (internal, prefixed with _)
-    _bert_embedding: Optional[List[float]] = None
+    _bert_embedding: Optional[List[float]] = None  # Averaged embedding from all examples
     _target_word: Optional[str] = None
-    _target_start: Optional[int] = None
-    _target_end: Optional[int] = None
+    _target_starts: Optional[List[int]] = None  # Char start positions per example
+    _target_ends: Optional[List[int]] = None  # Char end positions per example
 
     @property
     def primary_translation(self) -> str:
@@ -41,6 +41,18 @@ class Meaning:
             hint = f" ({primary.get('hint', '')})" if primary.get("hint") else ""
             return primary.get("text", "") + hint
         return ""
+
+    @property
+    def all_translations(self) -> str:
+        """Returns all translations concatenated with ' / '."""
+        if not self.translations:
+            return ""
+        parts = []
+        for t in self.translations:
+            text = t.get("text", "")
+            hint = f" ({t.get('hint', '')})" if t.get("hint") else ""
+            parts.append(text + hint)
+        return " / ".join(parts)
 
     @property
     def bert_embedding(self) -> Optional[np.ndarray]:
@@ -57,15 +69,15 @@ class Meaning:
             estimated_share=data.get("estimated_share", 0.0),
             translations=data.get("translations", []),
             structure=data.get("structure"),
-            example_es=data.get("example_es"),
+            examples_es=data.get("examples_es"),
             flags=data.get("flags", []),
             gender=data.get("gender"),
             _bert_embedding=data.get(
                 "meaning_embedding"
             ),  # JSON uses meaning_embedding
             _target_word=data.get("_target_word"),
-            _target_start=data.get("_target_start"),
-            _target_end=data.get("_target_end"),
+            _target_starts=data.get("_target_starts"),
+            _target_ends=data.get("_target_ends"),
         )
 
     def to_dict(self, include_embeddings: bool = True) -> Dict[str, Any]:
@@ -77,8 +89,8 @@ class Meaning:
         }
         if self.structure is not None:
             result["structure"] = self.structure
-        if self.example_es is not None:
-            result["example_es"] = self.example_es
+        if self.examples_es is not None:
+            result["examples_es"] = self.examples_es
         if self.flags is not None:
             result["flags"] = self.flags
         if self.gender is not None:
@@ -87,10 +99,10 @@ class Meaning:
             result["meaning_embedding"] = self._bert_embedding
         if self._target_word is not None:
             result["_target_word"] = self._target_word
-        if self._target_start is not None:
-            result["_target_start"] = self._target_start
-        if self._target_end is not None:
-            result["_target_end"] = self._target_end
+        if self._target_starts is not None:
+            result["_target_starts"] = self._target_starts
+        if self._target_ends is not None:
+            result["_target_ends"] = self._target_ends
         return result
 
 
@@ -180,6 +192,11 @@ class WordVariant:
     def primary_translation(self) -> str:
         """Returns the primary translation text."""
         return self.meaning.primary_translation
+
+    @property
+    def all_translations(self) -> str:
+        """Returns all translations concatenated."""
+        return self.meaning.all_translations
 
     @property
     def bert_embedding(self) -> Optional[np.ndarray]:

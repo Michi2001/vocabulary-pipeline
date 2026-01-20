@@ -23,14 +23,26 @@
       {
         "definition_es": "ciudad principal donde está el gobierno de un país",
         "gender": "f",
-        "example_es": "Madrid es la [capital] de España.",
+        "examples_es": [
+          "Madrid es la [capital] de España.",
+          "¿Cuál es la [capital] de Australia?",
+          "Visitamos tres [capitales] europeas en una semana.",
+          "La [capital] tiene más de cinco millones de habitantes.",
+          "Nos mudamos a la [capital] por trabajo."
+        ],
         "flags": [],
         "translations": [{"text": "Hauptstadt", "gender_target": "f"}]
       },
       {
         "definition_es": "dinero o recursos económicos disponibles para invertir",
         "gender": "m",
-        "example_es": "La empresa necesita más [capital] extranjero.",
+        "examples_es": [
+          "La empresa necesita más [capital] extranjero.",
+          "Invirtió todo su [capital] en acciones tecnológicas.",
+          "¿De dónde sacaste el [capital] para montar el negocio?",
+          "El [capital] inicial fue de cien mil euros.",
+          "Los inversores aportaron el [capital] necesario."
+        ],
         "flags": [],
         "translations": [{"text": "Kapital", "gender_target": "n"}, {"text": "Vermögen", "gender_target": "n"}]
       }
@@ -44,44 +56,41 @@
       {
         "definition_es": "lista de platos y bebidas disponibles en un restaurante",
         "gender": "f",
-        "example_es": "¿Me puede traer la [carta], por favor?",
+        "examples_es": [
+          "¿Me puede traer la [carta], por favor?",
+          "Este restaurante tiene una [carta] muy variada.",
+          "La [carta] de vinos es impresionante.",
+          "Han cambiado la [carta] para la temporada de verano.",
+          "No encuentro los postres en la [carta]."
+        ],
         "flags": [],
         "translations": [{"text": "Speisekarte", "gender_target": "f"}]
       },
       {
         "definition_es": "mensaje escrito que se envía a otra persona",
         "gender": "f",
-        "example_es": "Ayer escribí una [carta] a mi abuela.",
+        "examples_es": [
+          "Ayer escribí una [carta] a mi abuela.",
+          "¿Has recibido mi [carta]?",
+          "Las [cartas] de amor las guardo en una caja.",
+          "Envié la [carta] por correo certificado.",
+          "Mi abuelo me mandaba [cartas] desde el extranjero."
+        ],
         "flags": [],
         "translations": [{"text": "Brief", "gender_target": "m"}]
       },
       {
         "definition_es": "naipe usado para juegos de mesa",
         "gender": "f",
-        "example_es": "Mis tíos juegan a las [cartas] todos los domingos.",
+        "examples_es": [
+          "Mis tíos juegan a las [cartas] todos los domingos.",
+          "¿Me repartes las [cartas]?",
+          "Tengo una [carta] muy buena en la mano.",
+          "Se me cayeron todas las [cartas] al suelo.",
+          "Barajó las [cartas] antes de empezar la partida."
+        ],
         "flags": [],
         "translations": [{"text": "Spielkarte", "gender_target": "f"}]
-      }
-    ]
-  },
-  {
-    "id": "00303",
-    "lemma": "frente",
-    "pos": "NOUN",
-    "meanings": [
-      {
-        "definition_es": "parte superior de la cara entre las cejas y el pelo",
-        "gender": "f",
-        "example_es": "El niño tiene fiebre, tócale la [frente].",
-        "flags": [],
-        "translations": [{"text": "Stirn", "gender_target": "f"}]
-      },
-      {
-        "definition_es": "zona donde se enfrentan fuerzas opuestas o masa de aire",
-        "gender": "m",
-        "example_es": "Un [frente] frío llegará mañana por el norte.",
-        "flags": [],
-        "translations": [{"text": "Front", "gender_target": "f", "hint": "Wetter / Militär"}]
       }
     ]
   }

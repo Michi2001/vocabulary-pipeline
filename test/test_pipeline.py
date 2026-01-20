@@ -173,7 +173,30 @@ class TestPipelineIntegration(unittest.TestCase):
                 print(f"    Tokens:  {tokens}")
                 print(f"    Lemmas:  {lemma_tokens}")
                 if variants is not None:
-                    print(f"    Variants: {variants}")
+                    # Mark polysemous variants with [POL]
+                    variant_strs = []
+                    for v_id in variants:
+                        if v_id is None:
+                            variant_strs.append("None")
+                        else:
+                            variant = result.vocabulary.get_word_variant(v_id)
+                            num_meanings = len(variant.translation.meanings)
+                            pol_marker = "[POL]" if num_meanings > 1 else ""
+                            variant_strs.append(f"{v_id}{pol_marker}")
+                    print(f"    Variants: [{', '.join(variant_strs)}]")
+                    # Show all translations for each variant, mark polysemous with [POL]
+                    translation_strs = []
+                    for v_id in variants:
+                        if v_id is None:
+                            translation_strs.append("None")
+                        else:
+                            variant = result.vocabulary.get_word_variant(v_id)
+                            num_meanings = len(variant.translation.meanings)
+                            pol_marker = "[POL]" if num_meanings > 1 else ""
+                            translation_strs.append(
+                                f"{variant.all_translations}{pol_marker}"
+                            )
+                    print(f"    Translations: [{', '.join(translation_strs)}]")
 
     def _print_word_variants(self, result):
         """Print all WordVariants with their IDs."""
@@ -182,11 +205,14 @@ class TestPipelineIntegration(unittest.TestCase):
         print("=" * 80)
 
         for variant in result.vocabulary.word_variants:
+            # Check if this lemma has multiple meanings (polysemous)
+            num_meanings = len(variant.translation.meanings)
+            polysemy_marker = " [POL]" if num_meanings > 1 else ""
             print(
                 f"  ID {variant.id}: {variant.lemma}|{variant.pos} "
-                f"-> {variant.primary_translation} "
+                f"-> {variant.all_translations} "
                 f"(meaning_idx={variant.meaning_idx}, freq={variant.frequency}, "
-                f"string_id={variant.string_id})"
+                f"string_id={variant.string_id}){polysemy_marker}"
             )
 
 

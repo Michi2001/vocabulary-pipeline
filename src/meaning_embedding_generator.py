@@ -9,6 +9,7 @@ These embeddings are used later by the BatchDisambiguator for WSD.
 import logging
 from typing import List, Optional
 
+import numpy as np
 import torch
 from transformers import AutoTokenizer, AutoModel
 
@@ -105,12 +106,13 @@ class MeaningEmbeddingGenerator:
 
     def generate(self, translations: List[Translation]) -> List[Translation]:
         """
-        Add BERT embedding to each meaning with extracted target word metadata.
+        Add averaged BERT embedding from multiple examples per meaning.
 
         Expects that LemmaTranslator has already extracted and stored:
         - _target_word: The target word
-        - _target_start: Character start position
-        - _target_end: Character end position
+        - _target_starts: Character start positions (list, one per example)
+        - _target_ends: Character end positions (list, one per example)
+        - examples_es: List of example sentences
 
         Modifies Translation objects in-place.
 
@@ -118,13 +120,14 @@ class MeaningEmbeddingGenerator:
             translations: List of Translation objects
 
         Returns:
-            Same list with embeddings added to meanings
+            Same list with averaged embeddings added to meanings
         """
         logger.info(f"Generating meaning embeddings for {len(translations)} lemmas...")
 
         total_meanings = 0
         successful_embeddings = 0
         missing_metadata = 0
+        total_examples_processed = 0
 
         for translation in translations:
             if not translation.meanings:
@@ -133,29 +136,45 @@ class MeaningEmbeddingGenerator:
             for meaning in translation.meanings:
                 total_meanings += 1
 
-                if not meaning.example_es:
+                if not meaning.examples_es:
                     continue
 
                 # Check if metadata exists (extracted by LemmaTranslator)
-                if meaning._target_start is None or meaning._target_end is None:
+                if meaning._target_starts is None or meaning._target_ends is None:
                     missing_metadata += 1
                     continue
 
                 target_word = meaning._target_word or "unknown"
-                char_start = meaning._target_start
-                char_end = meaning._target_end
 
-                # Generate embedding
-                embedding = self._get_contextual_embedding(
-                    meaning.example_es, char_start, char_end, target_word
-                )
-                if embedding is not None:
-                    meaning._bert_embedding = embedding
+                # Collect embeddings from all valid examples
+                embeddings = []
+                for i, example in enumerate(meaning.examples_es):
+                    if i >= len(meaning._target_starts) or i >= len(meaning._target_ends):
+                        break
+
+                    char_start = meaning._target_starts[i]
+                    char_end = meaning._target_ends[i]
+
+                    # Skip examples with missing position data
+                    if char_start is None or char_end is None:
+                        continue
+
+                    embedding = self._get_contextual_embedding(
+                        example, char_start, char_end, target_word
+                    )
+                    if embedding is not None:
+                        embeddings.append(embedding)
+                        total_examples_processed += 1
+
+                # Average all embeddings for this meaning
+                if embeddings:
+                    averaged = np.mean(embeddings, axis=0).tolist()
+                    meaning._bert_embedding = averaged
                     successful_embeddings += 1
 
         logger.info(
             f"Meaning embeddings generated: {successful_embeddings}/{total_meanings} "
-            f"(missing metadata: {missing_metadata})"
+            f"(from {total_examples_processed} examples, missing metadata: {missing_metadata})"
         )
 
         return translations

@@ -74,21 +74,31 @@ Wenn zwei Bedeutungen dieselbe deutsche Kernübersetzung haben, gehören sie in 
 - `tocar` (berühren): `"poner la mano sobre algo o alguien"`
 - `tocar` (Instrument): `"producir música con un instrumento"`
 
-### 3. Beispielsätze (example_es)
-- Verwende natürliche, alltägliche spanische Sätze
-- Der Beispielsatz muss die spezifische Bedeutung klar demonstrieren
-- Vermeide zu einfache oder zu komplexe Sätze
-- Der Kontext sollte eindeutig sein
+### 3. Beispielsätze (examples_es)
+- Generiere **{num_examples} DIVERSE Beispielsätze** pro Bedeutung
+- JEDER Satz muss das Zielwort mit eckigen Klammern markieren: `[wort]`
+- Die Beispiele müssen die Bedeutung in VERSCHIEDENEN Kontexten zeigen
+- **Hinweis:** Die POS-spezifischen Beispiele zeigen jeweils 5 Sätze zur Illustration, generiere aber genau {num_examples} Sätze
+
+**Diversitätskriterien (WICHTIG für gute Disambiguierung):**
+1. **Grammatische Variation:**
+   - Verben: verschiedene Zeiten (Präsens, Perfekt, Futur, Subjunktiv)
+   - Nomen: Singular und Plural, verschiedene Artikel (el/la/un/una/los/las)
+   - Adjektive: verschiedene Positionen (attributiv/prädikativ)
+
+2. **Kontextuelle Variation:**
+   - Verschiedene Domänen (Alltag, Beruf, Freizeit, Familie, Technik)
+   - Verschiedene Register (formell, informell)
+   - Verschiedene Satztypen (Aussage, Frage, Aufforderung)
+
+3. **Syntaktische Variation:**
+   - Verschiedene Positionen im Satz (Anfang, Mitte, Ende)
+   - Verschiedene Satzkomplexität (Hauptsatz, Nebensatz)
 
 **KRITISCH - Zielwort markieren:**
-- Das Zielwort im Beispielsatz MUSS mit eckigen Klammern markiert werden: `[wort]`
+- Das Zielwort in JEDEM Beispielsatz MUSS mit eckigen Klammern markiert werden: `[wort]`
 - Markiere die EXAKTE Wortform im Satz (konjugiertes Verb, Plural, etc.)
-- Nur EIN Wort pro Beispiel markieren (das Wort, das die Bedeutung demonstriert)
-- Beispiele:
-  - `"Vivo en la segunda [planta] del edificio."` (Nomen)
-  - `"Por favor, no [toques] las pinturas del museo."` (konjugiertes Verb)
-  - `"El equipo [ganó] la copa tras un partido emocionante."` (Vergangenheit)
-- Die Klammern werden für die automatische Worterkennung bei der Disambiguierung benötigt
+- Nur EIN Wort pro Beispiel markieren
 
 ### 4. Structure-Feld
 - **WICHTIG: Sei sehr sparsam mit Platzhaltern!** Verwende sie nur wenn unbedingt notwendig zum Verständnis
@@ -331,7 +341,7 @@ Gib ein JSON-Objekt mit folgendem Format zurück:
         {
           "definition_es": "...",
           "structure": "...",
-          "example_es": "...",
+          "examples_es": ["...", "...", "...", "...", "..."],
           "flags": [],
           "translations": [
             {"text": "..."},

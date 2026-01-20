@@ -39,14 +39,26 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
       {
         "definition_es": "preparado para hacer algo o partir",
         "structure": "estar listo",
-        "example_es": "Date prisa, el taxi está esperando y nosotros todavía no estamos [listos].",
+        "examples_es": [
+          "Date prisa, el taxi está esperando y nosotros todavía no estamos [listos].",
+          "¿Estás [lista] para salir?",
+          "La cena estará [lista] en diez minutos.",
+          "Cuando estés [listo], avísame.",
+          "Ya tengo todo [listo] para el viaje."
+        ],
         "flags": [],
         "translations": [{"text": "fertig"}, {"text": "bereit"}]
       },
       {
         "definition_es": "que tiene inteligencia y aprende rápido",
         "structure": "ser listo",
-        "example_es": "Ese chico es muy [listo], siempre saca las mejores notas en matemáticas.",
+        "examples_es": [
+          "Ese chico es muy [listo], siempre saca las mejores notas.",
+          "Mi perro es muy [listo], aprende trucos rápidamente.",
+          "Es la más [lista] de la clase.",
+          "Hay que ser [listo] para resolver este problema.",
+          "Se cree muy [listo], pero no lo es tanto."
+        ],
         "flags": [],
         "translations": [{"text": "schlau"}, {"text": "klug"}]
       }
@@ -54,90 +66,65 @@ Wenn Position nicht wichtig: nur das Adjektiv ohne Platzhalter
   },
   {
     "id": "00402",
-    "lemma": "viejo",
-    "pos": "ADJ",
-    "meanings": [
-      {
-        "definition_es": "que tiene muchos años de edad",
-        "structure": "viejo",
-        "example_es": "Mi abuelo es un hombre [viejo], tiene ya noventa años.",
-        "flags": [],
-        "translations": [{"text": "alt"}]
-      },
-      {
-        "definition_es": "que se conoce desde hace mucho tiempo",
-        "structure": "viejo [sustantivo]",
-        "example_es": "Juan es un [viejo] amigo mío, nos conocemos desde la infancia.",
-        "flags": [],
-        "translations": [{"text": "langjährig"}, {"text": "alt"}]
-      }
-    ]
-  },
-  {
-    "id": "00403",
     "lemma": "rico",
     "pos": "ADJ",
     "meanings": [
       {
         "definition_es": "que tiene buen sabor, sabroso",
         "structure": "estar rico",
-        "example_es": "Este pastel de chocolate está muy [rico], ¿me das la receta?",
+        "examples_es": [
+          "Este pastel de chocolate está muy [rico], ¿me das la receta?",
+          "¡Qué [rica] está la paella!",
+          "Las fresas están muy [ricas] este año.",
+          "El café que hace mi madre está [riquísimo].",
+          "¿Está [rico] el helado?"
+        ],
         "flags": [],
         "translations": [{"text": "lecker"}, {"text": "köstlich"}]
       },
       {
         "definition_es": "que tiene mucho dinero o bienes",
         "structure": "ser rico",
-        "example_es": "Se hizo [rico] invirtiendo en bolsa y ahora tiene tres casas.",
+        "examples_es": [
+          "Se hizo [rico] invirtiendo en bolsa y ahora tiene tres casas.",
+          "Es una familia muy [rica] con propiedades en todo el país.",
+          "No somos [ricos], pero vivimos bien.",
+          "Los países [ricos] deberían ayudar más.",
+          "¿Quién es el hombre más [rico] del mundo?"
+        ],
         "flags": [],
         "translations": [{"text": "reich"}]
       }
     ]
   },
   {
-    "id": "00404",
-    "lemma": "grande",
-    "pos": "ADJ",
-    "meanings": [
-      {
-        "definition_es": "de tamaño superior al normal",
-        "structure": "grande",
-        "example_es": "Viven en una casa muy [grande] con jardín y piscina.",
-        "flags": [],
-        "translations": [{"text": "groß"}]
-      },
-      {
-        "definition_es": "importante, destacado o admirable",
-        "structure": "gran [sustantivo]",
-        "example_es": "Einstein fue un [gran] científico que cambió la física.",
-        "flags": [],
-        "translations": [{"text": "großartig"}, {"text": "bedeutend"}]
-      }
-    ]
-  },
-  {
-    "id": "00405",
+    "id": "00403",
     "lemma": "malo",
     "pos": "ADJ",
     "meanings": [
       {
         "definition_es": "que tiene mala intención o hace daño",
         "structure": "ser malo",
-        "example_es": "En los cuentos infantiles, el lobo siempre es [malo].",
+        "examples_es": [
+          "En los cuentos infantiles, el lobo siempre es [malo].",
+          "No seas [malo] con tu hermana pequeña.",
+          "Esa persona no es [mala], solo está confundida.",
+          "El villano de la película era muy [malo].",
+          "¿Por qué eres tan [malo] conmigo?"
+        ],
         "flags": [],
         "translations": [{"text": "böse"}, {"text": "gemein"}]
       },
       {
-        "definition_es": "en mal estado, estropeado o podrido",
-        "structure": "estar malo",
-        "example_es": "No bebas esa leche, lleva mucho tiempo fuera y está [mala].",
-        "flags": [],
-        "translations": [{"text": "schlecht"}, {"text": "verdorben"}]
-      },
-      {
         "definition_es": "enfermo, que no se siente bien de salud",
         "structure": "estar malo",
-        "example_es": "No puedo ir a trabajar hoy porque estoy [malo], tengo fiebre.",
+        "examples_es": [
+          "No puedo ir a trabajar hoy porque estoy [malo], tengo fiebre.",
+          "Mi hijo está [malo] y no puede ir al colegio.",
+          "¿Estás [mala]? Te veo muy pálida.",
+          "Lleva tres días [malo] con gripe.",
+          "Me puse [malo] después de la cena."
+        ],
         "flags": [],
         "translations": [{"text": "krank"}]
       }

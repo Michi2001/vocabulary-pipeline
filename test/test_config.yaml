@@ -33,12 +33,24 @@ filtering:
   include_countries: false
 
 llm_correction:
-  enabled: false
+  enabled: true
+  batch_size: 25
+  prompt_file: "prompts/corrector.txt"
+  llm:
+    type: "google"
+    google:
+      model: "gemini-3-flash-preview"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 60
+      temperature: 1.0
+      thinking_level: "minimal"
 
 llm_translation:
   enabled: true
   batch_size: 20
   prompt_directory: "prompts/translation"
+  num_examples: 5
   llm:
     type: "google"
     google:

@@ -10,7 +10,7 @@ from collections import defaultdict
 from src.frequency_counter import FrequencyCounter
 from src.llm_providers.base_provider import BaseLLMProvider
 from src.lemma_cache import LemmaCache
-from src.vocab import Translation, Meaning
+from src.vocab import Translation
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ class LemmaTranslator:
         self.batch_size = config.get("batch_size", 25)
         self.prompts_dir = Path(config.get("prompts_dir", "prompts/translation"))
         self.output_dir = Path(config["output_dir"])
+        self.num_examples = config.get("num_examples", 5)
 
     def translate(
         self, counter: FrequencyCounter, min_frequency: int = 1
@@ -215,12 +216,15 @@ class LemmaTranslator:
         return dict(groups)
 
     def _load_general_prompt(self) -> str:
-        """Load general translation prompt."""
+        """Load general translation prompt and substitute num_examples."""
         general_file = self.prompts_dir / "general_prompt.txt"
         if not general_file.exists():
             raise FileNotFoundError(f"General prompt not found: {general_file}")
 
-        return general_file.read_text(encoding="utf-8")
+        prompt = general_file.read_text(encoding="utf-8")
+        # Replace placeholder with configured number of examples
+        prompt = prompt.replace("{num_examples}", str(self.num_examples))
+        return prompt
 
     def _create_batches_from_items(
         self, items: List[Dict[str, Any]]
@@ -433,12 +437,11 @@ class LemmaTranslator:
 
     def _extract_target_words(self, translation: Dict[str, Any]) -> None:
         """
-        Extract bracketed target words from example_es fields.
+        Extract bracketed target words from examples_es fields.
 
-        For each meaning, checks that example_es contains a bracketed word [word].
-        Extracts the bracketed word, removes brackets from example_es, and stores
-        metadata (_target_word, _target_start, _target_end) for MeaningEmbeddingGenerator.
-        Logs warnings for missing brackets but does not fail.
+        For each meaning, processes all examples in examples_es list.
+        Extracts bracketed words, removes brackets, and stores metadata
+        (_target_word, _target_starts, _target_ends) for MeaningEmbeddingGenerator.
         """
         if "meanings" not in translation or not translation["meanings"]:
             return
@@ -447,32 +450,47 @@ class LemmaTranslator:
         lemma_id = translation.get("id", "?")
 
         for idx, meaning in enumerate(translation["meanings"]):
-            example_es = meaning.get("example_es", "")
-            if not example_es:
+            examples_es = meaning.get("examples_es", [])
+            if not examples_es:
                 continue
 
-            match = BRACKET_PATTERN.search(example_es)
-            if not match:
-                logger.warning(
-                    f"Lemma '{lemma}' (ID: {lemma_id}), meaning {idx}: "
-                    f"No bracketed word in example_es: '{example_es[:50]}...'"
-                )
-            else:
-                # Extract bracketed word and position
-                target_word = match.group(1)
-                bracket_start = match.start()
+            cleaned_examples = []
+            target_starts = []
+            target_ends = []
+            target_word = None
 
-                # Position in cleaned sentence (without brackets)
-                char_start = bracket_start
-                char_end = char_start + len(target_word)
+            for ex_idx, example in enumerate(examples_es):
+                match = BRACKET_PATTERN.search(example)
+                if not match:
+                    logger.warning(
+                        f"Lemma '{lemma}' (ID: {lemma_id}), meaning {idx}, example {ex_idx}: "
+                        f"No bracketed word: '{example[:50]}...'"
+                    )
+                    cleaned_examples.append(example)
+                    target_starts.append(None)
+                    target_ends.append(None)
+                else:
+                    # Extract bracketed word and position
+                    word = match.group(1)
+                    bracket_start = match.start()
 
-                # Remove brackets from example_es
-                cleaned_sentence = example_es.replace(
-                    f"[{target_word}]", target_word, 1
-                )
-                meaning["example_es"] = cleaned_sentence
+                    # Store first target word found (should be same for all examples)
+                    if target_word is None:
+                        target_word = word
 
-                # Store metadata for MeaningEmbeddingGenerator
+                    # Position in cleaned sentence (without brackets)
+                    char_start = bracket_start
+                    char_end = char_start + len(word)
+
+                    # Remove brackets from example
+                    cleaned_sentence = example.replace(f"[{word}]", word, 1)
+                    cleaned_examples.append(cleaned_sentence)
+                    target_starts.append(char_start)
+                    target_ends.append(char_end)
+
+            # Update meaning with cleaned examples and metadata
+            meaning["examples_es"] = cleaned_examples
+            if target_word:
                 meaning["_target_word"] = target_word
-                meaning["_target_start"] = char_start
-                meaning["_target_end"] = char_end
+            meaning["_target_starts"] = target_starts
+            meaning["_target_ends"] = target_ends
