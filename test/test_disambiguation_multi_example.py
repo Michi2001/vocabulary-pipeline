@@ -8,19 +8,42 @@ from typing import Dict, List
 
 import numpy as np
 
-from disambiguators import BertMultiExampleDisambiguator, BertExampleDisambiguator
+from disambiguators import (
+    BertMultiExampleDisambiguator,
+    BertExampleDisambiguator,
+    BertWeightedPoolingDisambiguator,
+    BertHybridDisambiguator,
+)
 
 
 DISAMBIGUATORS_TO_TEST = [
+    # (
+    #     "BETO-word-only",
+    #     BertMultiExampleDisambiguator(
+    #         "bert-base-multilingual-cased",
+    #     ),
+    #     True,
+    # ),
+    # (
+    #     "BETO-hybrid-0.7",
+    #     BertHybridDisambiguator(
+    #         "dccuchile/bert-base-spanish-wwm-cased",
+    #         word_weight=0.7,
+    #     ),
+    #     True,
+    # ),
+    # (
+    #     "BETO-hybrid-0.5",
+    #     BertHybridDisambiguator(
+    #         "dccuchile/bert-base-spanish-wwm-cased",
+    #         word_weight=0.5,
+    #     ),
+    #     True,
+    # ),
     (
-        "BERT-Ex-BETO (single)",
-        BertExampleDisambiguator("dccuchile/bert-base-spanish-wwm-cased"),
-        False,  # uses single example
-    ),
-    (
-        "BERT-MultiEx-BETO (5 avg)",
+        "BERT-Ex-BETO",
         BertMultiExampleDisambiguator("dccuchile/bert-base-spanish-wwm-cased"),
-        True,  # uses multiple examples
+        True,
     ),
 ]
 
@@ -63,6 +86,7 @@ class TestMultiExampleDisambiguation(unittest.TestCase):
         """Run all test cases for one disambiguator."""
         correct = 0
         errors = []
+        ambiguous = []  # Cases where margin was too small
         per_case_results = []
 
         for test_case in self.test_cases:
@@ -76,7 +100,10 @@ class TestMultiExampleDisambiguation(unittest.TestCase):
                     test_case["target"], single_meanings
                 )
 
-            is_correct = result.predicted_index in test_case["correct_meaning_indices"]
+            is_ambiguous = result.predicted_index == -1
+            is_correct = (not is_ambiguous) and (
+                result.predicted_index in test_case["correct_meaning_indices"]
+            )
 
             case_result = {
                 "id": test_case["id"],
@@ -84,6 +111,7 @@ class TestMultiExampleDisambiguation(unittest.TestCase):
                 "predicted_index": result.predicted_index,
                 "correct_indices": test_case["correct_meaning_indices"],
                 "is_correct": is_correct,
+                "is_ambiguous": is_ambiguous,
                 "confidence": result.confidence,
                 "all_scores": result.all_scores,
                 "target_sentence": test_case["target"],
@@ -91,7 +119,18 @@ class TestMultiExampleDisambiguation(unittest.TestCase):
             }
             per_case_results.append(case_result)
 
-            if is_correct:
+            if is_ambiguous:
+                ambiguous.append(
+                    {
+                        "id": test_case["id"],
+                        "method": method_name,
+                        "target": test_case["target"],
+                        "expected": test_case["correct_meaning_indices"],
+                        "all_scores": result.all_scores,
+                        "notes": test_case.get("notes", ""),
+                    }
+                )
+            elif is_correct:
                 correct += 1
             else:
                 errors.append(
@@ -108,16 +147,23 @@ class TestMultiExampleDisambiguation(unittest.TestCase):
                 )
 
         total = len(self.test_cases)
+        decided = total - len(ambiguous)
         accuracy = (correct / total) * 100 if total > 0 else 0
+        precision = (correct / decided) * 100 if decided > 0 else 0
         avg_confidence = sum(r["confidence"] for r in per_case_results) / total
 
         return {
             "method": method_name,
             "correct": correct,
             "total": total,
+            "decided": decided,
+            "ambiguous": len(ambiguous),
+            "errors": len(errors),
             "accuracy": accuracy,
+            "precision": precision,
             "avg_confidence": avg_confidence,
-            "errors": errors,
+            "error_list": errors,
+            "ambiguous_list": ambiguous,
             "per_case_results": per_case_results,
         }
 
@@ -135,13 +181,24 @@ class TestMultiExampleDisambiguation(unittest.TestCase):
             print(
                 f"  Accuracy: {results['accuracy']:.2f}% ({results['correct']}/{results['total']})"
             )
+            if results["ambiguous"] > 0:
+                print(
+                    f"  Precision: {results['precision']:.2f}% ({results['correct']}/{results['decided']} decided)"
+                )
+                print(f"  Ambiguous (no decision): {results['ambiguous']}")
             print(f"  Avg Confidence: {results['avg_confidence']:.3f}")
-            if results["errors"]:
-                print(f"  Errors: {len(results['errors'])}")
-                for error in results["errors"]:
+            if results["error_list"]:
+                print(f"  Errors: {results['errors']}")
+                for error in results["error_list"]:
                     print(
                         f"    - {error['id']}: predicted {error['predicted']}, "
                         f"expected {error['expected']} (conf: {error['confidence']:.3f})"
+                    )
+            if results["ambiguous_list"]:
+                print(f"  Ambiguous cases:")
+                for amb in results["ambiguous_list"]:
+                    print(
+                        f"    - {amb['id']}: scores {[f'{s:.3f}' for s in amb['all_scores']]}"
                     )
 
         # Save results
@@ -152,17 +209,17 @@ class TestMultiExampleDisambiguation(unittest.TestCase):
         # Generate comparison report
         self._generate_comparison_report(all_results)
 
-        # Compare single vs multi-example
-        single_result = all_results[0]
-        multi_result = all_results[1]
-
+        # Print comparison summary
         print("\n" + "=" * 80)
-        print("COMPARISON: Single Example vs Multi-Example (5 averaged)")
+        print("POOLING STRATEGY COMPARISON")
         print("=" * 80)
-        print(f"Single Example: {single_result['accuracy']:.2f}% accuracy")
-        print(f"Multi Example:  {multi_result['accuracy']:.2f}% accuracy")
-        improvement = multi_result["accuracy"] - single_result["accuracy"]
-        print(f"Improvement:    {improvement:+.2f}%")
+        baseline = all_results[0]
+        print(f"Baseline ({baseline['method']}): {baseline['accuracy']:.2f}% accuracy")
+        for result in all_results[1:]:
+            improvement = result["accuracy"] - baseline["accuracy"]
+            print(
+                f"{result['method']}: {result['accuracy']:.2f}% ({improvement:+.2f}%)"
+            )
         print("=" * 80)
 
     def _generate_comparison_report(self, all_results: List[Dict]):
@@ -177,48 +234,60 @@ class TestMultiExampleDisambiguation(unittest.TestCase):
             f.write("=" * 80 + "\n\n")
 
             f.write(
-                f"{'Method':<30} {'Accuracy':<12} {'Correct/Total':<15} {'Avg Conf':<10}\n"
+                f"{'Method':<35} {'Accuracy':<10} {'Precision':<10} {'Decided':<10} {'Ambig':<6} {'Errors':<6}\n"
             )
             f.write("-" * 80 + "\n")
 
             for result in all_results:
                 f.write(
-                    f"{result['method']:<30} "
-                    f"{result['accuracy']:>6.2f}%      "
-                    f"{result['correct']}/{result['total']:<12} "
-                    f"{result['avg_confidence']:>6.3f}\n"
+                    f"{result['method']:<35} "
+                    f"{result['accuracy']:>6.2f}%   "
+                    f"{result['precision']:>6.2f}%   "
+                    f"{result['decided']:>3}/{result['total']:<5} "
+                    f"{result['ambiguous']:<6} "
+                    f"{result['errors']:<6}\n"
                 )
 
             f.write("\n" + "=" * 80 + "\n")
             f.write("Per-Case Comparison:\n")
             f.write("-" * 80 + "\n")
 
-            # Compare each case
-            single_results = {r["id"]: r for r in all_results[0]["per_case_results"]}
-            multi_results = {r["id"]: r for r in all_results[1]["per_case_results"]}
-
-            for case_id in single_results:
-                single = single_results[case_id]
-                multi = multi_results[case_id]
-
-                single_status = "OK" if single["is_correct"] else "WRONG"
-                multi_status = "OK" if multi["is_correct"] else "WRONG"
-
-                change = ""
-                if not single["is_correct"] and multi["is_correct"]:
-                    change = " [FIXED]"
-                elif single["is_correct"] and not multi["is_correct"]:
-                    change = " [BROKEN]"
-
-                f.write(
-                    f"{case_id:<25} Single: {single_status:<6} Multi: {multi_status:<6}{change}\n"
+            # Build results dict for all methods
+            all_method_results = []
+            for result in all_results:
+                all_method_results.append(
+                    {r["id"]: r for r in result["per_case_results"]}
                 )
-                f.write(
-                    f"  Single scores: {[f'{s:.3f}' for s in single['all_scores']]}\n"
+
+            for case_id in all_method_results[0]:
+                case_results = [m[case_id] for m in all_method_results]
+
+                def get_status(r):
+                    if r.get("is_ambiguous"):
+                        return "AMBIG"
+                    return "OK" if r["is_correct"] else "WRONG"
+
+                statuses = [get_status(r) for r in case_results]
+                status_str = "  ".join(
+                    f"{all_results[i]['method'].split()[0]}: {statuses[i]:<6}"
+                    for i in range(len(all_results))
                 )
-                f.write(
-                    f"  Multi scores:  {[f'{s:.3f}' for s in multi['all_scores']]}\n"
-                )
+
+                f.write(f"{case_id:<25} {status_str}\n")
+
+                # Show scores for each method
+                for i, result in enumerate(all_results):
+                    case_r = all_method_results[i][case_id]
+                    scores = case_r["all_scores"]
+                    sorted_scores = sorted(scores, reverse=True)
+                    margin = (
+                        sorted_scores[0] - sorted_scores[1]
+                        if len(sorted_scores) > 1
+                        else 0
+                    )
+                    f.write(
+                        f"  {result['method'].split('(')[0].strip()}: {[f'{s:.3f}' for s in scores]} (margin: {margin:.3f})\n"
+                    )
 
             f.write("=" * 80 + "\n")
 

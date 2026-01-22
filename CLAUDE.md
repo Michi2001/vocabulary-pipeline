@@ -116,14 +116,16 @@ The pipeline follows a multi-stage architecture with stream-based processing:
     - Processes lemmas by POS category (VERB, NOUN, ADJ, ADV, ADP, CONJ)
     - Uses POS-specific prompts for accurate translations
     - Generates multiple meanings with definitions and estimated frequency share
+    - Generates multiple diverse example sentences per meaning (`num_examples` config)
     - Cache key includes model config + combined prompt hash (general + POS-specific)
     - Outputs: `translations.json` with enriched frequency data
 
 **Stage 5: Meaning Embeddings (optional, requires translation)**
 11. **MeaningEmbeddingGenerator** (src/meaning_embedding_generator.py) → generates BERT embeddings
-    - Creates embeddings for each meaning's Spanish example sentence
+    - Creates embeddings for each meaning's multiple example sentences
     - Uses target word masking to extract context embeddings
-    - Adds `meaning_embedding` field to each meaning in `translations.json`
+    - Averages embeddings across all examples for robust meaning representation
+    - Adds `meaning_embedding` field (averaged) to each meaning in `translations.json`
 
 **Stage 6: Word Sense Disambiguation (optional, requires embeddings + stores)**
 12. **Vocabulary** (src/vocab.py) → builds from translations
@@ -287,7 +289,7 @@ Abstract base class pattern (src/corpus_readers/base_reader.py) enables support 
 - `cache`: directory, llm_directory
 - `filtering`: accepted_pos, pos_mappings, include_countries
 - `llm_correction`: enabled, batch_size, prompt_file, slice, llm provider config
-- `llm_translation`: enabled, batch_size, prompt_directory, llm provider config
+- `llm_translation`: enabled, batch_size, prompt_directory, num_examples, llm provider config
 - `disambiguation`: enabled, model (BERT model name), batch_size
 
 ### Output Structure
@@ -322,12 +324,18 @@ The `translations.json` structure (if enabled):
           {"text": "sein", "hint": "existieren"}
         ],
         "structure": "verb conjugation pattern",
-        "example_es": "El ser humano piensa",
+        "examples_es": [
+          "El ser humano piensa.",
+          "¿Quién eres tú?",
+          "Somos estudiantes.",
+          "Era una noche oscura.",
+          "Serán las cinco de la tarde."
+        ],
         "flags": ["common"],
-        "meaning_embedding": [0.123, -0.456, ...],  // 768-dim BERT vector
+        "meaning_embedding": [0.123, -0.456, ...],  // 768-dim averaged BERT vector
         "_target_word": "ser",
-        "_target_start": 3,
-        "_target_end": 6
+        "_target_starts": [3, 7, 0, 0, 0],
+        "_target_ends": [6, 11, 5, 3, 5]
       },
       {
         "definition_es": "Pertenecer, formar parte de",
@@ -335,6 +343,7 @@ The `translations.json` structure (if enabled):
         "translations": [
           {"text": "sein", "hint": "zugehören"}
         ],
+        "examples_es": ["...", "...", "...", "...", "..."],
         "meaning_embedding": [0.234, -0.567, ...]
       }
     ]

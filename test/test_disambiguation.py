@@ -26,6 +26,10 @@ DISAMBIGUATORS_TO_TEST = [
         BertExampleDisambiguator("dccuchile/bert-base-spanish-wwm-cased"),
     ),
     # (
+    #     "E5-MultiEx-Large",
+    #     BertExampleDisambiguator("intfloat/multilingual-e5-large"),
+    # ),
+    # (
     #     "BERT-Ex-BETO-SQuAD",
     #     BertExampleDisambiguator(
     #         "mrm8488/bert-base-spanish-wwm-cased-finetuned-spa-squad2-es"

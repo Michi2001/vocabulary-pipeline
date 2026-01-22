@@ -13,6 +13,16 @@ from disambiguators.base_disambiguator import DisambiguationResult
 class BertMultiExampleDisambiguator(BertWordEmbeddingDisambiguator):
     """WSD using multiple example sentences per meaning, averaging their embeddings."""
 
+    def __init__(self, model_name: str = "bert-base-uncased", min_score_margin: float = 0.0):
+        """
+        Args:
+            model_name: BERT model name
+            min_score_margin: Minimum difference between best and second-best score.
+                              If margin is smaller, returns predicted_index=-1 (ambiguous).
+        """
+        super().__init__(model_name)
+        self.min_score_margin = min_score_margin
+
     def _get_meaning_sentence(self, meaning: Dict[str, str]) -> str:
         """Not used - we override disambiguate() to handle multiple examples."""
         return meaning.get("examples", [""])[0]
@@ -52,10 +62,21 @@ class BertMultiExampleDisambiguator(BertWordEmbeddingDisambiguator):
             similarity = self._cosine_similarity(target_emb, averaged_emb)
             scores.append(similarity)
 
-        predicted_idx = scores.index(max(scores))
+        # Find best and second-best scores
+        sorted_scores = sorted(scores, reverse=True)
+        best_score = sorted_scores[0]
+        second_best_score = sorted_scores[1] if len(sorted_scores) > 1 else 0.0
+        margin = best_score - second_best_score
+
+        # Check if margin is sufficient
+        if margin < self.min_score_margin:
+            predicted_idx = -1  # Ambiguous, no confident prediction
+        else:
+            predicted_idx = scores.index(best_score)
+
         return DisambiguationResult(
             predicted_index=predicted_idx,
-            confidence=scores[predicted_idx],
+            confidence=best_score,
             all_scores=scores,
             target_word=target_word,
             method_name=f"BERT-MultiEx-{self.model_name.split('/')[-1]}",
