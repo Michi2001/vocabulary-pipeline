@@ -35,7 +35,7 @@ filtering:
 llm_correction:
   enabled: true
   batch_size: 25
-  prompt_file: "prompts/corrector.txt"
+  prompt_file: "prompts/correction/general_prompt.txt"
   llm:
     type: "google"
     google:

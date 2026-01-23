@@ -62,7 +62,7 @@ filtering:
 llm_correction:
   enabled: true
   batch_size: 25  # Lemmas per LLM request
-  prompt_file: "prompts/corrector.txt"
+  prompt_file: "prompts/correction/general_prompt.txt"
   slice: [6000, 6200]  # Optional: only correct lemmas ranked start-end
   llm:
     type: "google"  # openai or google
@@ -114,7 +114,7 @@ example_generation:
       retry_delay: 2
       timeout: 300
     google:
-      model: "gemini-2.0-flash"
+      model: "gemini-3-flash-preview"
       max_retries: 3
       retry_delay: 2
       timeout: 360

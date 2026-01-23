@@ -217,7 +217,9 @@ def run_pipeline(
         llm_cache = LemmaCache({"directory": llm_cache_dir})
 
         # Load system prompt
-        prompt_file = correction_config.get("prompt_file", "prompts/corrector.txt")
+        prompt_file = correction_config.get(
+            "prompt_file", "prompts/correction/general_prompt.txt"
+        )
         with open(prompt_file, "r", encoding="utf-8") as f:
             system_prompt = f.read()
 
@@ -341,11 +343,13 @@ def run_pipeline(
                 llm_cache_dir = cache_config.get("llm_directory", "cache/llm_results")
                 llm_cache = LemmaCache({"directory": llm_cache_dir})
 
-            example_provider_type = example_config.get("llm", {}).get("type", "openai")
+            example_provider_type = example_config.get("llm", {}).get("type", "google")
             example_provider_config = example_config.get("llm", {}).get(
                 example_provider_type, {}
             )
-            example_provider = create_provider(example_provider_type, example_provider_config)
+            example_provider = create_provider(
+                example_provider_type, example_provider_config
+            )
 
             example_gen_config = {
                 "batch_size": example_config.get("batch_size", 50),

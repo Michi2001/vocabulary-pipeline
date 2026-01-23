@@ -56,7 +56,7 @@ def load_expected_output(csv_path):
 # Load test data from CSV files
 TEST_INPUT = load_test_input(Path("test/data/corrector_input.csv"))
 EXPECTED_OUTPUT = load_expected_output(Path("test/data/corrector_exp_output.csv"))
-PROMPT_FILE = "prompts/corrector.txt"
+PROMPT_FILE = "prompts/correction/general_prompt.txt"
 PROVIDER_TYPE = "google"
 PROVIDER_CONFIG = {
     "model": "gemini-3-flash-preview",

@@ -97,7 +97,7 @@ Map words back to their canonical dictionary form if the lemmatizer failed.
    Generally, MERGE standard feminine forms to their masculine canonical form (e.g., 'profesora' → 'profesor').
 
    **EXCEPTIONS (KEEP as separate entries):**
-   
+
    A. **Foundational Social Vocabulary (A1/A2 level)**:
       KEEP high-frequency feminine forms of basic family/social terms because they are pedagogically treated as distinct core vocabulary.
       **Examples include (but are not limited to):**
