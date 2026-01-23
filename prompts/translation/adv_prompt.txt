@@ -24,39 +24,18 @@
       {
         "definition_es": "indica que algo ha ocurrido antes del momento presente",
         "structure": "ya",
-        "examples_es": [
-          "No tengo hambre, [ya] he comido en casa.",
-          "¿[Ya] has terminado los deberes?",
-          "[Ya] lo sabía, me lo contó tu hermano.",
-          "Cuando llegamos, [ya] había empezado la película.",
-          "[Ya] te lo he dicho mil veces."
-        ],
         "flags": [],
         "translations": [{"text": "schon"}, {"text": "bereits"}]
       },
       {
         "definition_es": "indica que algo ha dejado de ocurrir",
         "structure": "ya no",
-        "examples_es": [
-          "Antes fumaba un paquete al día, pero [ya] no fumo.",
-          "[Ya] no vive aquí, se mudó el mes pasado.",
-          "[Ya] no me duele la cabeza.",
-          "Este restaurante [ya] no es lo que era.",
-          "[Ya] no somos amigos después de lo que pasó."
-        ],
         "flags": [],
         "translations": [{"text": "nicht mehr"}]
       },
       {
         "definition_es": "expresa urgencia o inmediatez",
         "structure": "ya",
-        "examples_es": [
-          "¡Limpia tu habitación [ya], no quiero esperar más!",
-          "¡Vamos [ya], que llegamos tarde!",
-          "Necesito el informe [ya].",
-          "¡Hazlo [ya]!",
-          "Quiero irme [ya] de esta fiesta."
-        ],
         "flags": [],
         "translations": [{"text": "sofort"}, {"text": "jetzt gleich"}]
       }
@@ -70,26 +49,12 @@
       {
         "definition_es": "de manera correcta, adecuada o satisfactoria",
         "structure": "bien",
-        "examples_es": [
-          "Tu hijo dibuja muy [bien] para su edad.",
-          "¿Has dormido [bien]?",
-          "Lo hiciste muy [bien] en el examen.",
-          "Habla español muy [bien].",
-          "Este coche funciona [bien]."
-        ],
         "flags": [],
         "translations": [{"text": "gut"}]
       },
       {
         "definition_es": "en buen estado de salud o ánimo",
         "structure": "estar bien",
-        "examples_es": [
-          "No te preocupes por mí, estoy [bien].",
-          "¿Estás [bien]? Te veo preocupado.",
-          "Después del accidente, todos estaban [bien].",
-          "¿Todo [bien] con tu familia?",
-          "Ya estoy [bien], gracias por preguntar."
-        ],
         "flags": [],
         "translations": [{"text": "gut"}, {"text": "wohlauf"}]
       }

@@ -20,39 +20,18 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce un momento específico en el pasado",
         "structure": "cuando [pasado]",
-        "examples_es": [
-          "[Cuando] llegué a casa, vi que la puerta estaba abierta.",
-          "[Cuando] era niño, vivía en el campo.",
-          "Me llamó [cuando] salía del trabajo.",
-          "[Cuando] terminó la película, todos aplaudieron.",
-          "Lo conocí [cuando] estudiaba en la universidad."
-        ],
         "flags": [],
         "translations": [{"text": "als"}]
       },
       {
         "definition_es": "introduce una acción habitual o repetida",
         "structure": "cuando [presente]",
-        "examples_es": [
-          "[Cuando] voy al supermercado, siempre compro chocolate.",
-          "[Cuando] hace sol, salimos a pasear.",
-          "Me pongo nervioso [cuando] tengo exámenes.",
-          "[Cuando] estoy triste, escucho música.",
-          "Los niños juegan fuera [cuando] no llueve."
-        ],
         "flags": [],
         "translations": [{"text": "immer wenn"}, {"text": "wenn"}]
       },
       {
         "definition_es": "introduce una acción futura o hipotética",
         "structure": "cuando [subjuntivo]",
-        "examples_es": [
-          "[Cuando] tengas tiempo, llámame.",
-          "Iremos de vacaciones [cuando] ahorremos suficiente.",
-          "[Cuando] llegues, avísame.",
-          "Te lo diré [cuando] esté preparado.",
-          "[Cuando] puedas, ven a visitarme."
-        ],
         "flags": [],
         "translations": [{"text": "sobald"}, {"text": "wenn"}]
       }
@@ -66,26 +45,12 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce una condición o hipótesis",
         "structure": "si [condición]",
-        "examples_es": [
-          "[Si] llueve mañana, cancelaremos la barbacoa.",
-          "[Si] tuviera más dinero, viajaría más.",
-          "¿Qué harías [si] te tocara la lotería?",
-          "[Si] necesitas ayuda, dímelo.",
-          "No vendré [si] no me invitas."
-        ],
         "flags": [],
         "translations": [{"text": "wenn"}, {"text": "falls"}]
       },
       {
         "definition_es": "introduce una pregunta indirecta sobre alternativas",
         "structure": "si [pregunta indirecta]",
-        "examples_es": [
-          "No sé [si] Juan vendrá a la fiesta o se quedará en casa.",
-          "Me pregunto [si] es verdad lo que dice.",
-          "Dime [si] puedes venir o no.",
-          "No estoy seguro de [si] lo entendí bien.",
-          "Quiero saber [si] me quieres."
-        ],
         "flags": [],
         "translations": [{"text": "ob"}]
       }
@@ -99,13 +64,6 @@ Bei Konjunktionen zeigt das structure-Feld den **Tempus** oder **Modus** des fol
       {
         "definition_es": "introduce una idea que contrasta con la anterior",
         "structure": "pero",
-        "examples_es": [
-          "Me gustaría ir a la fiesta, [pero] tengo que trabajar.",
-          "Es caro, [pero] merece la pena.",
-          "Lo intenté, [pero] no lo conseguí.",
-          "Sé que tienes razón, [pero] no estoy de acuerdo.",
-          "Quería llamarte, [pero] se me olvidó."
-        ],
         "flags": [],
         "translations": [{"text": "aber"}]
       }

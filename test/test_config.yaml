@@ -50,7 +50,21 @@ llm_translation:
   enabled: true
   batch_size: 20
   prompt_directory: "prompts/translation"
-  num_examples: 5
+  llm:
+    type: "google"
+    google:
+      model: "gemini-3-flash-preview"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 360
+      temperature: 1.0
+      thinking_level: "minimal"
+
+# Example Generation runs automatically when disambiguation.enabled=true
+example_generation:
+  batch_size: 20
+  prompt_directory: "prompts/examples"
+  num_examples_poly: 10
   llm:
     type: "google"
     google:

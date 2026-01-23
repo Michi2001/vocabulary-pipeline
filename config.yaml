@@ -1,0 +1,127 @@
+# Lemma Frequency Analysis Configuration
+
+# Corpora to process (multiple corpora are merged)
+corpora:
+  - name: "TED2020"
+    file_path: "data/OPUS/TED2020/es.txt"
+    type: "opus"  # opus: one sentence per line, leipzig: ID<TAB>Sentence
+    encoding: "utf-8"
+
+  - name: "Books_v1"
+    file_path: "data/OPUS/Books_v1/es.txt"
+    type: "opus"
+    encoding: "utf-8"
+
+  - name: "WikiMatrix_v1"
+    file_path: "data/OPUS/WikiMatrix_v1/es.txt"
+    type: "opus"
+    encoding: "utf-8"
+    max_sentences: 2000000  # Optional: limit to random sample
+
+  - name: "OpenSubtitles_v2024"
+    file_path: "data/OPUS/OpenSubtitles_v2024/es.txt"
+    type: "opus"
+    encoding: "utf-8"
+    max_sentences: 32000000
+
+lemmatization:
+  # spaCy model: es_core_news_sm (fast), es_core_news_md, es_core_news_lg (accurate)
+  model: "es_core_news_lg"
+  batch_size: 1000  # Sentences per spaCy batch
+
+processing:
+  sentence_batch_size: 10000  # Sentences read from corpus per batch
+  min_frequency: 5  # Minimum frequency for output
+
+output:
+  directory: "output/spanish_lemma_frequencies"
+  include_embeddings: true  # Include meaning_embedding in translations.json
+
+cache:
+  directory: "cache"
+  llm_directory: "cache/llm_results"
+
+filtering:
+  # POS tags: NOUN, VERB, ADJ, ADV, ADP, CONJ, AUX, CCONJ, SCONJ, PROPN, DET, PRON, NUM, etc.
+  accepted_pos:
+    - NOUN
+    - VERB
+    - ADJ
+    - ADV
+    - ADP
+    - CONJ
+    - AUX     # Mapped to VERB
+    - CCONJ   # Mapped to CONJ
+    - SCONJ   # Mapped to CONJ
+  pos_mappings:
+    AUX: VERB
+    CCONJ: CONJ
+    SCONJ: CONJ
+  include_countries: true  # Allow country names (PROPN) from babel
+
+llm_correction:
+  enabled: true
+  batch_size: 25  # Lemmas per LLM request
+  prompt_file: "prompts/corrector.txt"
+  slice: [6000, 6200]  # Optional: only correct lemmas ranked start-end
+  llm:
+    type: "google"  # openai or google
+    openai:
+      model: "gpt-5-mini"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 60
+    google:
+      model: "gemini-3-flash-preview"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 60
+      temperature: 1.0
+      thinking_level: "minimal"  # minimal, low, medium, high
+
+llm_translation:
+  enabled: true
+  batch_size: 20  # Lemmas per LLM request
+  prompt_directory: "prompts/translation"
+  llm:
+    type: "google"
+    openai:
+      model: "gpt-5-mini"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 300
+    google:
+      model: "gemini-3-flash-preview"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 360
+      temperature: 1.0
+      thinking_level: "minimal"
+
+# Example Generation runs automatically when disambiguation.enabled=true
+# Examples are required for embedding-based disambiguation.
+# For monosemantic words (1 meaning): 1 example
+# For polysemantic words (2+ meanings): num_examples_poly examples per meaning
+example_generation:
+  batch_size: 50  # Meanings per LLM request (larger since less output per item)
+  prompt_directory: "prompts/examples"
+  num_examples_poly: 10  # Examples per meaning for polysemantic words
+  llm:
+    type: "openai"  # Can use different/cheaper provider than translation
+    openai:
+      model: "gpt-4o-mini"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 300
+    google:
+      model: "gemini-2.0-flash"
+      max_retries: 3
+      retry_delay: 2
+      timeout: 360
+      temperature: 1.0
+      thinking_level: "minimal"
+
+disambiguation:
+  enabled: true  # Also enables example_generation!
+  model: "dccuchile/bert-base-spanish-wwm-cased"  # BERT model for embeddings
+  batch_size: 32  # Sentences per BERT batch

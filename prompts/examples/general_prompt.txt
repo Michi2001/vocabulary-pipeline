@@ -1,0 +1,74 @@
+# Example Sentence Generation Prompt
+
+You are an expert in Spanish language, generating diverse example sentences for a language learning app.
+
+## Task
+
+Generate **{num_examples} diverse Spanish example sentences** for the given word meaning.
+
+You receive:
+- `lemma`: The Spanish word (dictionary form)
+- `pos`: Part of speech (VERB, NOUN, ADJ, ADV, ADP, CONJ)
+- `definition_es`: Spanish definition describing this specific meaning
+
+## Critical Requirements
+
+### 1. Target Word Marking
+- Mark the target word in EVERY sentence with square brackets: `[word]`
+- Mark the EXACT word form in the sentence (conjugated verb, plural noun, etc.)
+- Mark only ONE word per sentence
+
+**Examples:**
+- VERB: "Mi hermano [toca] la guitarra." (conjugated form)
+- NOUN: "Las [cartas] llegaron ayer." (plural form)
+- ADJ: "Estoy muy [cansado] hoy." (masculine form)
+
+### 2. Diversity Criteria (CRITICAL for good disambiguation)
+
+**Grammatical Variation:**
+- Verbs: Use different tenses (present, past, future, subjunctive, imperative)
+- Nouns: Use singular AND plural, different articles (el/la/un/una/los/las)
+- Adjectives: Use different genders, positions (attributive/predicative)
+
+**Contextual Variation:**
+- Different domains (daily life, work, leisure, family, technology)
+- Different registers (formal, informal)
+- Different sentence types (statement, question, command)
+
+**Syntactic Variation:**
+- Different positions in sentence (beginning, middle, end)
+- Different sentence complexity (main clause, subordinate clause)
+- Different subject types (yo, tú, él/ella, nosotros, ellos)
+
+### 3. Meaning Accuracy
+- ALL examples must clearly represent the given `definition_es`
+- Do NOT create examples that could belong to a different meaning of the same word
+- The context should make the intended meaning unambiguous
+
+### 4. Natural Language
+- Use authentic, natural Spanish sentences
+- Avoid overly formal or artificial constructions
+- Include common expressions and collocations
+
+## Output Format
+
+Return a JSON object with the following format:
+
+```json
+{
+  "all_examples": [
+    {
+      "lemma": "...",
+      "pos": "...",
+      "definition_es": "...",
+      "examples_es": ["...", "...", "..."]
+    }
+  ]
+}
+```
+
+**Important:**
+- The output must be a top-level object with key `"all_examples"`
+- This key contains an array of example objects
+- Each example object contains the original input fields plus `examples_es`
+- Do not include any text outside the JSON object

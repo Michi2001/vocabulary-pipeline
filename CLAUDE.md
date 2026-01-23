@@ -24,15 +24,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Spanish vocabulary frequency analyzer and word sense disambiguation system that processes large text corpora using spaCy for contextual lemmatization. The pipeline transforms raw Spanish text into a disambiguated, semantically-enriched vocabulary dataset through seven stages:
+Spanish vocabulary frequency analyzer and word sense disambiguation system that processes large text corpora using spaCy for contextual lemmatization. The pipeline transforms raw Spanish text into a disambiguated, semantically-enriched vocabulary dataset through eight stages:
 
 1. **Frequency Analysis**: Contextual lemmatization and frequency counting with caching
 2. **Post-Processing**: POS filtering, mapping, and lemma cleaning
 3. **LLM Correction**: Optional LLM-based lemmatization error correction
-4. **Translation**: Optional LLM-based translation to German with multiple meanings
-5. **Meaning Embeddings**: BERT embeddings for each meaning variant
-6. **Word Sense Disambiguation**: Corpus-wide disambiguation using embedding similarity
-7. **Co-Occurrence Matrix**: Semantic co-occurrence matrix for vocabulary relationships
+4. **Translation**: Optional LLM-based translation to German with multiple meanings (without examples)
+5. **Example Generation**: LLM-based diverse example sentences per meaning (when disambiguation enabled)
+6. **Meaning Embeddings**: BERT embeddings for each meaning variant
+7. **Word Sense Disambiguation**: Corpus-wide disambiguation using embedding similarity
+8. **Co-Occurrence Matrix**: Semantic co-occurrence matrix for vocabulary relationships
 
 The system supports multiple corpora, aggressive caching at each stage, and streaming processing for memory efficiency. Primary use case: vocabulary learning applications requiring disambiguated word meanings and semantic relationships.
 
@@ -116,22 +117,31 @@ The pipeline follows a multi-stage architecture with stream-based processing:
     - Processes lemmas by POS category (VERB, NOUN, ADJ, ADV, ADP, CONJ)
     - Uses POS-specific prompts for accurate translations
     - Generates multiple meanings with definitions and estimated frequency share
-    - Generates multiple diverse example sentences per meaning (`num_examples` config)
+    - Does NOT generate example sentences (handled by Stage 5)
     - Cache key includes model config + combined prompt hash (general + POS-specific)
-    - Outputs: `translations.json` with enriched frequency data
+    - Outputs: `translations.json` with enriched frequency data (no examples yet)
 
-**Stage 5: Meaning Embeddings (optional, requires translation)**
-11. **MeaningEmbeddingGenerator** (src/meaning_embedding_generator.py) → generates BERT embeddings
+**Stage 5: Example Generation (optional, requires translation, runs when disambiguation enabled)**
+11. **ExampleGenerator** (src/example_generator.py) → generates diverse example sentences
+    - Generates 1 example for monosemantic words (1 meaning)
+    - Generates `num_examples_poly` (default: 10) examples for polysemantic words (2+ meanings)
+    - Uses separate LLM provider (can be cheaper model than translation)
+    - Cache key includes model config + prompt hash + definition_hash
+    - Extracts target word positions for BERT embedding
+    - Outputs: Updated `translations.json` with `examples_es` per meaning
+
+**Stage 6: Meaning Embeddings (optional, requires examples)**
+12. **MeaningEmbeddingGenerator** (src/meaning_embedding_generator.py) → generates BERT embeddings
     - Creates embeddings for each meaning's multiple example sentences
     - Uses target word masking to extract context embeddings
     - Averages embeddings across all examples for robust meaning representation
     - Adds `meaning_embedding` field (averaged) to each meaning in `translations.json`
 
-**Stage 6: Word Sense Disambiguation (optional, requires embeddings + stores)**
-12. **Vocabulary** (src/vocab.py) → builds from translations
+**Stage 7: Word Sense Disambiguation (optional, requires embeddings + stores)**
+13. **Vocabulary** (src/vocab.py) → builds from translations
     - Creates WordVariant objects (one per meaning)
     - Provides lookup structures for disambiguation
-13. **BatchDisambiguator** (src/batch_disambiguator.py) → disambiguates corpus tokens
+14. **BatchDisambiguator** (src/batch_disambiguator.py) → disambiguates corpus tokens
     - Processes ALL corpora (multi-corpus support)
     - Compares runtime token embeddings with pre-computed meaning embeddings
     - Uses cosine similarity to select best meaning variant
@@ -139,8 +149,8 @@ The pipeline follows a multi-stage architecture with stream-based processing:
     - Writes variant IDs to DisambiguatedStore → `DisambiguatedStore.jsonl.gz` (per corpus)
     - Includes caching: checks if disambiguation already exists for vocabulary + BERT model
 
-**Stage 7: Co-Occurrence Matrix (optional, requires disambiguation)**
-14. **CoOccurrenceBuilder** (src/cooccurrence_builder.py) → builds co-occurrence matrix
+**Stage 8: Co-Occurrence Matrix (optional, requires disambiguation)**
+15. **CoOccurrenceBuilder** (src/cooccurrence_builder.py) → builds co-occurrence matrix
     - Processes ALL disambiguated stores from all corpora
     - Creates sparse co-occurrence matrix across all corpora
     - Outputs: `cooccurrence_matrix.npz`
@@ -197,15 +207,25 @@ This separation enables cache reusability across different configurations and pr
 - Generates multiple meanings with:
   - German translations (infinitive form)
   - Spanish definitions (`definition_es`)
-  - German definitions (`definition_de`)
   - Estimated frequency share per meaning
+- Does NOT generate example sentences (handled by ExampleGenerator)
 - Cache key combines model config + general prompt hash + POS prompt hash
 - Normalizes `estimated_share` values to sum to 1.0
 - Tracks token usage statistics (prompt/completion tokens, API calls, cache hits)
 
+**ExampleGenerator** (src/example_generator.py)
+- Generates diverse example sentences for translations
+- Monosemantic words (1 meaning): 1 example
+- Polysemantic words (2+ meanings): `num_examples_poly` examples per meaning
+- Uses separate LLM provider (can be cheaper/faster model)
+- Cache key: `{lemma}|{pos}|{definition_hash}_{model_hash}_{prompt_hash}`
+- Extracts bracketed target words and computes character positions
+- Adds `examples_es`, `_target_word`, `_target_starts`, `_target_ends` to meanings
+
 **LemmaCache** (src/lemma_cache.py)
-- Unified cache for both correction and translation results
-- Two-level directory structure: `cache/lemma_cache/{correction|translation}/`
+- Unified cache for correction, translation, and example results
+- SQLite database: `cache/lemma_cache.db`
+- Tables: `corrections`, `translations`, `examples`
 - Cache key format: `{lemma}|{pos}_{model_hash}_{prompt_hash}.json`
 - Model hash includes: provider type, model name, temperature, max_tokens
 - Separate prompt hashes for correction vs translation
@@ -441,23 +461,31 @@ The pipeline stages have the following dependencies:
 **Stage 4: Translation**
 - Optional (enabled via `llm_translation.enabled`)
 - Requires: Frequency data (corrected or original)
-- Outputs: `translations.json`
+- Outputs: `translations.json` (without examples)
 
-**Stage 5: Meaning Embeddings**
-- Optional (enabled via `disambiguation.enabled`)
+**Stage 5: Example Generation**
+- Runs automatically when `disambiguation.enabled=true`
 - Requires: `translations.json` from Stage 4
+- Uses separate LLM provider (configurable in `example_generation.llm`)
+- Monosemantic words (1 meaning): 1 example
+- Polysemantic words (2+ meanings): `num_examples_poly` examples per meaning
+- Outputs: Updated `translations.json` with `examples_es`
+
+**Stage 6: Meaning Embeddings**
+- Runs automatically when `disambiguation.enabled=true`
+- Requires: `translations.json` with examples from Stage 5
 - Modifies: Adds `meaning_embedding` field to each meaning in `translations.json`
 
-**Stage 6: Word Sense Disambiguation**
+**Stage 7: Word Sense Disambiguation**
 - Optional (enabled via `disambiguation.enabled`)
 - Requires:
-  - `translations.json` with embeddings from Stage 5
+  - `translations.json` with embeddings from Stage 6
   - SentenceStore and LemmatizedStore from all corpora
 - Processes ALL corpora (multi-corpus support)
 - Outputs: `DisambiguatedStore.jsonl.gz` per corpus in `cache/{corpus_name}/{cache_key}/{disambiguation_cache_key}/`
 - Includes caching based on vocabulary hash + BERT model
 
-**Stage 7: Co-Occurrence Matrix**
+**Stage 8: Co-Occurrence Matrix**
 - Runs automatically when disambiguation is enabled
 - Requires DisambiguatedStore from ALL corpora
 - Builds matrix across all corpora
@@ -465,9 +493,9 @@ The pipeline stages have the following dependencies:
 
 **Dependency Chain Summary:**
 ```
-Stage 1-2 (always) → Stage 3 (optional) → Stage 4 (optional) → Stage 5 (auto with Stage 6)
-                                                                        ↓
-                          SentenceStore + LemmatizedStore (always) → Stage 6 (optional) → Stage 7 (auto with Stage 6)
+Stage 1-2 (always) → Stage 3 (optional) → Stage 4 (optional) → Stage 5-6 (auto with Stage 7)
+                                                                             ↓
+                          SentenceStore + LemmatizedStore (always) → Stage 7 (optional) → Stage 8 (auto with Stage 7)
 ```
 
 ## Data Expectations

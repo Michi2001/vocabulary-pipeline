@@ -32,39 +32,18 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       {
         "definition_es": "indica la causa o razón de algo",
         "structure": "por [motivo]",
-        "examples_es": [
-          "No pudimos salir a pasear [por] la lluvia.",
-          "Lo hice [por] amor, no [por] dinero.",
-          "El vuelo se canceló [por] la niebla.",
-          "Gracias [por] tu ayuda.",
-          "Me castigaron [por] llegar tarde."
-        ],
         "flags": [],
         "translations": [{"text": "wegen"}, {"text": "aufgrund"}]
       },
       {
         "definition_es": "indica movimiento a través de un espacio",
         "structure": "por [lugar]",
-        "examples_es": [
-          "El ladrón entró en la casa [por] la ventana.",
-          "Paseamos [por] el parque toda la tarde.",
-          "El tren pasa [por] Barcelona.",
-          "Caminamos [por] la playa al atardecer.",
-          "El río fluye [por] el centro de la ciudad."
-        ],
         "flags": [],
         "translations": [{"text": "durch"}]
       },
       {
         "definition_es": "indica intercambio o precio",
         "structure": "por [precio / intercambio]",
-        "examples_es": [
-          "Te cambio mi bocadillo [por] tu manzana.",
-          "Compré el coche [por] diez mil euros.",
-          "¿[Por] cuánto vendes la bicicleta?",
-          "Daría todo [por] estar allí.",
-          "Lo vendió [por] muy poco dinero."
-        ],
         "flags": [],
         "translations": [{"text": "gegen"}, {"text": "für"}]
       }
@@ -78,39 +57,18 @@ Präpositionen haben oft mehrere deutsche Entsprechungen - sortiere nach Häufig
       {
         "definition_es": "indica finalidad o propósito de una acción",
         "structure": "para [infinitivo]",
-        "examples_es": [
-          "Necesito gafas nuevas [para] ver mejor de lejos.",
-          "Estudio español [para] poder viajar a México.",
-          "Trabajo mucho [para] ahorrar dinero.",
-          "¿[Para] qué sirve esta herramienta?",
-          "Hizo todo lo posible [para] ayudarme."
-        ],
         "flags": [],
         "translations": [{"text": "um ... zu"}, {"text": "zum"}]
       },
       {
         "definition_es": "indica el destinatario o beneficiario",
         "structure": "para [alguien]",
-        "examples_es": [
-          "He comprado un regalo [para] mi madre.",
-          "Esta carta es [para] ti.",
-          "¿[Para] quién es el pastel?",
-          "Cocino siempre [para] toda la familia.",
-          "Lo hago [para] mis hijos."
-        ],
         "flags": [],
         "translations": [{"text": "für"}]
       },
       {
         "definition_es": "indica dirección o destino",
         "structure": "para [lugar]",
-        "examples_es": [
-          "El tren sale [para] Madrid en cinco minutos.",
-          "Salimos mañana [para] la playa.",
-          "¿[Para] dónde vas?",
-          "El avión despega [para] París a las ocho.",
-          "Me voy [para] casa, estoy cansado."
-        ],
         "flags": [],
         "translations": [{"text": "nach"}, {"text": "in Richtung"}]
       }

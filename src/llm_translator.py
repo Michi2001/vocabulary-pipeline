@@ -2,7 +2,6 @@
 
 import hashlib
 import logging
-import re
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from collections import defaultdict
@@ -13,9 +12,6 @@ from src.lemma_cache import LemmaCache
 from src.vocab import Translation
 
 logger = logging.getLogger(__name__)
-
-# Regex for extracting bracketed target word from example sentences
-BRACKET_PATTERN = re.compile(r"\[([^\]]+)\]")
 
 POS_PROMPT_MAP = {
     "VERB": "verb_prompt.txt",
@@ -59,7 +55,6 @@ class LemmaTranslator:
         self.batch_size = config.get("batch_size", 25)
         self.prompts_dir = Path(config.get("prompts_dir", "prompts/translation"))
         self.output_dir = Path(config["output_dir"])
-        self.num_examples = config.get("num_examples", 5)
 
     def translate(
         self, counter: FrequencyCounter, min_frequency: int = 1
@@ -170,9 +165,6 @@ class LemmaTranslator:
             # Set equal estimated_share as initial value (will be updated after disambiguation)
             self._set_equal_shares(translation)
 
-            # Extract and process bracketed target words
-            self._extract_target_words(translation)
-
         # Sort by frequency descending (highest frequency first)
         enriched_translations.sort(key=lambda x: x.get("frequency", 0), reverse=True)
 
@@ -216,15 +208,12 @@ class LemmaTranslator:
         return dict(groups)
 
     def _load_general_prompt(self) -> str:
-        """Load general translation prompt and substitute num_examples."""
+        """Load general translation prompt."""
         general_file = self.prompts_dir / "general_prompt.txt"
         if not general_file.exists():
             raise FileNotFoundError(f"General prompt not found: {general_file}")
 
-        prompt = general_file.read_text(encoding="utf-8")
-        # Replace placeholder with configured number of examples
-        prompt = prompt.replace("{num_examples}", str(self.num_examples))
-        return prompt
+        return general_file.read_text(encoding="utf-8")
 
     def _create_batches_from_items(
         self, items: List[Dict[str, Any]]
@@ -435,62 +424,3 @@ class LemmaTranslator:
         for meaning in translation["meanings"]:
             meaning["estimated_share"] = equal_share
 
-    def _extract_target_words(self, translation: Dict[str, Any]) -> None:
-        """
-        Extract bracketed target words from examples_es fields.
-
-        For each meaning, processes all examples in examples_es list.
-        Extracts bracketed words, removes brackets, and stores metadata
-        (_target_word, _target_starts, _target_ends) for MeaningEmbeddingGenerator.
-        """
-        if "meanings" not in translation or not translation["meanings"]:
-            return
-
-        lemma = translation.get("lemma", "unknown")
-        lemma_id = translation.get("id", "?")
-
-        for idx, meaning in enumerate(translation["meanings"]):
-            examples_es = meaning.get("examples_es", [])
-            if not examples_es:
-                continue
-
-            cleaned_examples = []
-            target_starts = []
-            target_ends = []
-            target_word = None
-
-            for ex_idx, example in enumerate(examples_es):
-                match = BRACKET_PATTERN.search(example)
-                if not match:
-                    logger.warning(
-                        f"Lemma '{lemma}' (ID: {lemma_id}), meaning {idx}, example {ex_idx}: "
-                        f"No bracketed word: '{example[:50]}...'"
-                    )
-                    cleaned_examples.append(example)
-                    target_starts.append(None)
-                    target_ends.append(None)
-                else:
-                    # Extract bracketed word and position
-                    word = match.group(1)
-                    bracket_start = match.start()
-
-                    # Store first target word found (should be same for all examples)
-                    if target_word is None:
-                        target_word = word
-
-                    # Position in cleaned sentence (without brackets)
-                    char_start = bracket_start
-                    char_end = char_start + len(word)
-
-                    # Remove brackets from example
-                    cleaned_sentence = example.replace(f"[{word}]", word, 1)
-                    cleaned_examples.append(cleaned_sentence)
-                    target_starts.append(char_start)
-                    target_ends.append(char_end)
-
-            # Update meaning with cleaned examples and metadata
-            meaning["examples_es"] = cleaned_examples
-            if target_word:
-                meaning["_target_word"] = target_word
-            meaning["_target_starts"] = target_starts
-            meaning["_target_ends"] = target_ends

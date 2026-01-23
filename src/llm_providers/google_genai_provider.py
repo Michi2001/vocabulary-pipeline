@@ -173,3 +173,59 @@ class GoogleGenAIProvider(BaseLLMProvider):
             )
         except Exception as e:
             raise LLMProviderError(f"Google GenAI translation failed: {e}")
+
+    def generate_examples(
+        self, batch: List[Dict[str, Any]], system_prompt: str
+    ) -> Dict[str, Any]:
+        """
+        Generate example sentences via Google GenAI API.
+
+        Args:
+            batch: List of dicts with 'lemma', 'pos', 'definition_es' keys
+            system_prompt: Example generation prompt
+
+        Returns:
+            Dict with parsed examples
+
+        Raises:
+            LLMProviderError: If all retries fail
+        """
+        user_message = self._format_examples_batch(batch)
+
+        config = types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            response_mime_type="application/json",
+            thinking_config=types.ThinkingConfig(thinking_level=self.thinking_level),
+            temperature=self.temperature,
+        )
+
+        def api_call():
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=user_message,
+                config=config,
+            )
+
+            content = response.text
+            parsed = ResponseParser.parse_json_response(content)
+
+            if not ResponseParser.validate_examples_response(parsed):
+                raise LLMProviderError("Invalid examples response structure")
+
+            token_usage = extract_token_usage_google(response)
+            if token_usage:
+                parsed["_token_usage"] = token_usage.to_dict()
+
+            logger.info(f"Successfully generated examples for {len(batch)} meanings")
+            return parsed
+
+        try:
+            return retry_with_backoff(
+                api_call,
+                max_retries=self.max_retries,
+                retry_delay=self.retry_delay,
+                operation_name="Google GenAI example generation",
+            )
+        except Exception as e:
+            raise LLMProviderError(f"Google GenAI example generation failed: {e}")
+

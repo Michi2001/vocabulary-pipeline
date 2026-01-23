@@ -64,6 +64,26 @@ class BaseLLMProvider(ABC):
         pass
 
     @abstractmethod
+    def generate_examples(
+        self, batch: List[Dict[str, Any]], system_prompt: str
+    ) -> Dict[str, Any]:
+        """
+        Generate example sentences for meanings.
+
+        Args:
+            batch: List of dicts with 'lemma', 'pos', 'definition_es' keys
+            system_prompt: Example generation prompt
+
+        Returns:
+            Dict with 'all_examples' key containing list of example objects
+            Format: {"all_examples": [{"lemma": "...", "pos": "...", "definition_es": "...", "examples_es": [...]}, ...]}
+
+        Raises:
+            LLMProviderError: On API errors
+        """
+        pass
+
+    @abstractmethod
     def get_cache_key_components(self) -> str:
         """
         Get provider-specific cache key components.
@@ -81,19 +101,20 @@ class BaseLLMProvider(ABC):
         pass
 
     def _format_batch(self, batch: List[Dict[str, Any]]) -> str:
-        """
-        Format batch as string for LLM input (shared across providers).
-
-        Args:
-            batch: List of dicts with 'id', 'lemma', 'frequency', 'pos' keys
-
-        Returns:
-            Formatted string (one line per entry: "ID | Lemma | Frequency | POS")
-        """
+        """Format batch for correction/translation (ID | Lemma | Frequency | POS)."""
         lines = []
         for item in batch:
             lines.append(
                 f"{item['id']} | {item['lemma']} | {item['frequency']} | {item['pos']}"
+            )
+        return "\n".join(lines)
+
+    def _format_examples_batch(self, batch: List[Dict[str, Any]]) -> str:
+        """Format batch for example generation (Lemma | POS | Definition)."""
+        lines = []
+        for item in batch:
+            lines.append(
+                f"Lemma: {item['lemma']} | POS: {item['pos']} | Definition: {item['definition_es']}"
             )
         return "\n".join(lines)
 

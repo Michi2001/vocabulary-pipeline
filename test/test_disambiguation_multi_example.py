@@ -11,8 +11,6 @@ import numpy as np
 from disambiguators import (
     BertMultiExampleDisambiguator,
     BertExampleDisambiguator,
-    BertWeightedPoolingDisambiguator,
-    BertHybridDisambiguator,
 )
 
 

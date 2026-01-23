@@ -29,6 +29,7 @@ from src.lemmatizer import Lemmatizer
 from src.llm_corrector import LemmaCorrector
 from src.llm_providers import create_provider
 from src.llm_translator import LemmaTranslator
+from src.example_generator import ExampleGenerator
 from src.meaning_embedding_generator import MeaningEmbeddingGenerator
 from src.output_writer import OutputWriter
 from src.post_processor import FrequencyPostProcessor
@@ -281,14 +282,14 @@ def run_pipeline(
     OutputWriter.write_csv(frequencies, output_path)
 
     # =========================================================================
-    # STAGE 4-5: Translation and Meaning Embeddings
+    # STAGE 4-6: Translation, Example Generation, and Meaning Embeddings
     # (Skip if translations_override provided)
     # =========================================================================
     translations: Optional[List[Translation]] = None
 
     if translations_override is not None:
         logger.info("=" * 60)
-        logger.info("STAGE 4-5: Using provided translations (skipping LLM stages)")
+        logger.info("STAGE 4-6: Using provided translations (skipping LLM stages)")
         logger.info("=" * 60)
         translations = translations_override
     else:
@@ -326,11 +327,46 @@ def run_pipeline(
             logger.info("LLM translation completed")
 
         # =========================================================================
-        # STAGE 5: Meaning Embeddings
+        # STAGE 5: Example Generation (only when disambiguation enabled)
         # =========================================================================
         if translations is not None and disambiguation_config.get("enabled", False):
             logger.info("=" * 60)
-            logger.info("STAGE 5: Meaning Embeddings")
+            logger.info("STAGE 5: Example Generation")
+            logger.info("=" * 60)
+
+            example_config = config.get("example_generation", {})
+
+            # Initialize LLM cache if not already done
+            if "llm_cache" not in locals():
+                llm_cache_dir = cache_config.get("llm_directory", "cache/llm_results")
+                llm_cache = LemmaCache({"directory": llm_cache_dir})
+
+            example_provider_type = example_config.get("llm", {}).get("type", "openai")
+            example_provider_config = example_config.get("llm", {}).get(
+                example_provider_type, {}
+            )
+            example_provider = create_provider(example_provider_type, example_provider_config)
+
+            example_gen_config = {
+                "batch_size": example_config.get("batch_size", 50),
+                "prompts_dir": example_config.get(
+                    "prompt_directory", "prompts/examples"
+                ),
+                "num_examples_poly": example_config.get("num_examples_poly", 10),
+            }
+
+            example_generator = ExampleGenerator(
+                example_provider, llm_cache, example_gen_config
+            )
+            translations, _ = example_generator.generate(translations)
+            logger.info("Example generation completed")
+
+        # =========================================================================
+        # STAGE 6: Meaning Embeddings
+        # =========================================================================
+        if translations is not None and disambiguation_config.get("enabled", False):
+            logger.info("=" * 60)
+            logger.info("STAGE 6: Meaning Embeddings")
             logger.info("=" * 60)
 
             model_name = disambiguation_config.get(
@@ -352,14 +388,14 @@ def run_pipeline(
         logger.info(f"Translations saved to: {translations_path}")
 
     # =========================================================================
-    # STAGE 6: Disambiguation (ALL corpora)
+    # STAGE 7: Disambiguation (ALL corpora)
     # =========================================================================
     disambiguated_stores: Dict[str, DisambiguatedStore] = {}  # corpus_name -> store
     vocabulary: Optional[Vocabulary] = None
 
     if translations is not None and disambiguation_config.get("enabled", False):
         logger.info("=" * 60)
-        logger.info("STAGE 6: Disambiguation")
+        logger.info("STAGE 7: Disambiguation")
         logger.info("=" * 60)
 
         vocabulary = Vocabulary.from_translations_list(translations)
@@ -407,11 +443,11 @@ def run_pipeline(
         logger.info(f"Disambiguation complete for {len(disambiguated_stores)} corpora")
 
     # =========================================================================
-    # STAGE 6.5: Update estimated_share from corpus usage
+    # STAGE 7.5: Update estimated_share from corpus usage
     # =========================================================================
     if disambiguated_stores and vocabulary is not None and translations is not None:
         logger.info("=" * 60)
-        logger.info("STAGE 6.5: Updating estimated shares from corpus usage")
+        logger.info("STAGE 7.5: Updating estimated shares from corpus usage")
         logger.info("=" * 60)
 
         share_updater = ShareUpdater()
@@ -430,12 +466,12 @@ def run_pipeline(
         logger.info(f"Updated translations saved to: {translations_path}")
 
     # =========================================================================
-    # STAGE 7: Co-Occurrence Matrix (ALL corpora)
+    # STAGE 8: Co-Occurrence Matrix (ALL corpora)
     # =========================================================================
     cooccurrence_matrix = None
     if disambiguated_stores and vocabulary is not None:
         logger.info("=" * 60)
-        logger.info("STAGE 7: Co-Occurrence Matrix")
+        logger.info("STAGE 8: Co-Occurrence Matrix")
         logger.info("=" * 60)
 
         builder = CoOccurrenceBuilder(vocabulary)

@@ -228,4 +228,3 @@ if __name__ == "__main__":
     finally:
         sys.stdout = original_stdout
         log_file.close()
-9

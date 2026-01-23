@@ -3,7 +3,6 @@ data/
 .DS_Store
 .vscode/
 output/
-config.yaml
 __pycache__/
 cache/
 .env

@@ -43,39 +43,18 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "poner la mano o los dedos sobre algo o alguien",
         "structure": "tocar",
-        "examples_es": [
-          "Por favor, no [toques] las pinturas del museo.",
-          "El médico me [tocó] el abdomen para ver si me dolía.",
-          "¿Puedo [tocar] el perro o muerde?",
-          "Los niños [tocaban] la nieve por primera vez.",
-          "No me [toques], tengo las manos sucias."
-        ],
         "flags": [],
         "translations": [{"text": "anfassen"}, {"text": "berühren"}]
       },
       {
         "definition_es": "producir música con un instrumento",
         "structure": "tocar",
-        "examples_es": [
-          "Mi hermano [toca] la guitarra en una banda.",
-          "¿Sabes [tocar] algún instrumento?",
-          "Ayer [tocaron] música clásica en el concierto.",
-          "Me gustaría que [tocaras] algo para nosotros.",
-          "Han [tocado] juntos durante años."
-        ],
         "flags": [],
         "translations": [{"text": "Instrument spielen"}]
       },
       {
         "definition_es": "corresponder el turno o la responsabilidad a alguien",
         "structure": "tocar a [alguien]",
-        "examples_es": [
-          "A cada uno le [toca] hacer su parte del trabajo.",
-          "Hoy te [toca] a ti fregar los platos.",
-          "¿A quién le [tocará] presentar mañana?",
-          "Nos [tocó] esperar tres horas en la cola.",
-          "Les [ha tocado] vivir tiempos difíciles."
-        ],
         "flags": [],
         "translations": [{"text": "an der Reihe sein"}]
       }
@@ -89,39 +68,18 @@ Bei reflexiven Formen: schreibe die Form aus (z.B. `quedarse`, `volverse`)
       {
         "definition_es": "permanecer en un lugar sin moverse",
         "structure": "quedarse",
-        "examples_es": [
-          "Hoy me [quedo] en casa porque estoy enfermo.",
-          "¿Por qué no te [quedas] a cenar con nosotros?",
-          "Se [quedaron] en el hotel todo el día.",
-          "Me [quedaré] aquí hasta que vuelvas.",
-          "Prefiero [quedarme] leyendo un libro."
-        ],
         "flags": [],
         "translations": [{"text": "bleiben"}]
       },
       {
         "definition_es": "acordar un encuentro con alguien",
         "structure": "quedar con [alguien]",
-        "examples_es": [
-          "He [quedado] con María a las ocho en el cine.",
-          "¿A qué hora [quedamos] mañana?",
-          "[Quedé] con mis amigos para tomar algo.",
-          "Siempre [quedábamos] en la misma cafetería.",
-          "¿Quieres [quedar] conmigo este fin de semana?"
-        ],
         "flags": [],
         "translations": [{"text": "sich verabreden"}, {"text": "sich treffen"}]
       },
       {
         "definition_es": "restar o sobrar una cantidad",
         "structure": "quedar",
-        "examples_es": [
-          "Date prisa, solo [quedan] cinco minutos para que salga el tren.",
-          "¿Cuánto dinero nos [queda]?",
-          "No [quedaba] nadie en la oficina.",
-          "Aún [quedan] dos capítulos por leer.",
-          "Solo me [ha quedado] un trozo de tarta."
-        ],
         "flags": [],
         "translations": [{"text": "übrig bleiben"}]
       }

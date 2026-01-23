@@ -108,3 +108,41 @@ class ResponseParser:
                 return False
 
         return True
+
+    @staticmethod
+    def validate_examples_response(response: Dict[str, Any]) -> bool:
+        """
+        Validate examples response structure.
+
+        Expected format:
+        {
+            "all_examples": [
+                {"lemma": "...", "pos": "...", "definition_es": "...", "examples_es": [...]},
+                ...
+            ]
+        }
+
+        Args:
+            response: Parsed JSON response
+
+        Returns:
+            True if valid, False otherwise
+        """
+        if "all_examples" not in response:
+            logger.error("Response missing 'all_examples' key")
+            return False
+
+        if not isinstance(response["all_examples"], list):
+            logger.error("'all_examples' is not a list")
+            return False
+
+        for example in response["all_examples"]:
+            if "lemma" not in example or "examples_es" not in example:
+                logger.error(f"Example missing required fields: {example}")
+                return False
+
+            if not isinstance(example["examples_es"], list):
+                logger.error(f"'examples_es' is not a list: {example}")
+                return False
+
+        return True

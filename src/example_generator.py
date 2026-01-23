@@ -1,0 +1,284 @@
+"""LLM-based example sentence generator with caching support."""
+
+import hashlib
+import logging
+import re
+from pathlib import Path
+from typing import List, Dict, Any, Optional, Tuple
+
+from src.llm_providers.base_provider import BaseLLMProvider
+from src.lemma_cache import LemmaCache
+from src.vocab import Translation
+
+logger = logging.getLogger(__name__)
+
+BRACKET_PATTERN = re.compile(r"\[([^\]]+)\]")
+
+
+class ExampleGenerator:
+    """
+    Generates diverse example sentences for translation meanings.
+
+    For polysemantic words (2+ meanings): generates num_examples_poly examples per meaning.
+    For monosemantic words (1 meaning): generates 1 example.
+    """
+
+    def __init__(
+        self,
+        provider: BaseLLMProvider,
+        cache: Optional[LemmaCache],
+        config: Dict[str, Any],
+    ):
+        """
+        Initialize generator.
+
+        Args:
+            provider: LLM provider instance
+            cache: Shared LemmaCache instance (None to disable caching)
+            config: {
+                'batch_size': int,
+                'prompts_dir': str,
+                'num_examples_poly': int (examples per meaning for polysemantic words)
+            }
+        """
+        self.provider = provider
+        self.cache = cache
+        self.model_config = provider.get_cache_key_components()
+        self.batch_size = config.get("batch_size", 50)
+        self.prompts_dir = Path(config.get("prompts_dir", "prompts/examples"))
+        self.num_examples_poly = config.get("num_examples_poly", 10)
+
+        # Load prompt and compute hash
+        self.system_prompt = self._load_prompt()
+        self.prompt_hash = hashlib.sha256(self.system_prompt.encode()).hexdigest()[:8]
+
+    def generate(
+        self, translations: List[Translation]
+    ) -> Tuple[List[Translation], Dict[str, int]]:
+        """
+        Generate examples for all translations.
+
+        Args:
+            translations: List of Translation objects (without examples)
+
+        Returns:
+            Tuple of (translations_with_examples, usage_stats)
+        """
+        logger.info("Starting example sentence generation...")
+
+        # Collect all meaning items that need examples
+        items_to_process = []
+        cached_count = 0
+
+        for translation in translations:
+            num_meanings = len(translation.meanings)
+            num_examples = 1 if num_meanings == 1 else self.num_examples_poly
+
+            for meaning_idx, meaning in enumerate(translation.meanings):
+                definition_hash = self._compute_definition_hash(meaning.definition_es)
+
+                # Check cache
+                cached = None
+                if self.cache is not None:
+                    cached = self.cache.get_examples(
+                        translation.lemma,
+                        translation.pos,
+                        definition_hash,
+                        self.model_config,
+                        self.prompt_hash,
+                    )
+
+                if cached is not None:
+                    # Apply cached examples
+                    self._apply_examples_to_meaning(meaning, cached["examples_es"])
+                    cached_count += 1
+                else:
+                    items_to_process.append(
+                        {
+                            "translation": translation,
+                            "meaning_idx": meaning_idx,
+                            "meaning": meaning,
+                            "definition_hash": definition_hash,
+                            "num_examples": num_examples,
+                        }
+                    )
+
+        logger.info(
+            f"Cache: {cached_count} hits, {len(items_to_process)} meanings need generation"
+        )
+
+        # Token usage tracking
+        total_usage = {
+            "total_prompt_tokens": 0,
+            "total_completion_tokens": 0,
+            "total_tokens": 0,
+            "api_calls": 0,
+            "cache_hits": cached_count,
+        }
+
+        if not items_to_process:
+            logger.info("All examples loaded from cache")
+            return translations, total_usage
+
+        # Process in batches
+        batches = self._create_batches(items_to_process)
+        logger.info(
+            f"Created {len(batches)} batches for {len(items_to_process)} meanings"
+        )
+
+        for batch_idx, batch in enumerate(batches):
+            logger.info(
+                f"Processing batch {batch_idx + 1}/{len(batches)} ({len(batch)} meanings)"
+            )
+
+            # Prepare batch for LLM
+            batch_input = self._prepare_batch_input(batch)
+
+            # Call LLM
+            prompt_with_num = self.system_prompt.replace(
+                "{num_examples}", str(batch[0]["num_examples"])
+            )
+            response = self.provider.generate_examples(batch_input, prompt_with_num)
+
+            # Track token usage
+            if "_token_usage" in response:
+                usage = response["_token_usage"]
+                total_usage["total_prompt_tokens"] += usage.get("prompt_tokens", 0)
+                total_usage["total_completion_tokens"] += usage.get(
+                    "completion_tokens", 0
+                )
+                total_usage["total_tokens"] += usage.get("total_tokens", 0)
+                total_usage["api_calls"] += 1
+
+            # Apply examples to meanings and cache
+            self._apply_batch_results(batch, response.get("all_examples", []))
+
+            # Commit cache after each batch
+            if self.cache is not None:
+                self.cache.save_all()
+
+        # Log usage summary
+        logger.info("\n" + "=" * 60)
+        logger.info("EXAMPLE GENERATION - TOKEN USAGE SUMMARY")
+        logger.info("=" * 60)
+        logger.info(f"API Calls:          {total_usage['api_calls']}")
+        logger.info(f"Cache Hits:         {total_usage['cache_hits']}")
+        logger.info(f"Prompt Tokens:      {total_usage['total_prompt_tokens']:,}")
+        logger.info(f"Completion Tokens:  {total_usage['total_completion_tokens']:,}")
+        logger.info(f"Total Tokens:       {total_usage['total_tokens']:,}")
+        logger.info("=" * 60 + "\n")
+
+        return translations, total_usage
+
+    def _load_prompt(self) -> str:
+        """Load example generation prompt."""
+        prompt_file = self.prompts_dir / "general_prompt.txt"
+        if not prompt_file.exists():
+            raise FileNotFoundError(f"Prompt not found: {prompt_file}")
+        return prompt_file.read_text(encoding="utf-8")
+
+    def _compute_definition_hash(self, definition_es: str) -> str:
+        """Compute hash of definition for cache key."""
+        return hashlib.sha256(definition_es.encode()).hexdigest()[:8]
+
+    def _create_batches(self, items: List[Dict]) -> List[List[Dict]]:
+        """Create batches from items, grouping by num_examples."""
+        # Group by num_examples (mono vs poly)
+        mono = [i for i in items if i["num_examples"] == 1]
+        poly = [i for i in items if i["num_examples"] > 1]
+
+        batches = []
+
+        # Batch mono items
+        for i in range(0, len(mono), self.batch_size):
+            batches.append(mono[i : i + self.batch_size])
+
+        # Batch poly items
+        for i in range(0, len(poly), self.batch_size):
+            batches.append(poly[i : i + self.batch_size])
+
+        return batches
+
+    def _prepare_batch_input(self, batch: List[Dict]) -> List[Dict]:
+        """Prepare input format for LLM."""
+        return [
+            {
+                "lemma": item["translation"].lemma,
+                "pos": item["translation"].pos,
+                "definition_es": item["meaning"].definition_es,
+            }
+            for item in batch
+        ]
+
+    def _apply_batch_results(self, batch: List[Dict], results: List[Dict]):
+        """Apply LLM results to meanings and cache."""
+        # Build lookup by (lemma, pos, definition_es)
+        result_lookup = {}
+        for result in results:
+            key = (result["lemma"], result["pos"], result["definition_es"])
+            result_lookup[key] = result.get("examples_es", [])
+
+        for item in batch:
+            key = (
+                item["translation"].lemma,
+                item["translation"].pos,
+                item["meaning"].definition_es,
+            )
+            examples = result_lookup.get(key, [])
+
+            if not examples:
+                logger.warning(
+                    f"No examples returned for {item['translation'].lemma} "
+                    f"(meaning: {item['meaning'].definition_es[:30]}...)"
+                )
+                continue
+
+            # Apply to meaning
+            self._apply_examples_to_meaning(item["meaning"], examples)
+
+            # Cache
+            if self.cache is not None:
+                self.cache.set_examples(
+                    item["translation"].lemma,
+                    item["translation"].pos,
+                    item["definition_hash"],
+                    self.model_config,
+                    self.prompt_hash,
+                    {"examples_es": examples},
+                )
+
+    def _apply_examples_to_meaning(self, meaning, examples: List[str]):
+        """Apply examples to meaning, extracting target word metadata."""
+        cleaned_examples = []
+        target_starts = []
+        target_ends = []
+        target_word = None
+
+        for example in examples:
+            match = BRACKET_PATTERN.search(example)
+            if not match:
+                logger.warning(f"No bracketed word in example: '{example[:50]}...'")
+                cleaned_examples.append(example)
+                target_starts.append(None)
+                target_ends.append(None)
+            else:
+                word = match.group(1)
+                bracket_start = match.start()
+
+                if target_word is None:
+                    target_word = word
+
+                char_start = bracket_start
+                char_end = char_start + len(word)
+
+                cleaned_sentence = example.replace(f"[{word}]", word, 1)
+                cleaned_examples.append(cleaned_sentence)
+                target_starts.append(char_start)
+                target_ends.append(char_end)
+
+        # Update meaning object
+        meaning.examples_es = cleaned_examples
+        if target_word:
+            meaning._target_word = target_word
+        meaning._target_starts = target_starts
+        meaning._target_ends = target_ends

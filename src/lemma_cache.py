@@ -17,6 +17,7 @@ class LemmaCache:
     Tables:
     - corrections: (model_config, prompt_hash, lemma, pos, data)
     - translations: (model_config, prompt_hash, lemma, pos, data)
+    - examples: (model_config, prompt_hash, lemma, pos, definition_hash, data)
     """
 
     def __init__(self, config: Dict[str, Any]):
@@ -74,6 +75,20 @@ class LemmaCache:
         """
         )
 
+        self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS examples (
+                model_config TEXT NOT NULL,
+                prompt_hash TEXT NOT NULL,
+                lemma TEXT NOT NULL,
+                pos TEXT NOT NULL,
+                definition_hash TEXT NOT NULL,
+                data TEXT NOT NULL,
+                PRIMARY KEY (model_config, prompt_hash, lemma, pos, definition_hash)
+            )
+        """
+        )
+
         # Create indices for faster lookups
         self.conn.execute(
             """
@@ -86,6 +101,13 @@ class LemmaCache:
             """
             CREATE INDEX IF NOT EXISTS idx_translations_lookup
             ON translations(model_config, prompt_hash)
+        """
+        )
+
+        self.conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_examples_lookup
+            ON examples(model_config, prompt_hash)
         """
         )
 
@@ -229,6 +251,81 @@ class LemmaCache:
             self.has_uncommitted_changes = True
         except Exception as e:
             logger.warning(f"Failed to set translation in cache: {e}")
+
+    def get_examples(
+        self,
+        lemma: str,
+        pos: str,
+        definition_hash: str,
+        model_config: str,
+        prompt_hash: str,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get cached examples for a meaning.
+
+        Args:
+            lemma: Lemma string
+            pos: POS tag
+            definition_hash: Hash of definition_es (8 chars)
+            model_config: Provider-specific model config string
+            prompt_hash: Hash of system prompt (8 chars)
+
+        Returns:
+            Cached examples dict or None if cache miss
+        """
+        if not self.enabled:
+            return None
+
+        try:
+            result = self.conn.execute(
+                "SELECT data FROM examples WHERE model_config=? AND prompt_hash=? AND lemma=? AND pos=? AND definition_hash=?",
+                (model_config, prompt_hash, lemma, pos, definition_hash),
+            ).fetchone()
+
+            return json.loads(result[0]) if result else None
+        except Exception:
+            return None
+
+    def set_examples(
+        self,
+        lemma: str,
+        pos: str,
+        definition_hash: str,
+        model_config: str,
+        prompt_hash: str,
+        examples: Dict[str, Any],
+    ):
+        """
+        Cache examples for a meaning.
+
+        Note: Changes are not committed until save_all() is called.
+
+        Args:
+            lemma: Lemma string
+            pos: POS tag
+            definition_hash: Hash of definition_es (8 chars)
+            model_config: Provider-specific model config string
+            prompt_hash: Hash of system prompt (8 chars)
+            examples: Examples data to cache
+        """
+        if not self.enabled:
+            return
+
+        try:
+            self.conn.execute(
+                "INSERT OR REPLACE INTO examples (model_config, prompt_hash, lemma, pos, definition_hash, data) VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    model_config,
+                    prompt_hash,
+                    lemma,
+                    pos,
+                    definition_hash,
+                    json.dumps(examples, ensure_ascii=False),
+                ),
+            )
+            self.has_uncommitted_changes = True
+        except Exception as e:
+            logger.warning(f"Failed to set examples in cache: {e}")
 
     def save_all(self):
         """Commit any pending changes. Called after batch processing."""
