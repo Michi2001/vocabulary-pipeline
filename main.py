@@ -489,10 +489,25 @@ def run_pipeline(
         if cooccurrence_matrix is not None:
             vocabulary.cooccurrence_matrix = cooccurrence_matrix
 
-        vocab_dir = Path(output_dir) / "vocabulary"
-        include_embeddings = config.get("output", {}).get("include_embeddings", True)
-        vocabulary.save(str(vocab_dir), include_embeddings=include_embeddings)
-        logger.info(f"Vocabulary saved to: {vocab_dir}")
+        # Save lightweight version (for quick inspection)
+        vocab_dir_light = Path(output_dir) / "vocabulary"
+        vocabulary.save(
+            str(vocab_dir_light),
+            include_embeddings=False,
+            include_private=False,
+            save_cooccurrence=False,
+        )
+        logger.info(f"Vocabulary (light) saved to: {vocab_dir_light}")
+
+        # Save full version (with embeddings and cooccurrence matrix)
+        vocab_dir_full = Path(output_dir) / "vocabulary_full"
+        vocabulary.save(
+            str(vocab_dir_full),
+            include_embeddings=True,
+            include_private=True,
+            save_cooccurrence=True,
+        )
+        logger.info(f"Vocabulary (full) saved to: {vocab_dir_full}")
 
     logger.info("=" * 60)
     logger.info("Pipeline completed!")

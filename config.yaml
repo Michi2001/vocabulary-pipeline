@@ -35,7 +35,6 @@ processing:
 
 output:
   directory: "output/spanish_lemma_frequencies"
-  include_embeddings: true  # Include meaning_embedding in translations.json
 
 cache:
   directory: "cache"

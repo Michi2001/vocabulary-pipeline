@@ -53,7 +53,7 @@ class MeaningEmbeddingGenerator:
             logger.info("BERT model loaded successfully")
 
     def _get_contextual_embedding(
-        self, sentence: str, char_start: int, char_end: int, target_word: str
+        self, sentence: str, char_start: int, char_end: int
     ) -> Optional[List[float]]:
         """
         Get BERT contextual embedding for target word.
@@ -64,7 +64,6 @@ class MeaningEmbeddingGenerator:
             sentence: Sentence text (without brackets)
             char_start: Character start position of target word
             char_end: Character end position of target word
-            target_word: Target word text (for logging only)
 
         Returns:
             Embedding as list of floats, or None if extraction fails
@@ -87,6 +86,7 @@ class MeaningEmbeddingGenerator:
                 target_positions.append(token_idx)
 
         if not target_positions:
+            target_word = sentence[char_start:char_end]
             logger.warning(
                 f"Target word '{target_word}' not found in tokenized sentence"
             )
@@ -108,8 +108,7 @@ class MeaningEmbeddingGenerator:
         """
         Add averaged BERT embedding from multiple examples per meaning.
 
-        Expects that LemmaTranslator has already extracted and stored:
-        - _target_word: The target word
+        Expects that ExampleGenerator has already extracted and stored:
         - _target_starts: Character start positions (list, one per example)
         - _target_ends: Character end positions (list, one per example)
         - examples_es: List of example sentences
@@ -139,12 +138,10 @@ class MeaningEmbeddingGenerator:
                 if not meaning.examples_es:
                     continue
 
-                # Check if metadata exists (extracted by LemmaTranslator)
+                # Check if metadata exists (extracted by ExampleGenerator)
                 if meaning._target_starts is None or meaning._target_ends is None:
                     missing_metadata += 1
                     continue
-
-                target_word = meaning._target_word or "unknown"
 
                 # Collect embeddings from all valid examples
                 embeddings = []
@@ -160,7 +157,7 @@ class MeaningEmbeddingGenerator:
                         continue
 
                     embedding = self._get_contextual_embedding(
-                        example, char_start, char_end, target_word
+                        example, char_start, char_end
                     )
                     if embedding is not None:
                         embeddings.append(embedding)

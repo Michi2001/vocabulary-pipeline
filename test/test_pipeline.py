@@ -38,9 +38,14 @@ class TestPipelineIntegration(unittest.TestCase):
 
         output_path = Path(result.output_dir)
         self.assertTrue((output_path / "translations.json").exists())
+        # Light vocabulary (no embeddings, no private fields, no cooccurrence)
         self.assertTrue((output_path / "vocabulary" / "translations.json").exists())
+        # Full vocabulary (with embeddings, private fields, and cooccurrence)
         self.assertTrue(
-            (output_path / "vocabulary" / "cooccurrence_matrix.npz").exists()
+            (output_path / "vocabulary_full" / "translations.json").exists()
+        )
+        self.assertTrue(
+            (output_path / "vocabulary_full" / "cooccurrence_matrix.npz").exists()
         )
 
         self._visualize_cooccurrence_matrix(result)

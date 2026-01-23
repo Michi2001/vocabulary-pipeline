@@ -16,7 +16,6 @@ processing:
 
 output:
   directory: "test/outputs"
-  include_embeddings: false
 
 cache:
   directory: "test/cache"

@@ -248,11 +248,10 @@ class ExampleGenerator:
                 )
 
     def _apply_examples_to_meaning(self, meaning, examples: List[str]):
-        """Apply examples to meaning, extracting target word metadata."""
+        """Apply examples to meaning, extracting target word positions."""
         cleaned_examples = []
         target_starts = []
         target_ends = []
-        target_word = None
 
         for example in examples:
             match = BRACKET_PATTERN.search(example)
@@ -263,12 +262,7 @@ class ExampleGenerator:
                 target_ends.append(None)
             else:
                 word = match.group(1)
-                bracket_start = match.start()
-
-                if target_word is None:
-                    target_word = word
-
-                char_start = bracket_start
+                char_start = match.start()
                 char_end = char_start + len(word)
 
                 cleaned_sentence = example.replace(f"[{word}]", word, 1)
@@ -276,9 +270,6 @@ class ExampleGenerator:
                 target_starts.append(char_start)
                 target_ends.append(char_end)
 
-        # Update meaning object
         meaning.examples_es = cleaned_examples
-        if target_word:
-            meaning._target_word = target_word
         meaning._target_starts = target_starts
         meaning._target_ends = target_ends

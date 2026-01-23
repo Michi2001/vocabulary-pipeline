@@ -297,6 +297,8 @@ class LemmaTranslator:
                 )
 
             if cached_translation is not None:
+                # Update ID to current run's ID (cache may have old ID)
+                cached_translation["id"] = item_id
                 cached_translations.append(cached_translation)
             else:
                 # Add to uncached with ID and normalized POS
