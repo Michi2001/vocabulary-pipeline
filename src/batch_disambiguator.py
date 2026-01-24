@@ -285,7 +285,7 @@ class BatchDisambiguator:
             f"Starting disambiguation (bert_batch_tokens={self.bert_batch_tokens})"
         )
 
-        # Select lemma source
+        # Select lemma source (both apply POS mapping if set)
         if use_corrections and lemmatized_store.has_corrections():
             logger.info("Using corrected lemmas")
             sentences = lemmatized_store.iter_corrected_with_sentences(sentence_store)

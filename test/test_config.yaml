@@ -22,14 +22,22 @@ cache:
   llm_directory: "test/cache/llm_results"
 
 filtering:
+  # POS tags: NOUN, VERB, ADJ, ADV, ADP, CONJ, AUX, CCONJ, SCONJ, PROPN, DET, PRON, NUM, etc.
   accepted_pos:
     - NOUN
     - VERB
     - ADJ
-    - AUX
+    - ADV
+    # - ADP
+    - CONJ
+    - AUX     # Mapped to VERB
+    - CCONJ   # Mapped to CONJ
+    - SCONJ   # Mapped to CONJ
   pos_mappings:
     AUX: VERB
-  include_countries: false
+    CCONJ: CONJ
+    SCONJ: CONJ
+  include_countries: true
 
 llm_correction:
   enabled: true

@@ -4,6 +4,7 @@ import datetime
 import sys
 import unittest
 from pathlib import Path
+from src.vocab import Vocabulary
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -219,6 +220,102 @@ class TestPipelineIntegration(unittest.TestCase):
                 f"(meaning_idx={variant.meaning_idx}, freq={variant.frequency}, "
                 f"string_id={variant.string_id}){polysemy_marker}"
             )
+
+    def test_load_saved_vocabulary(self):
+        """Test loading a saved vocabulary and verify data integrity."""
+        # First run the pipeline to create vocabulary
+        config = load_config(str(self.config_path))
+        config["output"]["directory"] = str(OUTPUT_DIR)
+        result = run_pipeline(config)
+
+        self.assertIsNotNone(result.vocabulary)
+        original_vocab = result.vocabulary
+
+        vocab_full_path = Path(result.output_dir) / "vocabulary_full"
+        loaded_vocab = Vocabulary.from_dir(str(vocab_full_path))
+
+        # Verify translations count matches
+        self.assertEqual(
+            len(loaded_vocab.translations),
+            len(original_vocab.translations),
+            "Translation count mismatch",
+        )
+
+        # Verify word variants count matches
+        self.assertEqual(
+            len(loaded_vocab.word_variants),
+            len(original_vocab.word_variants),
+            "Word variant count mismatch",
+        )
+
+        # Verify co-occurrence matrix loaded
+        self.assertIsNotNone(
+            loaded_vocab.cooccurrence_matrix, "Co-occurrence matrix not loaded"
+        )
+        self.assertEqual(
+            loaded_vocab.cooccurrence_matrix.shape,
+            original_vocab.cooccurrence_matrix.shape,
+            "Co-occurrence matrix shape mismatch",
+        )
+
+        # Verify IDs are unique
+        translation_ids = [t.id for t in loaded_vocab.translations]
+        self.assertEqual(
+            len(translation_ids),
+            len(set(translation_ids)),
+            f"Duplicate translation IDs found: {[id for id in translation_ids if translation_ids.count(id) > 1]}",
+        )
+
+        # Verify each translation has correct data
+        for orig, loaded in zip(original_vocab.translations, loaded_vocab.translations):
+            self.assertEqual(orig.id, loaded.id, f"ID mismatch for {orig.lemma}")
+            self.assertEqual(
+                orig.lemma, loaded.lemma, f"Lemma mismatch for ID {orig.id}"
+            )
+            self.assertEqual(orig.pos, loaded.pos, f"POS mismatch for {orig.lemma}")
+            self.assertEqual(
+                orig.frequency, loaded.frequency, f"Frequency mismatch for {orig.lemma}"
+            )
+            self.assertEqual(
+                len(orig.meanings),
+                len(loaded.meanings),
+                f"Meanings count mismatch for {orig.lemma}",
+            )
+
+        # Verify word variant lookups work
+        for variant in loaded_vocab.word_variants:
+            # Test lookup by lemma token
+            lemma_token = (variant.lemma, variant.pos)
+            variant_ids = loaded_vocab.get_variant_ids_for_lemma(lemma_token)
+            self.assertIn(
+                variant.id, variant_ids, f"Variant ID {variant.id} not in lookup"
+            )
+
+            # Test lookup by variant ID
+            retrieved = loaded_vocab.get_word_variant(variant.id)
+            self.assertEqual(
+                retrieved.lemma, variant.lemma, "Variant lookup returned wrong lemma"
+            )
+
+        # Test loading light vocabulary (without embeddings)
+        vocab_light_path = Path(result.output_dir) / "vocabulary"
+        loaded_light = Vocabulary.from_dir(str(vocab_light_path))
+
+        self.assertEqual(
+            len(loaded_light.translations),
+            len(original_vocab.translations),
+            "Light vocab translation count mismatch",
+        )
+        # Light version should not have co-occurrence matrix
+        self.assertIsNone(
+            loaded_light.cooccurrence_matrix,
+            "Light vocab should not have co-occurrence matrix",
+        )
+
+        print(f"\nVocabulary load test passed!")
+        print(f"  Translations: {len(loaded_vocab.translations)}")
+        print(f"  Word variants: {len(loaded_vocab.word_variants)}")
+        print(f"  Unique IDs verified: {len(set(translation_ids))}")
 
 
 if __name__ == "__main__":

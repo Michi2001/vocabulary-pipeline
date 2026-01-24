@@ -9,11 +9,12 @@ from src.stores.sentence_store import SentenceStore
 from src.vocab import LemmaToken
 
 CorrectionMapping = Dict[LemmaToken, LemmaToken]
+PosMapping = Dict[str, str]  # e.g. {"AUX": "VERB", "CCONJ": "CONJ"}
 
 
 class LemmatizedStore(BaseStore[List[LemmaToken]]):
     """
-    Stores lemmatized tokens with optional correction mapping.
+    Stores lemmatized tokens with optional correction and POS mapping.
     Format: {"sid": int, "tokens": [["el", "DET"], ["gato", "NOUN"], ...]}
     """
 
@@ -23,6 +24,7 @@ class LemmatizedStore(BaseStore[List[LemmaToken]]):
         self._deleted_tokens: Optional[Set[LemmaToken]] = None
         self._correction_mapping_path: Optional[Path] = None
         self._corrections_loaded = False
+        self._pos_mapping: Optional[PosMapping] = None
 
     def _parse_data(self, data: dict) -> List[LemmaToken]:
         return [(t[0], t[1]) for t in data["tokens"]]
@@ -61,35 +63,53 @@ class LemmatizedStore(BaseStore[List[LemmaToken]]):
         """Check if correction mapping is available."""
         return self._corrections_loaded and self._correction_mapping is not None
 
+    def set_pos_mapping(self, pos_mapping: PosMapping) -> None:
+        """Set POS mapping (e.g. AUX→VERB, CCONJ→CONJ)."""
+        self._pos_mapping = pos_mapping
+
+    def _apply_pos_mapping(self, token: LemmaToken) -> LemmaToken:
+        """Apply POS mapping to a single token."""
+        if self._pos_mapping and token[1] in self._pos_mapping:
+            return (token[0], self._pos_mapping[token[1]])
+        return token
+
     def iter_corrected(self) -> Generator[Tuple[int, List[LemmaToken]], None, None]:
-        """Iterate with corrections applied dynamically."""
+        """Iterate with POS mapping and corrections applied dynamically.
+
+        Order: POS mapping first, then correction lookup.
+        This is because correction mapping uses mapped POS tags (from PostProcessor).
+        """
         if not self._corrections_loaded:
             raise ValueError("Correction mapping not loaded. Call load_correction_mapping() first.")
 
         for sid, tokens in self:
             corrected = []
             for token in tokens:
-                if token in self._deleted_tokens:
+                # First apply POS mapping (correction keys use mapped POS)
+                mapped_token = self._apply_pos_mapping(token)
+
+                if mapped_token in self._deleted_tokens:
                     corrected.append(("_DELETED_", ""))
-                elif token in self._correction_mapping:
-                    corrected.append(self._correction_mapping[token])
+                elif mapped_token in self._correction_mapping:
+                    corrected.append(self._correction_mapping[mapped_token])
                 else:
-                    corrected.append(token)
+                    corrected.append(mapped_token)
             yield sid, corrected
 
     def iter_with_sentences(
         self, sentence_store: SentenceStore
     ) -> Generator[Tuple[int, List[str], List[LemmaToken]], None, None]:
-        """Parallel iteration with sentence store."""
+        """Parallel iteration with sentence store. Applies POS mapping if set."""
         for (sid1, tokens), (sid2, lemmas) in zip(sentence_store, self):
             if sid1 != sid2:
                 raise ValueError(f"SID mismatch: {sid1} vs {sid2}")
-            yield sid1, tokens, lemmas
+            mapped_lemmas = [self._apply_pos_mapping(t) for t in lemmas]
+            yield sid1, tokens, mapped_lemmas
 
     def iter_corrected_with_sentences(
         self, sentence_store: SentenceStore
     ) -> Generator[Tuple[int, List[str], List[LemmaToken]], None, None]:
-        """Parallel iteration with corrections applied."""
+        """Parallel iteration with corrections and POS mapping applied."""
         for (sid1, tokens), (sid2, lemmas) in zip(sentence_store, self.iter_corrected()):
             if sid1 != sid2:
                 raise ValueError(f"SID mismatch: {sid1} vs {sid2}")

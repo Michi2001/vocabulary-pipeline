@@ -199,6 +199,13 @@ def run_pipeline(
         processor = FrequencyPostProcessor(filter_config)
         merged_counter = processor.process(merged_counter)
 
+    # Set POS mapping on all LemmatizedStores (needed for correction lookup and disambiguation)
+    pos_mappings = filter_config.get("pos_mappings", {})
+    if pos_mappings:
+        for corpus_name, (sent_store, lemma_store, cache_key) in corpus_stores.items():
+            lemma_store.set_pos_mapping(pos_mappings)
+        logger.info(f"POS mapping set on {len(corpus_stores)} LemmatizedStores")
+
     # =========================================================================
     # STAGE 3: LLM Correction (global mapping)
     # =========================================================================

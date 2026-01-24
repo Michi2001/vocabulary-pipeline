@@ -27,7 +27,7 @@ corpora:
 lemmatization:
   # spaCy model: es_core_news_sm (fast), es_core_news_md, es_core_news_lg (accurate)
   model: "es_core_news_lg"
-  batch_size: 1000  # Sentences per spaCy batch
+  batch_size: 500  # Sentences per spaCy batch
 
 processing:
   sentence_batch_size: 10000  # Sentences read from corpus per batch
@@ -59,7 +59,7 @@ filtering:
   include_countries: true  # Allow country names (PROPN) from babel
 
 llm_correction:
-  enabled: true
+  enabled: false
   batch_size: 25  # Lemmas per LLM request
   prompt_file: "prompts/correction/general_prompt.txt"
   slice: [6000, 6200]  # Optional: only correct lemmas ranked start-end
@@ -79,7 +79,7 @@ llm_correction:
       thinking_level: "minimal"  # minimal, low, medium, high
 
 llm_translation:
-  enabled: true
+  enabled: false
   batch_size: 20  # Lemmas per LLM request
   prompt_directory: "prompts/translation"
   llm:
@@ -121,6 +121,6 @@ example_generation:
       thinking_level: "minimal"
 
 disambiguation:
-  enabled: true  # Also enables example_generation!
+  enabled: false  # Also enables example_generation!
   model: "dccuchile/bert-base-spanish-wwm-cased"  # BERT model for embeddings
   batch_size: 32  # Sentences per BERT batch
