@@ -59,9 +59,7 @@ class FrequencyCounter:
                     f"({len(self.lemma_counts):,} unique lemmas)"
                 )
 
-    def get_sorted_frequencies(
-        self, min_frequency: int = 1
-    ) -> List[Dict[str, any]]:
+    def get_sorted_frequencies(self, min_frequency: int = 1) -> List[Dict[str, any]]:
         """
         Get lemma frequencies sorted by count (descending).
 
@@ -69,7 +67,7 @@ class FrequencyCounter:
             min_frequency: Minimum frequency threshold (default: 1)
 
         Returns:
-            List of dictionaries with 'lemma', 'frequency', and 'pos' keys
+            List of dicts with 'lemma', 'frequency', 'pos', 'counter_key' keys
         """
         results = []
         for key, count in self.lemma_counts.items():
@@ -89,6 +87,7 @@ class FrequencyCounter:
                         "lemma": lemma,
                         "frequency": count,
                         "pos": pos_string,
+                        "counter_key": key,  # Original key in counter (lemma|POS)
                     }
                 )
 

@@ -31,10 +31,10 @@ lemmatization:
 
 processing:
   sentence_batch_size: 10000  # Sentences read from corpus per batch
-  min_frequency: 5  # Minimum frequency for output
 
 output:
   directory: "output/spanish_lemma_frequencies"
+  min_frequency: 5  # Only include lemmas with freq >= this in output CSV
 
 cache:
   directory: "cache"
@@ -62,7 +62,7 @@ llm_correction:
   enabled: false
   batch_size: 25  # Lemmas per LLM request
   prompt_file: "prompts/correction/general_prompt.txt"
-  slice: [6000, 6200]  # Optional: only correct lemmas ranked start-end
+  target_output_size: 5000  # Correct until output has >= this many lemmas; If number of lemmas in cache > this, the output might be larger
   llm:
     type: "google"  # openai or google
     openai:

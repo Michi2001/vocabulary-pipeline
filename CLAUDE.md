@@ -196,9 +196,8 @@ This separation enables cache reusability across different configurations and pr
 - Sends lemmas to LLM for quality validation and correction
 - Batch processing with intelligent caching (prompt hash-based)
 - Three operations: KEEP (correct), DELETE (invalid), MERGE (combine variants)
-- Pre-loads cache to minimize API calls
+- Iterative processing: corrects batches until target_output_size reached
 - Applies corrections to FrequencyCounter (removes deleted, merges variants)
-- Configurable slicing (only correct top N lemmas)
 
 **LemmaTranslator** (src/llm_translator.py)
 - Translates Spanish lemmas to German with POS-aware prompts
@@ -304,11 +303,11 @@ Abstract base class pattern (src/corpus_readers/base_reader.py) enables support 
 **config.yaml** structure:
 - `corpora`: List of corpus configs (name, file_path, type, encoding, max_sentences)
 - `lemmatization`: spaCy model and batch_size
-- `processing`: sentence_batch_size, min_frequency
-- `output`: directory (timestamped subdirs created automatically)
+- `processing`: sentence_batch_size
+- `output`: directory, min_frequency (timestamped subdirs created automatically)
 - `cache`: directory, llm_directory
 - `filtering`: accepted_pos, pos_mappings, include_countries
-- `llm_correction`: enabled, batch_size, prompt_file, slice, llm provider config
+- `llm_correction`: enabled, batch_size, prompt_file, target_output_size, llm provider config
 - `llm_translation`: enabled, batch_size, prompt_directory, num_examples, llm provider config
 - `disambiguation`: enabled, model (BERT model name), batch_size
 

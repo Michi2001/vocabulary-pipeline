@@ -207,7 +207,7 @@ def run_pipeline(
         logger.info(f"POS mapping set on {len(corpus_stores)} LemmatizedStores")
 
     # Output raw frequencies (before LLM correction)
-    min_freq = processing_config.get("min_frequency", 1)
+    min_freq = output_config.get("min_frequency", 1)
     raw_frequencies = merged_counter.get_sorted_frequencies(min_frequency=min_freq)
     raw_output_path = os.path.join(output_dir, "frequencies_raw.csv")
     LemmaFrequencyOutputWriter.write_csv(raw_frequencies, raw_output_path)
@@ -251,12 +251,12 @@ def run_pipeline(
             "batch_size": correction_config.get("batch_size", 50),
             "system_prompt": system_prompt,
             "output_dir": output_dir,
-            "slice": correction_config.get("slice", None),
+            "target_output_size": correction_config.get("target_output_size"),
         }
         corrector = LemmaCorrector(correction_provider, llm_cache, corrector_config)
 
         # Apply corrections
-        min_freq = processing_config.get("min_frequency", 1)
+        min_freq = output_config.get("min_frequency", 1)
         merged_counter, correction_mapping, deleted_tokens = corrector.correct(
             merged_counter, min_frequency=min_freq
         )
@@ -292,7 +292,7 @@ def run_pipeline(
         f"  Total tokens: {stats['total_tokens']:,}\n"
         f"  Unique lemmas: {stats['unique_lemmas']:,}"
     )
-    min_freq = processing_config.get("min_frequency", 1)
+    min_freq = output_config.get("min_frequency", 1)
     frequencies = merged_counter.get_sorted_frequencies(min_frequency=min_freq)
     corrected_output_path = os.path.join(output_dir, "frequencies_corrected.csv")
     LemmaFrequencyOutputWriter.write_csv(frequencies, corrected_output_path)
@@ -336,7 +336,7 @@ def run_pipeline(
             translator = LemmaTranslator(
                 translation_provider, llm_cache, translator_config
             )
-            min_freq = processing_config.get("min_frequency", 1)
+            min_freq = output_config.get("min_frequency", 1)
             translations, _ = translator.translate(
                 merged_counter, min_frequency=min_freq
             )

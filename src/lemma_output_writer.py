@@ -19,11 +19,13 @@ class LemmaFrequencyOutputWriter:
         Write frequency data to CSV file.
 
         Args:
-            data: List of dictionaries with 'lemma', 'frequency', 'pos' keys
+            data: List of dicts with 'lemma', 'frequency', 'pos', 'counter_key' keys
             output_path: Output file path
         """
         with open(output_path, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=["lemma", "frequency", "pos"])
+            writer = csv.DictWriter(
+                f, fieldnames=["lemma", "frequency", "pos", "counter_key"]
+            )
             writer.writeheader()
             writer.writerows(data)
 

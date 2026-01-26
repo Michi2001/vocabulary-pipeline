@@ -12,10 +12,10 @@ lemmatization:
 
 processing:
   sentence_batch_size: 100
-  min_frequency: 1
 
 output:
   directory: "test/outputs"
+  min_frequency: 1
 
 cache:
   directory: "test/cache"
@@ -41,7 +41,8 @@ filtering:
 
 llm_correction:
   enabled: true
-  batch_size: 25
+  batch_size: 10
+  target_output_size: 30
   prompt_file: "prompts/correction/general_prompt.txt"
   llm:
     type: "google"
