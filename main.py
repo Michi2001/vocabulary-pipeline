@@ -31,7 +31,7 @@ from src.llm_providers import create_provider
 from src.llm_translator import LemmaTranslator
 from src.example_generator import ExampleGenerator
 from src.meaning_embedding_generator import MeaningEmbeddingGenerator
-from src.output_writer import OutputWriter
+from src.lemma_output_writer import LemmaFrequencyOutputWriter
 from src.post_processor import FrequencyPostProcessor
 from src.stores.disambiguated_store import DisambiguatedStore
 from src.stores.lemmatized_store import LemmatizedStore
@@ -206,6 +206,13 @@ def run_pipeline(
             lemma_store.set_pos_mapping(pos_mappings)
         logger.info(f"POS mapping set on {len(corpus_stores)} LemmatizedStores")
 
+    # Output raw frequencies (before LLM correction)
+    min_freq = processing_config.get("min_frequency", 1)
+    raw_frequencies = merged_counter.get_sorted_frequencies(min_frequency=min_freq)
+    raw_output_path = os.path.join(output_dir, "frequencies_raw.csv")
+    LemmaFrequencyOutputWriter.write_csv(raw_frequencies, raw_output_path)
+    logger.info(f"Raw frequencies saved to: {raw_output_path}")
+
     # =========================================================================
     # STAGE 3: LLM Correction (global mapping)
     # =========================================================================
@@ -278,7 +285,7 @@ def run_pipeline(
 
         logger.info("LLM correction completed successfully")
 
-    # Output lemma frequencies to CSV
+    # Output corrected frequencies to CSV
     stats = merged_counter.get_statistics()
     logger.info(
         f"\nFinal statistics:\n"
@@ -287,8 +294,9 @@ def run_pipeline(
     )
     min_freq = processing_config.get("min_frequency", 1)
     frequencies = merged_counter.get_sorted_frequencies(min_frequency=min_freq)
-    output_path = os.path.join(output_dir, "output.csv")
-    OutputWriter.write_csv(frequencies, output_path)
+    corrected_output_path = os.path.join(output_dir, "frequencies_corrected.csv")
+    LemmaFrequencyOutputWriter.write_csv(frequencies, corrected_output_path)
+    logger.info(f"Corrected frequencies saved to: {corrected_output_path}")
 
     # =========================================================================
     # STAGE 4-6: Translation, Example Generation, and Meaning Embeddings

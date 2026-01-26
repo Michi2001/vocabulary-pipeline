@@ -172,7 +172,7 @@ class CorpusProcessor:
             Tuple of (SentenceStore, LemmatizedStore, FrequencyCounter).
             Note: FrequencyCounter is raw (unfiltered). Apply post-processing separately.
         """
-        if self.cache_config.get("enabled", False) and self._all_cached():
+        if self._all_cached():
             return self._load_from_cache()
 
         return self._process_and_cache()

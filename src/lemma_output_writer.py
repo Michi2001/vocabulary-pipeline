@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class OutputWriter:
+class LemmaFrequencyOutputWriter:
     """
     Writer for frequency data in multiple formats.
 
