@@ -85,6 +85,11 @@ class FrequencyPostProcessor:
                     skipped_count += 1
                     continue
 
+            # Step 1b: Skip NUM lemmas containing digits (keep only written-out numbers)
+            if original_pos == "NUM" and re.search(r"\d", lemma):
+                skipped_count += 1
+                continue
+
             # Step 2: Apply POS mapping (e.g., AUX→VERB)
             mapped_pos = self.pos_mappings.get(original_pos, original_pos)
 

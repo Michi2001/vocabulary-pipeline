@@ -28,7 +28,9 @@ class Meaning:
     flags: Optional[List[str]] = None
     gender: Optional[str] = None  # Spanish grammatical gender ("m" or "f")
     # Embedding metadata (internal, prefixed with _)
-    _bert_embedding: Optional[List[float]] = None  # Averaged embedding from all examples
+    _bert_embedding: Optional[List[float]] = (
+        None  # Averaged embedding from all examples
+    )
     _target_starts: Optional[List[int]] = None  # Char start positions per example
     _target_ends: Optional[List[int]] = None  # Char end positions per example
 
@@ -213,11 +215,13 @@ class WordVariant:
         for translation in translations:
             for idx, meaning in enumerate(translation.meanings):
                 derived_freq = int(translation.frequency * meaning.estimated_share)
-                variants_unsorted.append({
-                    "translation": translation,
-                    "meaning_idx": idx,
-                    "derived_freq": derived_freq,
-                })
+                variants_unsorted.append(
+                    {
+                        "translation": translation,
+                        "meaning_idx": idx,
+                        "derived_freq": derived_freq,
+                    }
+                )
 
         # Sort by frequency descending, then by translation_id and meaning_idx for determinism
         variants_unsorted.sort(
@@ -316,7 +320,9 @@ class Vocabulary:
 
         if save_cooccurrence and self.cooccurrence_matrix is not None:
             cooccurrence_path = dir_path / self.COOCCURRENCE_FILE
-            sparse.save_npz(cooccurrence_path, self.cooccurrence_matrix, compressed=True)
+            sparse.save_npz(
+                cooccurrence_path, self.cooccurrence_matrix, compressed=True
+            )
 
     def get_translation(self, lemma_token: LemmaToken) -> Optional[Translation]:
         """Get Translation by lemma token."""

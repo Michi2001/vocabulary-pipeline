@@ -28,11 +28,14 @@ filtering:
     - VERB
     - ADJ
     - ADV
-    # - ADP
+    - ADP
     - CONJ
     - AUX     # Mapped to VERB
     - CCONJ   # Mapped to CONJ
     - SCONJ   # Mapped to CONJ
+    - PRON
+    - INTJ
+    - NUM
   pos_mappings:
     AUX: VERB
     CCONJ: CONJ
@@ -42,7 +45,7 @@ filtering:
 llm_correction:
   enabled: true
   batch_size: 10
-  target_output_size: 30
+  target_output_size: 50
   prompt_file: "prompts/correction/general_prompt.txt"
   llm:
     type: "google"
@@ -57,7 +60,7 @@ llm_correction:
 llm_translation:
   enabled: true
   batch_size: 20
-  prompt_directory: "prompts/translation"
+  prompt_directory: "prompts/translation_v2"
   llm:
     type: "google"
     google:

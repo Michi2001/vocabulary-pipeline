@@ -52,6 +52,9 @@ filtering:
     - AUX     # Mapped to VERB
     - CCONJ   # Mapped to CONJ
     - SCONJ   # Mapped to CONJ
+    - PRON
+    - INTJ
+    - NUM
   pos_mappings:
     AUX: VERB
     CCONJ: CONJ
@@ -81,7 +84,7 @@ llm_correction:
 llm_translation:
   enabled: false
   batch_size: 20  # Lemmas per LLM request
-  prompt_directory: "prompts/translation"
+  prompt_directory: "prompts/translation_v2"
   llm:
     type: "google"
     openai:

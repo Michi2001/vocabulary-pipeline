@@ -111,20 +111,63 @@ class OpenAIProvider(BaseLLMProvider):
     def translate_lemmas(
         self, batch: List[Dict[str, Any]], system_prompt: str
     ) -> Dict[str, Any]:
-        """
-        Send batch to OpenAI API for translation.
-
-        Args:
-            batch: List of dicts with 'id', 'lemma', 'frequency', 'pos' keys
-            system_prompt: Combined general + POS-specific translation prompt
-
-        Returns:
-            Dict with parsed translations
-
-        Raises:
-            LLMProviderError: If all retries fail
-        """
+        """Send batch to OpenAI API for translation."""
         user_message = self._format_batch(batch)
+
+        translation_schema = {
+            "name": "translation_response",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "all_lemma_translations": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string"},
+                                "lemma": {"type": "string"},
+                                "pos": {"type": "string"},
+                                "meanings": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "definition_es": {"type": "string"},
+                                            "structure": {"type": "string"},
+                                            "gender": {"type": "string"},
+                                            "flags": {
+                                                "type": "array",
+                                                "items": {"type": "string"},
+                                            },
+                                            "translations": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "text": {"type": "string"},
+                                                        "hint": {"type": "string"},
+                                                        "gender_target": {"type": "string"},
+                                                    },
+                                                    "required": ["text"],
+                                                    "additionalProperties": False,
+                                                },
+                                            },
+                                        },
+                                        "required": ["definition_es", "flags", "translations"],
+                                        "additionalProperties": False,
+                                    },
+                                },
+                            },
+                            "required": ["id", "lemma", "pos", "meanings"],
+                            "additionalProperties": False,
+                        },
+                    }
+                },
+                "required": ["all_lemma_translations"],
+                "additionalProperties": False,
+            },
+        }
 
         def api_call():
             response = self.client.chat.completions.create(
@@ -133,7 +176,10 @@ class OpenAIProvider(BaseLLMProvider):
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},
                 ],
-                response_format={"type": "json_object"},
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": translation_schema,
+                },
                 timeout=self.timeout,
             )
 
