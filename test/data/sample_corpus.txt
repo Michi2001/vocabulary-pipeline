@@ -1,39 +1,64 @@
 El gato come pescado fresco.
-El perro come carne roja.
-El gato y el perro juegan juntos.
-El pescado es fresco y delicioso.
-La carne es roja y jugosa.
-El gato duerme en la casa.
-El perro duerme en el jardin.
-La casa tiene un jardin grande.
+La casa tiene un jardín grande.
 El banco abre sus puertas a las nueve de la mañana.
 Me senté en el banco del parque para descansar un rato.
 El tiempo vuela cuando estás disfrutando de la vida.
 Necesito tiempo para pensar en esta decisión importante.
 La planta crece rápidamente en el jardín soleado.
 Trabajamos en la planta de producción durante el turno de noche.
-El libro tiene muchas hojas con ilustraciones hermosas.
-Las hojas del árbol caen en otoño y cubren el suelo.
-El gato está debajo del coche.
-Hace buen tiempo hoy.
-El agua está fresca.
-Mañana voy al banco.
-La planta necesita agua.
-El tiempo pasa rápido.
-Veo un gato negro.
 La copa de vino está llena.
 España ganó la copa mundial.
 El ratón come queso.
 Haz clic en el ratón.
 La muñeca de la niña es bonita.
 Me duele la muñeca derecha.
-El cuarto está oscuro.
-Llegué en cuarto lugar.
 La carta llegó ayer.
 Leo la carta del restaurante.
-El pico del pájaro es amarillo.
-Subimos al pico de la montaña.
-La sierra corta la madera.
-Vamos a la sierra este verano.
 Toca la batería muy bien.
 La batería del coche está muerta.
+Ella es muy lista y aprende rápido.
+¿Ya estás listo para salir?
+Esta comida está muy rica.
+Su familia es rica desde hace generaciones.
+El niño está malo y no puede ir al colegio.
+No seas malo con tu hermano.
+Es un viejo amigo de la familia.
+El hombre viejo camina despacio por el parque.
+El niño encontró una moneda en la calle.
+Los amigos se encuentran todos los viernes en el bar.
+Se fue sin decir adiós.
+El bebé se durmió en mis brazos.
+Ya he terminado el trabajo.
+Ya no vivo en Madrid.
+¡Hazlo ya, que es urgente!
+Habla bien el español después de vivir tres años en México.
+Está bien, no te preocupes.
+Lo hizo por amor, no por dinero.
+Caminamos por el centro de la ciudad.
+Pagó diez euros por el libro.
+El poema fue escrito por Neruda.
+Estudio por la mañana y trabajo por la tarde.
+Vine para ayudarte con la mudanza.
+Este regalo es para ti.
+Salimos para Barcelona a las ocho.
+Cuando era niño, jugaba en la calle todos los días.
+Cuando tengo hambre, me pongo de mal humor.
+Cuando llegues, llámame por teléfono.
+Aunque llueve, salimos a caminar.
+Aunque lloviera, saldríamos a caminar.
+Si tienes tiempo, ven a visitarme.
+No sé si puede venir mañana.
+Me gusta el café, pero prefiero el té.
+Algo me dice que hoy va a ser un buen día.
+Está algo nervioso por el examen.
+Alguien llamó a la puerta mientras dormías.
+No le dije nada sobre la fiesta sorpresa.
+Le di el libro a mi hermana.
+¡Oye, espérame un momento!
+¡Ay, qué dolor!
+Bueno, vamos a empezar con la reunión.
+Tiene cien euros en la cartera.
+Los dos hermanos son muy diferentes.
+Necesitamos mil voluntarios para el evento.
+Colombia es famosa por su café y su biodiversidad.
+El verano pasado viajamos a Argentina y visitamos Buenos Aires.
