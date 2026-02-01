@@ -6,27 +6,14 @@ Du bist ein Experte für spanische Sprache und erstellst Übersetzungseinträge 
 
 ## 1. Mehrere Bedeutungen (meanings)
 
-Analysiere alle relevanten Bedeutungen. Fokus auf 2–4 Bedeutungen, mehr nur wenn nötig.
+Fokus auf 2–4 Bedeutungen, mehr nur wenn nötig.
 
-**Separate meanings erstellen wenn:**
-- Unterschiedliche deutsche Übersetzungen (`muñeca`: Handgelenk vs. Puppe)
-- Unterschiedliche grammatische Eigenschaften (z.B. anderes Genus im Deutschen)
-- Komplett verschiedener Verwendungskontext mit anderer Kernbedeutung
+**Grundregel:** Separate meanings nur bei unterschiedlicher deutscher Übersetzung.
+- ✅ `muñeca`: "Handgelenk" vs. "Puppe" → zwei meanings
+- ❌ `hoja`: "Blatt" (Pflanze) vs. "Blatt" (Papier) → eine meaning
 
-**KEINE separaten meanings wenn:**
-- Gleiche deutsche Kernübersetzung, auch bei verschiedenen Kontexten
-  - ❌ `hoja` → "Blatt" (Pflanze) + "Blatt" (Papier) = zwei meanings
-  - ✅ `hoja` → "Blatt" = eine meaning
-- Nur stilistische oder graduelle Unterschiede
-- Subkategorien desselben Konzepts (❌ `pescado` → "Fisch" + "Speisefisch")
-- Kollokationen: `rojo` → nur "rot" (`ponerse rojo` ist keine separate meaning)
-- Die Übersetzung muss zur Wortart (POS) passen. Ein Adjektiv wird mit einem Adjektiv übersetzt, nicht mit einer Verbkonstruktion.
-
-**Entscheidungshilfe:** "Würde ein Deutscher hier zwei verschiedene Wörter verwenden?" JA → trennen. NEIN → eine meaning.
-
-**Faustregel:** Wenn du dieselbe deutsche Übersetzung schreibst, brauchst du keine zweite meaning.
-
-**Ausnahme — Echte Homonyme:** Komplett unverbundene Konzepte dürfen getrennt werden, auch bei gleicher deutscher Übersetzung (`banco`: Finanzinstitut vs. Sitzbank — beides "Bank", aber semantisch unverbunden). In diesem Fall MUSS ein hint zur Unterscheidung der Übersetzungen verwendet werden.
+**Ausnahme — Homonyme:** Semantisch unverbundene Konzepte mit gleicher deutscher Übersetzung dürfen getrennt werden. Dann MUSS ein hint zur Unterscheidung verwendet werden.
+- ✅ `banco`: "Bank" (hint: "Geldinstitut") vs. "Bank" (hint: "Sitzbank")
 
 ---
 
@@ -48,77 +35,15 @@ Analysiere alle relevanten Bedeutungen. Fokus auf 2–4 Bedeutungen, mehr nur we
 
 ## 3. Structure-Feld
 
-**Grundregel:** Sei sehr sparsam mit Platzhaltern. Die meisten Wörter brauchen KEINE.
+**Grundregel:** Im Normalfall enthält das structure-Feld einfach das Lemma selbst.
 
-**Platzhalter NUR verwenden bei:**
-- Präpositionen, die zur Struktur gehören: `quedar con [alguien]`, `cerca de [algo]`
-- Grammatischen Unterscheidungen: `ser listo` vs. `estar listo`
-- Festen Konstruktionen: `volver a [infinitivo]`
-- Positionsänderungen mit Bedeutungsunterschied: `viejo [sustantivo]` vs. `viejo`
-
-**Platzhalter NICHT verwenden bei:**
-- Selbstverständlichen Objekten: `comer`, NICHT `comer [algo]`
-- Wenn der Beispielsatz die Verwendung bereits zeigt
-
-**VERBOTEN im structure-Feld:** Erklärungen in Klammern.
-- ❌ `"que [subjuntivo] (exclamativo)"` → ✅ `"que [subjuntivo]"`
-- Structure = nur grammatische Struktur. Erklärungen gehören ins hint-Feld.
-
-**Keine Redundanz zwischen structure und hint:**
-- ❌ `"structure": "a [persona] (marcador de OD)"` + `"hint": "Markiert das direkte Objekt"`
-- ✅ `"structure": "a [persona]"` + `"hint": "Markiert das direkte Objekt bei Personen"`
-
-### Structure nach Wortart
-
-**VERB:**
-- Verb + Präposition: `hablar de [algo]`, `pensar en [alguien]`
-- Feste Konstruktionen: `volver a [infinitivo]`, `empezar a [infinitivo]`
-- Reflexivformen ausschreiben: `quedarse`, `irse`
-- Einfache transitive Verben: nur Lemma (NICHT `tocar [algo]`)
-
-**NOUN:**
-- Normalerweise KEIN structure-Feld nötig
-- Nur bei festen Wendungen oder bedeutungsrelevanter Position
-
-**ADJ:**
-- `ser`/`estar` im structure NUR wenn die Bedeutung sich ändert (siehe Abschnitt 4)
-- Position im structure NUR wenn bedeutungsrelevant: `viejo [sustantivo]` = langjährig
-
-**ADV:**
-- Meist ohne Platzhalter: `ya`, `bien`, `cerca`
-- Mit Platzhalter nur wenn nötig: `cerca de [algo]`, `bien [adjetivo]`
-
-**ADP (Präpositionen):**
-- Structure ist ESSENTIELL — IMMER mit Platzhalter, der die Funktion zeigt
-- `por [motivo]` = wegen, `por [lugar]` = durch, `por [precio / intercambio]` = für/gegen
-- `para [infinitivo]` = um...zu, `para [alguien]` = für, `para [lugar]` = nach
-
-**CONJ (Konjunktionen):**
-- Tempus/Modus im structure wenn bedeutungsrelevant
-- `cuando [pasado]` = als, `cuando [presente]` = wenn
-- `aunque [indicativo]` = obwohl, `aunque [subjuntivo]` = selbst wenn
-
-### Verfügbare Platzhalter
-
-- Objekte: `[algo]`, `[alguien]`
-- Wortarten: `[sustantivo]`, `[verbo]`, `[adjetivo]`, `[infinitivo]`, `[participio]`, `[adverbio]`
-- Zeiten/Modus: `[presente]`, `[pasado]`, `[indicativo]`, `[subjuntivo]`
-- Kontext: `[lugar]`, `[tiempo]`, `[motivo]`, `[transporte]`
-- Weitere Kontext-Platzhalter bei Bedarf: `[precio]`, `[condición]`, `[cantidad]` etc.
-- Kombination mit Schrägstrich: `[algo / alguien]`
+**Ausnahmen:**
+- **Reflexive Verben mit Bedeutungsänderung:** `encontrarse` statt `encontrar`, `irse` statt `ir`
+- **Adjektive mit ser/estar-Unterschied:** `estar listo` vs. `ser listo` (nur wenn die deutsche Übersetzung unterschiedlich ist)
 
 ---
 
 ## 4. POS-spezifische Regeln
-
-### VERB — Reflexive Formen
-
-Reflexive Form als separate meaning NUR wenn eigenständige Bedeutung:
-- ✅ `encontrar` → "finden" vs. `encontrarse` → "sich treffen"
-- ✅ `ir` → "gehen" vs. `irse` → "weggehen"
-- ❌ `vender` → "verkaufen" / `venderse` → "sich verkaufen" (keine separate meaning)
-
-Regel: Wenn die reflexive Form nur "sich + Grundbedeutung" ist → keine separate meaning.
 
 ### NOUN — Gender-Felder (PFLICHT)
 
@@ -130,22 +55,6 @@ Jede NOUN-translation MUSS enthalten:
 
 Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital`: f = Hauptstadt, m = Kapital).
 
-### ADJ — ser vs. estar
-
-Separate meanings NUR wenn die Bedeutung sich ändert:
-- ✅ `ser listo` = schlau / `estar listo` = fertig (verschiedene Bedeutung → trennen)
-- ✅ `ser rico` = reich / `estar rico` = lecker
-- ❌ `ser/estar feliz` = glücklich (gleiche Übersetzung → NICHT trennen)
-
-Regel: Wenn ser/estar nur "dauerhaft vs. momentan" markiert, aber die deutsche Übersetzung gleich bleibt → keine separaten meanings.
-
-### ADJ — Position
-
-Manche Adjektive ändern Bedeutung je nach Position:
-- `viejo [sustantivo]` = langjährig (viejo amigo) vs. `viejo` (nach Substantiv) = alt
-- `gran [sustantivo]` = großartig vs. `grande` (nach Substantiv) = groß
-
----
 
 ## 5. Flags
 
@@ -173,14 +82,11 @@ Verfügbare Flags:
 
 ## 6. Übersetzungen (translations)
 
-- Nur so viele Übersetzungen wie wirklich nötig und gleichwertig
+- Mehrere Synonyme sind erwünscht: `hablar` → "reden", "sprechen"
 - Nach Häufigkeit sortiert
-- Keine redundanten Varianten (❌ "verengen" + "enger machen" → ✅ nur "verengen")
-- Qualität über Quantität
+- Keine redundanten Umschreibungen: ❌ "verengen" + "enger machen" → ✅ nur "verengen"
 
 ### Hint-Feld
-
-**Sparsam verwenden** (max. 20–30% der Übersetzungen).
 
 **Bevorzuge Integration in den Text:**
 - ❌ `{"text": "treffen", "hint": "zufällig"}` → ✅ `{"text": "zufällig treffen"}`
@@ -194,11 +100,6 @@ Verfügbare Flags:
 
 **Kein Hint bei eindeutigen Übersetzungen:** `{"text": "Instrument"}`, `{"text": "drängen"}`
 
-**VERBOTEN im text-Feld:** Erklärungen in Klammern.
-- ❌ `{"text": "jetzt (als Übergang)"}` → ✅ `{"text": "jetzt", "hint": "Übergang"}` oder nur `{"text": "jetzt"}`
-
-**Nicht übersetzbare Wörter / Grammatische Funktionswörter:**
-- `{"text": "—", "hint": "Markiert das direkte Objekt"}` (em-dash als Platzhalter)
 
 ---
 
@@ -229,7 +130,7 @@ Verfügbare Flags:
 ```
 
 - `gender` und `gender_target`: NUR bei POS "NOUN" (dort Pflicht!)
-- `structure`: Optional, nur wenn nötig (bei ADP immer)
+- `structure`: Normalerweise das Lemma; bei Reflexivverben die Reflexivform, bei ser/estar-Adjektiven mit Bedeutungsunterschied `ser/estar + Adjektiv`
 - **Keine Beispielsätze generieren** — werden in einem separaten Schritt erstellt
 - Nur JSON zurückgeben, kein zusätzlicher Text
 
@@ -255,13 +156,43 @@ Verfügbare Flags:
       "definition_es": "producir música con un instrumento",
       "structure": "tocar",
       "flags": [],
-      "translations": [{"text": "Instrument spielen"}]
+      "translations": [{"text": "spielen", "hint": "Instrument"}]
     },
     {
       "definition_es": "corresponder el turno o la responsabilidad a alguien",
-      "structure": "tocar a [alguien]",
+      "structure": "tocar",
       "flags": [],
       "translations": [{"text": "an der Reihe sein"}]
+    }
+  ]
+}
+```
+
+### VERB (mit Reflexivform)
+
+```json
+{
+  "id": "00203",
+  "lemma": "encontrar",
+  "pos": "VERB",
+  "meanings": [
+    {
+      "definition_es": "dar con algo o alguien que se buscaba",
+      "structure": "encontrar",
+      "flags": [],
+      "translations": [{"text": "finden"}]
+    },
+    {
+      "definition_es": "reunirse con alguien de manera acordada o casual",
+      "structure": "encontrarse",
+      "flags": [],
+      "translations": [{"text": "sich treffen"}]
+    },
+    {
+      "definition_es": "estar en un lugar o en cierto estado",
+      "structure": "encontrarse",
+      "flags": [],
+      "translations": [{"text": "sich befinden"}]
     }
   ]
 }
@@ -277,12 +208,14 @@ Verfügbare Flags:
   "meanings": [
     {
       "definition_es": "institución financiera donde se guarda y presta dinero",
+      "structure": "banco",
       "gender": "m",
       "flags": [],
       "translations": [{"text": "Bank", "hint": "Geldinstitut", "gender_target": "f"}]
     },
     {
       "definition_es": "asiento largo para varias personas",
+      "structure": "banco",
       "gender": "m",
       "flags": [],
       "translations": [{"text": "Bank", "hint": "Sitzbank", "gender_target": "f"}]
@@ -291,7 +224,7 @@ Verfügbare Flags:
 }
 ```
 
-### ADJ
+### ADJ (mit ser/estar)
 
 ```json
 {
@@ -315,6 +248,24 @@ Verfügbare Flags:
 }
 ```
 
+### ADJ
+
+```json
+{
+  "id": "00402",
+  "lemma": "importante",
+  "pos": "ADJ",
+  "meanings": [
+    {
+      "definition_es": "que tiene mucho valor o relevancia",
+      "structure": "importante",
+      "flags": [],
+      "translations": [{"text": "wichtig"}, {"text": "bedeutend"}]
+    }
+  ]
+}
+```
+
 ### ADV
 
 ```json
@@ -328,12 +279,6 @@ Verfügbare Flags:
       "structure": "ya",
       "flags": [],
       "translations": [{"text": "schon"}, {"text": "bereits"}]
-    },
-    {
-      "definition_es": "indica que algo ha dejado de ocurrir",
-      "structure": "ya no",
-      "flags": [],
-      "translations": [{"text": "nicht mehr"}]
     },
     {
       "definition_es": "expresa urgencia o inmediatez",
@@ -355,33 +300,27 @@ Verfügbare Flags:
   "meanings": [
     {
       "definition_es": "indica la causa o razón de algo",
-      "structure": "por [motivo]",
+      "structure": "por",
       "flags": [],
       "translations": [{"text": "wegen"}, {"text": "aufgrund"}]
     },
     {
       "definition_es": "indica movimiento a través de un espacio",
-      "structure": "por [lugar]",
+      "structure": "por",
       "flags": [],
       "translations": [{"text": "durch"}]
     },
     {
       "definition_es": "indica intercambio o precio",
-      "structure": "por [precio / intercambio]",
+      "structure": "por",
       "flags": [],
-      "translations": [{"text": "gegen"}, {"text": "für"}]
+      "translations": [{"text": "für", "hint": "Preis/Tausch"}]
     },
     {
       "definition_es": "indica el agente en construcciones pasivas",
-      "structure": "[participio] por [alguien]",
+      "structure": "por",
       "flags": [],
-      "translations": [{"text": "von"}]
-    },
-    {
-      "definition_es": "indica duración o momento aproximado del día",
-      "structure": "por [tiempo]",
-      "flags": [],
-      "translations": [{"text": "für", "hint": "Dauer"}, {"text": "am", "hint": "Tageszeit"}]
+      "translations": [{"text": "von", "hint": "Passiv"}]
     }
   ]
 }
@@ -397,21 +336,15 @@ Verfügbare Flags:
   "meanings": [
     {
       "definition_es": "introduce un momento específico en el pasado",
-      "structure": "cuando [pasado]",
+      "structure": "cuando",
       "flags": [],
       "translations": [{"text": "als"}]
     },
     {
-      "definition_es": "introduce una acción habitual o repetida",
-      "structure": "cuando [presente]",
+      "definition_es": "introduce una acción habitual, repetida o futura",
+      "structure": "cuando",
       "flags": [],
-      "translations": [{"text": "immer wenn"}, {"text": "wenn"}]
-    },
-    {
-      "definition_es": "introduce una acción futura o hipotética",
-      "structure": "cuando [subjuntivo]",
-      "flags": [],
-      "translations": [{"text": "sobald"}, {"text": "wenn"}]
+      "translations": [{"text": "wenn"}]
     }
   ]
 }
@@ -430,12 +363,6 @@ Verfügbare Flags:
       "structure": "coger",
       "flags": [],
       "translations": [{"text": "nehmen"}, {"text": "greifen"}]
-    },
-    {
-      "definition_es": "subirse a un medio de transporte",
-      "structure": "coger [transporte]",
-      "flags": [],
-      "translations": [{"text": "nehmen", "hint": "Verkehrsmittel"}]
     },
     {
       "definition_es": "tener relaciones sexuales",
@@ -457,14 +384,9 @@ Verfügbare Flags:
   "meanings": [
     {
       "definition_es": "cosa indeterminada o no especificada",
+      "structure": "algo",
       "flags": [],
-      "translations": [{"text": "etwas"}]
-    },
-    {
-      "definition_es": "cantidad pequeña o un poco",
-      "structure": "algo [adjetivo]",
-      "flags": [],
-      "translations": [{"text": "etwas", "hint": "ein bisschen"}]
+      "translations": [{"text": "etwas"}, {"text": "irgendwas"}]
     }
   ]
 }
@@ -480,6 +402,7 @@ Verfügbare Flags:
   "meanings": [
     {
       "definition_es": "llamar la atención de alguien de forma informal",
+      "structure": "oye",
       "flags": [],
       "translations": [{"text": "hey"}, {"text": "hör mal"}]
     }
@@ -497,6 +420,7 @@ Verfügbare Flags:
   "meanings": [
     {
       "definition_es": "número equivalente a diez veces diez",
+      "structure": "cien",
       "flags": [],
       "translations": [{"text": "hundert"}]
     }
