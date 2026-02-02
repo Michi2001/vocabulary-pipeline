@@ -2,8 +2,11 @@
 Co-Occurrence Matrix Builder.
 
 Builds a sparse co-occurrence matrix from disambiguated sentences.
-Matrix dimensions are num_word_variants x num_word_variants.
-Variant IDs (integers) are used directly as matrix indices.
+Matrix dimensions are num_vocab_entries x num_vocab_entries.
+Entry IDs (integers) are used directly as matrix indices.
+
+Supports mixed entries: disambiguated (specific meanings) and
+non-disambiguated (entire lemmas).
 """
 
 import logging
@@ -22,11 +25,14 @@ class CoOccurrenceBuilder:
     """
     Builds sparse co-occurrence matrix from disambiguated sentences.
 
-    Co-occurrence is defined at sentence level: all word variants in the same
+    Co-occurrence is defined at sentence level: all vocab entries in the same
     sentence are considered co-occurrent.
 
-    Since WordVariant.id is now an integer index into Vocabulary.word_variants,
-    no separate mapping is needed - variant IDs are used directly as matrix indices.
+    Supports mixed entries:
+    - Disambiguated: specific meaning of a polysemous word
+    - Non-disambiguated: entire lemma (all meanings treated as one)
+
+    Entry IDs are used directly as matrix indices.
     """
 
     def __init__(self, vocabulary: Vocabulary):
@@ -34,12 +40,15 @@ class CoOccurrenceBuilder:
         Initialize with vocabulary.
 
         Args:
-            vocabulary: Vocabulary with word variants
+            vocabulary: Vocabulary with vocab entries
         """
         self.vocabulary = vocabulary
-        self.n_variants = len(vocabulary.word_variants)
+        self.n_entries = len(vocabulary.vocab_entries)
+        disamb_count = sum(1 for e in vocabulary.vocab_entries if e.is_disambiguated)
+        non_disamb_count = self.n_entries - disamb_count
         logger.info(
-            f"CoOccurrenceBuilder initialized with {self.n_variants} word variants"
+            f"CoOccurrenceBuilder initialized with {self.n_entries} vocab entries "
+            f"({disamb_count} disambiguated, {non_disamb_count} non-disambiguated)"
         )
 
     def build(
@@ -54,7 +63,7 @@ class CoOccurrenceBuilder:
         Returns:
             Sparse co-occurrence matrix (symmetric)
         """
-        n = self.n_variants
+        n = self.n_entries
         logger.info(
             f"Building {n}x{n} co-occurrence matrix from {len(disambiguated_stores)} corpora..."
         )
@@ -72,26 +81,26 @@ class CoOccurrenceBuilder:
             sentence_count = 0
             pair_count = 0
 
-            for sid, variants in store:
+            for sid, entries in store:
                 # Filter out None values (tokens not in vocabulary)
-                # variants are already integers (variant IDs = matrix indices)
-                variant_ids = [v for v in variants if v is not None]
+                # entries are already integers (entry IDs = matrix indices)
+                entry_ids = [e for e in entries if e is not None]
 
                 # Count co-occurrences (all pairs)
                 seen_pairs: Set[Tuple[int, int]] = set()
-                for i, idx_i in enumerate(variant_ids):
-                    for j, idx_j in enumerate(variant_ids):
+                for i, id_i in enumerate(entry_ids):
+                    for j, id_j in enumerate(entry_ids):
                         if i >= j:  # Skip self and duplicates (symmetric)
                             continue
 
                         # Ensure consistent ordering for symmetric matrix
-                        if idx_i > idx_j:
-                            idx_i, idx_j = idx_j, idx_i
+                        if id_i > id_j:
+                            id_i, id_j = id_j, id_i
 
-                        pair_key = (idx_i, idx_j)
+                        pair_key = (id_i, id_j)
                         if pair_key not in seen_pairs:
-                            matrix[idx_i, idx_j] += 1
-                            matrix[idx_j, idx_i] += 1  # Symmetric
+                            matrix[id_i, id_j] += 1
+                            matrix[id_j, id_i] += 1  # Symmetric
                             seen_pairs.add(pair_key)
                             pair_count += 1
 

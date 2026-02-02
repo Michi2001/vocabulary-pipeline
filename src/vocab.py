@@ -5,7 +5,7 @@ import logging
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 from scipy import sparse
@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 # Type alias for lemma tokens - hashable, usable as dict key
 LemmaToken = Tuple[str, str]  # (lemma, pos)
+
+# Default POS types that are disambiguated (have multiple VocabEntries per lemma)
+DEFAULT_DISAMBIGUATED_POS = {"NOUN", "VERB", "ADJ", "ADV"}
 
 
 @dataclass
@@ -24,15 +27,12 @@ class Meaning:
     estimated_share: float
     translations: List[Dict[str, str]]
     structure: Optional[str] = None
-    examples_es: Optional[List[str]] = None  # Multiple example sentences
+    examples_es: Optional[List[str]] = None
     flags: Optional[List[str]] = None
     gender: Optional[str] = None  # Spanish grammatical gender ("m" or "f")
-    # Embedding metadata (internal, prefixed with _)
-    _bert_embedding: Optional[List[float]] = (
-        None  # Averaged embedding from all examples
-    )
-    _target_starts: Optional[List[int]] = None  # Char start positions per example
-    _target_ends: Optional[List[int]] = None  # Char end positions per example
+    _bert_embedding: Optional[List[float]] = None
+    _target_starts: Optional[List[int]] = None
+    _target_ends: Optional[List[int]] = None
 
     @property
     def primary_translation(self) -> str:
@@ -73,9 +73,7 @@ class Meaning:
             examples_es=data.get("examples_es"),
             flags=data.get("flags", []),
             gender=data.get("gender"),
-            _bert_embedding=data.get(
-                "meaning_embedding"
-            ),  # JSON uses meaning_embedding
+            _bert_embedding=data.get("meaning_embedding"),
             _target_starts=data.get("_target_starts"),
             _target_ends=data.get("_target_ends"),
         )
@@ -150,20 +148,34 @@ class Translation:
 
 
 @dataclass
-class WordVariant:
+class VocabEntry:
     """
-    An indexed view into a specific meaning of a Translation.
-    The id is the index in Vocabulary.word_variants (integer for direct array/matrix access).
+    A vocabulary entry for the co-occurrence matrix.
+
+    For disambiguated POS (NOUN, VERB, ADJ, ADV):
+        - meaning_idx is set → represents a specific meaning
+        - Multiple VocabEntries per Translation
+
+    For non-disambiguated POS (ADP, CONJ, PRON, etc.):
+        - meaning_idx is None → represents the entire lemma
+        - One VocabEntry per Translation
     """
 
-    id: int  # Index in Vocabulary.word_variants list
-    translation: Translation  # Reference to parent Translation
-    meaning_idx: int  # Index within translation.meanings
+    id: int  # Index in Vocabulary.vocab_entries list (= matrix index)
+    translation: Translation
+    meaning_idx: Optional[int]  # None = non-disambiguated (all meanings together)
 
     @property
-    def meaning(self) -> Meaning:
-        """Returns the Meaning object (shared reference)."""
-        return self.translation.meanings[self.meaning_idx]
+    def is_disambiguated(self) -> bool:
+        """True if this entry represents a specific meaning."""
+        return self.meaning_idx is not None
+
+    @property
+    def meaning(self) -> Optional[Meaning]:
+        """Returns the Meaning object if disambiguated, else None."""
+        if self.meaning_idx is not None:
+            return self.translation.meanings[self.meaning_idx]
+        return None
 
     @property
     def lemma(self) -> str:
@@ -175,18 +187,22 @@ class WordVariant:
 
     @property
     def frequency(self) -> int:
-        """Derived frequency based on translation frequency and meaning's estimated share."""
-        return int(self.translation.frequency * self.meaning.estimated_share)
+        """Derived frequency based on translation frequency and meaning's share."""
+        if self.meaning_idx is not None and self.meaning is not None:
+            return int(self.translation.frequency * self.meaning.estimated_share)
+        return self.translation.frequency
 
     @property
     def source_translation_id(self) -> str:
-        """Translation.id for JSON compatibility."""
+        """Translation.id for reference."""
         return self.translation.id
 
     @property
     def string_id(self) -> str:
-        """String ID for JSON serialization (format: 'translation_id_meaning_idx')."""
-        return f"{self.source_translation_id}_{self.meaning_idx}"
+        """String ID for JSON serialization."""
+        if self.meaning_idx is not None:
+            return f"{self.source_translation_id}_{self.meaning_idx}"
+        return self.source_translation_id
 
     @property
     def lemma_token(self) -> LemmaToken:
@@ -196,93 +212,145 @@ class WordVariant:
     @property
     def primary_translation(self) -> str:
         """Returns the primary translation text."""
-        return self.meaning.primary_translation
+        if self.meaning is not None:
+            return self.meaning.primary_translation
+        # For non-disambiguated: use first meaning
+        if self.translation.meanings:
+            return self.translation.meanings[0].primary_translation
+        return ""
 
     @property
     def all_translations(self) -> str:
         """Returns all translations concatenated."""
-        return self.meaning.all_translations
+        if self.meaning is not None:
+            return self.meaning.all_translations
+        if self.translation.meanings:
+            return self.translation.meanings[0].all_translations
+        return ""
 
     @property
     def bert_embedding(self) -> Optional[np.ndarray]:
-        """Returns BERT embedding as numpy array."""
-        return self.meaning.bert_embedding
+        """Returns BERT embedding as numpy array (only for disambiguated entries)."""
+        if self.meaning is not None:
+            return self.meaning.bert_embedding
+        return None
 
     @classmethod
-    def from_translations(cls, translations: List[Translation]) -> List["WordVariant"]:
-        """Create WordVariants from Translations, sorted by derived frequency."""
-        variants_unsorted = []
+    def from_translations(
+        cls,
+        translations: List[Translation],
+        disambiguated_pos: Set[str],
+    ) -> List["VocabEntry"]:
+        """Create VocabEntries from Translations."""
+        entries_unsorted = []
+
         for translation in translations:
-            for idx, meaning in enumerate(translation.meanings):
-                derived_freq = int(translation.frequency * meaning.estimated_share)
-                variants_unsorted.append(
-                    {
+            if translation.pos in disambiguated_pos:
+                # Disambiguated: one entry per meaning
+                for idx, meaning in enumerate(translation.meanings):
+                    derived_freq = int(translation.frequency * meaning.estimated_share)
+                    entries_unsorted.append({
                         "translation": translation,
                         "meaning_idx": idx,
                         "derived_freq": derived_freq,
-                    }
-                )
+                    })
+            else:
+                # Non-disambiguated: one entry for entire lemma
+                entries_unsorted.append({
+                    "translation": translation,
+                    "meaning_idx": None,
+                    "derived_freq": translation.frequency,
+                })
 
-        # Sort by frequency descending, then by translation_id and meaning_idx for determinism
-        variants_unsorted.sort(
-            key=lambda v: (-v["derived_freq"], v["translation"].id, v["meaning_idx"])
-        )
+        # Sort by frequency descending, then by translation_id and meaning_idx
+        def sort_key(v):
+            meaning_idx = v["meaning_idx"] if v["meaning_idx"] is not None else -1
+            return (-v["derived_freq"], v["translation"].id, meaning_idx)
+
+        entries_unsorted.sort(key=sort_key)
 
         return [
             cls(id=idx, translation=v["translation"], meaning_idx=v["meaning_idx"])
-            for idx, v in enumerate(variants_unsorted)
+            for idx, v in enumerate(entries_unsorted)
         ]
 
 
 class Vocabulary:
     """Central storage for vocabulary data with optional co-occurrence matrix."""
 
-    def __init__(self, translations: List[Translation]):
+    def __init__(
+        self,
+        translations: List[Translation],
+        disambiguated_pos: Optional[Set[str]] = None,
+    ):
         """Initialize from list of Translation objects."""
         self.translations = translations
+        self.disambiguated_pos = disambiguated_pos or DEFAULT_DISAMBIGUATED_POS
         self.translation_by_id = {t.id: t for t in translations}
         self.translation_by_lemma_token: Dict[LemmaToken, Translation] = {
             t.lemma_token: t for t in translations
         }
 
-        # word_variants list - index IS the variant ID
-        self.word_variants = WordVariant.from_translations(translations)
+        # vocab_entries list - index IS the entry ID (= matrix index)
+        self.vocab_entries = VocabEntry.from_translations(
+            translations, self.disambiguated_pos
+        )
 
-        # Lookup: LemmaToken → List of variant IDs (integers)
-        self.variants_by_lemma_token: Dict[LemmaToken, List[int]] = {}
-        for variant in self.word_variants:
-            key = variant.lemma_token
-            if key not in self.variants_by_lemma_token:
-                self.variants_by_lemma_token[key] = []
-            self.variants_by_lemma_token[key].append(variant.id)
+        # Lookup: LemmaToken → List of entry IDs (integers)
+        self.entries_by_lemma_token: Dict[LemmaToken, List[int]] = {}
+        for entry in self.vocab_entries:
+            key = entry.lemma_token
+            if key not in self.entries_by_lemma_token:
+                self.entries_by_lemma_token[key] = []
+            self.entries_by_lemma_token[key].append(entry.id)
 
         # Optional co-occurrence matrix (set after disambiguation)
         self.cooccurrence_matrix: Optional[sparse.csr_matrix] = None
 
     @classmethod
-    def from_translations_list(cls, translations: List[Translation]) -> "Vocabulary":
+    def from_translations_list(
+        cls,
+        translations: List[Translation],
+        disambiguated_pos: Optional[Set[str]] = None,
+    ) -> "Vocabulary":
         """Create Vocabulary from list of Translation objects."""
-        return cls(translations)
+        return cls(translations, disambiguated_pos)
 
     @classmethod
-    def from_dicts(cls, data: List[Dict[str, Any]]) -> "Vocabulary":
+    def from_dicts(
+        cls,
+        data: List[Dict[str, Any]],
+        disambiguated_pos: Optional[Set[str]] = None,
+    ) -> "Vocabulary":
         """Create Vocabulary from list of dictionaries."""
         translations = [Translation.from_dict(item) for item in data]
-        return cls(translations)
+        return cls(translations, disambiguated_pos)
 
     # File names for directory-based storage
     TRANSLATIONS_FILE = "translations.json"
     COOCCURRENCE_FILE = "cooccurrence_matrix.npz"
+    METADATA_FILE = "vocabulary_metadata.json"
 
     @classmethod
-    def from_dir(cls, dir_path: str) -> "Vocabulary":
+    def from_dir(
+        cls,
+        dir_path: str,
+        disambiguated_pos: Optional[Set[str]] = None,
+    ) -> "Vocabulary":
         """Load Vocabulary from directory."""
         dir_path = Path(dir_path)
+
+        # Try to load metadata for disambiguated_pos
+        metadata_path = dir_path / cls.METADATA_FILE
+        if metadata_path.exists() and disambiguated_pos is None:
+            with open(metadata_path, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+                disambiguated_pos = set(metadata.get("disambiguated_pos", []))
 
         translations_path = dir_path / cls.TRANSLATIONS_FILE
         with open(translations_path, "r", encoding="utf-8") as f:
             json_data = json.load(f)
-        vocab = cls.from_dicts(json_data)
+        vocab = cls.from_dicts(json_data, disambiguated_pos)
 
         cooccurrence_path = dir_path / cls.COOCCURRENCE_FILE
         if cooccurrence_path.exists():
@@ -318,6 +386,16 @@ class Vocabulary:
                 indent=2,
             )
 
+        # Save metadata
+        metadata_path = dir_path / self.METADATA_FILE
+        with open(metadata_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {"disambiguated_pos": list(self.disambiguated_pos)},
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
+
         if save_cooccurrence and self.cooccurrence_matrix is not None:
             cooccurrence_path = dir_path / self.COOCCURRENCE_FILE
             sparse.save_npz(
@@ -328,55 +406,55 @@ class Vocabulary:
         """Get Translation by lemma token."""
         return self.translation_by_lemma_token.get(lemma_token)
 
-    def get_word_variant(self, variant_id: int) -> WordVariant:
-        """Get WordVariant by ID (direct array access, O(1))."""
-        return self.word_variants[variant_id]
+    def get_vocab_entry(self, entry_id: int) -> VocabEntry:
+        """Get VocabEntry by ID (direct array access, O(1))."""
+        return self.vocab_entries[entry_id]
 
-    def get_variant_ids_for_lemma(self, lemma_token: LemmaToken) -> List[int]:
-        """Get list of variant IDs for a lemma token."""
-        return self.variants_by_lemma_token.get(lemma_token, [])
+    def get_entry_ids_for_lemma(self, lemma_token: LemmaToken) -> List[int]:
+        """Get list of entry IDs for a lemma token."""
+        return self.entries_by_lemma_token.get(lemma_token, [])
 
-    def get_all_word_variants(self) -> List[WordVariant]:
-        """Get all word variants sorted by frequency (descending)."""
-        return self.word_variants
+    def get_all_vocab_entries(self) -> List[VocabEntry]:
+        """Get all vocab entries sorted by frequency (descending)."""
+        return self.vocab_entries
 
-    def sample_word_variants(
+    def sample_vocab_entries(
         self, n: int, seed: Optional[int] = None
-    ) -> List[WordVariant]:
-        """Sample n random word variants."""
+    ) -> List[VocabEntry]:
+        """Sample n random vocab entries."""
         if seed is not None:
             random.seed(seed)
-        if n > len(self.word_variants):
+        if n > len(self.vocab_entries):
             raise ValueError(
-                f"Requested {n} variants, only {len(self.word_variants)} available"
+                f"Requested {n} entries, only {len(self.vocab_entries)} available"
             )
-        return random.sample(self.word_variants, n)
+        return random.sample(self.vocab_entries, n)
 
-    def sample_word_variants_groups(
+    def sample_vocab_entries_groups(
         self, group_sizes: List[int], seed: Optional[int] = None
-    ) -> List[List[WordVariant]]:
+    ) -> List[List[VocabEntry]]:
         """
-        Sample random word variants into groups.
+        Sample random vocab entries into groups.
 
         Constraints:
-        - No two WordVariants from the same Translation in the same group
-        - Each WordVariant can appear in at most one group
+        - No two VocabEntries from the same Translation in the same group
+        - Each VocabEntry can appear in at most one group
         """
         if seed is not None:
             random.seed(seed)
 
-        all_variants = list(self.word_variants)
-        random.shuffle(all_variants)
+        all_entries = list(self.vocab_entries)
+        random.shuffle(all_entries)
 
         total_needed = sum(group_sizes)
-        if total_needed > len(all_variants):
+        if total_needed > len(all_entries):
             raise ValueError(
-                f"Requested {total_needed} variants, only {len(all_variants)} available"
+                f"Requested {total_needed} entries, only {len(all_entries)} available"
             )
 
         result = []
-        used_variant_ids = set()
-        pool = all_variants.copy()
+        used_entry_ids = set()
+        pool = all_entries.copy()
 
         for group_size in group_sizes:
             group = []
@@ -387,20 +465,20 @@ class Vocabulary:
             while len(group) < group_size and attempts < max_attempts:
                 if not pool:
                     raise ValueError(
-                        f"Not enough variants for group of size {group_size}"
+                        f"Not enough entries for group of size {group_size}"
                     )
 
                 candidate = pool.pop(0)
                 attempts += 1
 
-                if candidate.id in used_variant_ids:
+                if candidate.id in used_entry_ids:
                     continue
                 if candidate.source_translation_id in used_trans_ids:
                     pool.append(candidate)
                     continue
 
                 group.append(candidate)
-                used_variant_ids.add(candidate.id)
+                used_entry_ids.add(candidate.id)
                 used_trans_ids.add(candidate.source_translation_id)
 
             if len(group) < group_size:
@@ -412,25 +490,25 @@ class Vocabulary:
         return result
 
     def get_cooccurrences(
-        self, variant_id: int, top_k: int = 20
+        self, entry_id: int, top_k: int = 20
     ) -> List[Tuple[int, float]]:
         """
-        Get top co-occurring variants for a given variant.
+        Get top co-occurring entries for a given entry.
 
         Args:
-            variant_id: Word variant ID (integer index)
+            entry_id: VocabEntry ID (integer index)
             top_k: Number of top co-occurrences to return
 
         Returns:
-            List of (variant_id, count) tuples, sorted by count descending
+            List of (entry_id, count) tuples, sorted by count descending
         """
         if self.cooccurrence_matrix is None:
             raise ValueError("No co-occurrence matrix available")
 
-        if variant_id < 0 or variant_id >= len(self.word_variants):
+        if entry_id < 0 or entry_id >= len(self.vocab_entries):
             return []
 
-        row = self.cooccurrence_matrix.getrow(variant_id).toarray().flatten()
+        row = self.cooccurrence_matrix.getrow(entry_id).toarray().flatten()
         top_indices = np.argsort(row)[-top_k:][::-1]
 
         results = []
@@ -441,11 +519,18 @@ class Vocabulary:
         return results
 
     def __len__(self) -> int:
-        return len(self.word_variants)
+        return len(self.vocab_entries)
 
     def __repr__(self) -> str:
         matrix_info = ""
         if self.cooccurrence_matrix is not None:
             nnz = self.cooccurrence_matrix.nnz
             matrix_info = f", cooccurrence={nnz:,} entries"
-        return f"Vocabulary(translations={len(self.translations)}, variants={len(self.word_variants)}{matrix_info})"
+        disamb_count = sum(1 for e in self.vocab_entries if e.is_disambiguated)
+        non_disamb_count = len(self.vocab_entries) - disamb_count
+        return (
+            f"Vocabulary(translations={len(self.translations)}, "
+            f"entries={len(self.vocab_entries)} "
+            f"[{disamb_count} disambiguated, {non_disamb_count} non-disambiguated]"
+            f"{matrix_info})"
+        )

@@ -417,7 +417,13 @@ def run_pipeline(
         logger.info("STAGE 7: Disambiguation")
         logger.info("=" * 60)
 
-        vocabulary = Vocabulary.from_translations_list(translations)
+        # Get disambiguated POS types from config
+        disambiguated_pos = set(
+            disambiguation_config.get("pos_types", ["NOUN", "VERB", "ADJ", "ADV"])
+        )
+        vocabulary = Vocabulary.from_translations_list(
+            translations, disambiguated_pos=disambiguated_pos
+        )
         vocab_hash = generate_vocabulary_hash(translations)
         bert_model = disambiguation_config.get(
             "model", "dccuchile/bert-base-spanish-wwm-cased"

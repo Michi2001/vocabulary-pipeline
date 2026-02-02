@@ -1,0 +1,51 @@
+# POS-spezifischer Prompt: ADV
+
+## Adverbien mit mehreren Bedeutungen
+
+Bei Adverbien dürfen mehrere meanings erstellt werden, wenn die deutschen Übersetzungen semantisch unverbunden sind.
+
+---
+
+## Beispiele
+
+### Adverb mit mehreren Bedeutungen
+
+```json
+{
+  "id": "00501",
+  "lemma": "ya",
+  "pos": "ADV",
+  "meanings": [
+    {
+      "definition_es": "indica que algo ha ocurrido antes del momento presente",
+      "structure": "ya",
+      "flags": [],
+      "translations": [{"text": "schon"}, {"text": "bereits"}]
+    },
+    {
+      "definition_es": "expresa urgencia o inmediatez",
+      "structure": "ya",
+      "flags": [],
+      "translations": [{"text": "sofort"}, {"text": "jetzt gleich"}]
+    }
+  ]
+}
+```
+
+### Adverb mit einer Bedeutung
+
+```json
+{
+  "id": "00502",
+  "lemma": "siempre",
+  "pos": "ADV",
+  "meanings": [
+    {
+      "definition_es": "en todo momento, sin excepción",
+      "structure": "siempre",
+      "flags": [],
+      "translations": [{"text": "immer"}, {"text": "stets"}]
+    }
+  ]
+}
+```

@@ -1,0 +1,63 @@
+# POS-spezifischer Prompt: PRON
+
+## Pronomen haben IMMER nur EINE meaning
+
+Pronomen werden NICHT in mehrere meanings aufgeteilt. Alle Verwendungen werden in einer meaning zusammengefasst.
+
+---
+
+## Beispiele
+
+### Indefinitpronomen
+
+```json
+{
+  "id": "00901",
+  "lemma": "algo",
+  "pos": "PRON",
+  "meanings": [
+    {
+      "definition_es": "cosa indeterminada o no especificada",
+      "structure": "algo",
+      "flags": [],
+      "translations": [{"text": "etwas"}, {"text": "irgendwas"}]
+    }
+  ]
+}
+```
+
+### Personalpronomen
+
+```json
+{
+  "id": "00902",
+  "lemma": "yo",
+  "pos": "PRON",
+  "meanings": [
+    {
+      "definition_es": "pronombre personal de primera persona singular",
+      "structure": "yo",
+      "flags": [],
+      "translations": [{"text": "ich"}]
+    }
+  ]
+}
+```
+
+### Objektpronomen
+
+```json
+{
+  "id": "00903",
+  "lemma": "le",
+  "pos": "PRON",
+  "meanings": [
+    {
+      "definition_es": "pronombre de objeto indirecto de tercera persona",
+      "structure": "le",
+      "flags": [],
+      "translations": [{"text": "ihm"}, {"text": "ihr", "hint": "Dativ feminin"}]
+    }
+  ]
+}
+```

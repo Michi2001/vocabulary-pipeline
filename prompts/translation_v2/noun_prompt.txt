@@ -1,0 +1,67 @@
+# POS-spezifischer Prompt: NOUN
+
+## Gender-Felder (PFLICHT)
+
+Jede NOUN-meaning MUSS enthalten:
+- `"gender"`: Spanisches Geschlecht (`"f"` oder `"m"`)
+
+Jede NOUN-translation MUSS enthalten:
+- `"gender_target"`: Deutsches Geschlecht (`"f"`, `"m"`, oder `"n"`)
+
+Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital`: f = Hauptstadt, m = Kapital).
+
+---
+
+## Beispiele
+
+### Nomen mit mehreren Bedeutungen (Homonyme)
+
+```json
+{
+  "id": "00301",
+  "lemma": "banco",
+  "pos": "NOUN",
+  "meanings": [
+    {
+      "definition_es": "institución financiera donde se guarda y presta dinero",
+      "structure": "banco",
+      "gender": "m",
+      "flags": [],
+      "translations": [{"text": "Bank", "hint": "Geldinstitut", "gender_target": "f"}]
+    },
+    {
+      "definition_es": "asiento largo para varias personas",
+      "structure": "banco",
+      "gender": "m",
+      "flags": [],
+      "translations": [{"text": "Bank", "hint": "Sitzbank", "gender_target": "f"}]
+    }
+  ]
+}
+```
+
+### Nomen mit verschiedenem Geschlecht
+
+```json
+{
+  "id": "00302",
+  "lemma": "capital",
+  "pos": "NOUN",
+  "meanings": [
+    {
+      "definition_es": "ciudad principal donde reside el gobierno de un país",
+      "structure": "capital",
+      "gender": "f",
+      "flags": [],
+      "translations": [{"text": "Hauptstadt", "gender_target": "f"}]
+    },
+    {
+      "definition_es": "dinero o bienes que se invierten",
+      "structure": "capital",
+      "gender": "m",
+      "flags": [],
+      "translations": [{"text": "Kapital", "gender_target": "n"}]
+    }
+  ]
+}
+```

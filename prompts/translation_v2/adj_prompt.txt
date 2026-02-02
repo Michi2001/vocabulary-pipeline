@@ -1,0 +1,56 @@
+# POS-spezifischer Prompt: ADJ
+
+## ser/estar-Unterschied
+
+Bei Adjektiven, die mit ser und estar **verschiedene Übersetzungen** haben, erstelle separate meanings:
+- `estar listo` → "fertig", "bereit"
+- `ser listo` → "schlau", "klug"
+
+**NICHT trennen** wenn ser/estar die gleiche Übersetzung ergibt:
+- `ser/estar importante` → beides "wichtig" (eine meaning)
+
+---
+
+## Beispiele
+
+### Adjektiv mit ser/estar-Unterschied
+
+```json
+{
+  "id": "00401",
+  "lemma": "listo",
+  "pos": "ADJ",
+  "meanings": [
+    {
+      "definition_es": "preparado para hacer algo o partir",
+      "structure": "estar listo",
+      "flags": [],
+      "translations": [{"text": "fertig"}, {"text": "bereit"}]
+    },
+    {
+      "definition_es": "que tiene inteligencia y aprende rápido",
+      "structure": "ser listo",
+      "flags": [],
+      "translations": [{"text": "schlau"}, {"text": "klug"}]
+    }
+  ]
+}
+```
+
+### Einfaches Adjektiv
+
+```json
+{
+  "id": "00402",
+  "lemma": "importante",
+  "pos": "ADJ",
+  "meanings": [
+    {
+      "definition_es": "que tiene mucho valor o relevancia",
+      "structure": "importante",
+      "flags": [],
+      "translations": [{"text": "wichtig"}, {"text": "bedeutend"}]
+    }
+  ]
+}
+```

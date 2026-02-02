@@ -1,0 +1,100 @@
+# POS-spezifischer Prompt: VERB
+
+## Structure-Feld bei Verben
+
+**Reflexive Verben mit Bedeutungsänderung:**
+- `encontrar` → "finden" vs. `encontrarse` → "sich treffen"
+- `ir` → "gehen" vs. `irse` → "weggehen/abreisen"
+- `dormir` → "schlafen" vs. `dormirse` → "einschlafen"
+
+**NICHT als separate meaning wenn Reflexivform nur "sich + Grundform" bedeutet:**
+- `vender` → "verkaufen" / `venderse` → "sich verkaufen" (keine separate meaning)
+- `lavar` → "waschen" / `lavarse` → "sich waschen" (keine separate meaning)
+
+---
+
+## Beispiele
+
+### Einfaches Verb mit mehreren Bedeutungen
+
+```json
+{
+  "id": "00201",
+  "lemma": "tocar",
+  "pos": "VERB",
+  "meanings": [
+    {
+      "definition_es": "poner la mano o los dedos sobre algo o alguien",
+      "structure": "tocar",
+      "flags": [],
+      "translations": [{"text": "anfassen"}, {"text": "berühren"}]
+    },
+    {
+      "definition_es": "producir música con un instrumento",
+      "structure": "tocar",
+      "flags": [],
+      "translations": [{"text": "spielen", "hint": "Instrument"}]
+    },
+    {
+      "definition_es": "corresponder el turno o la responsabilidad a alguien",
+      "structure": "tocar",
+      "flags": [],
+      "translations": [{"text": "an der Reihe sein"}]
+    }
+  ]
+}
+```
+
+### Verb mit Reflexivform
+
+```json
+{
+  "id": "00203",
+  "lemma": "encontrar",
+  "pos": "VERB",
+  "meanings": [
+    {
+      "definition_es": "dar con algo o alguien que se buscaba",
+      "structure": "encontrar",
+      "flags": [],
+      "translations": [{"text": "finden"}]
+    },
+    {
+      "definition_es": "reunirse con alguien de manera acordada o casual",
+      "structure": "encontrarse",
+      "flags": [],
+      "translations": [{"text": "sich treffen"}]
+    },
+    {
+      "definition_es": "estar en un lugar o en cierto estado",
+      "structure": "encontrarse",
+      "flags": [],
+      "translations": [{"text": "sich befinden"}]
+    }
+  ]
+}
+```
+
+### Verb mit Flags
+
+```json
+{
+  "id": "00202",
+  "lemma": "coger",
+  "pos": "VERB",
+  "meanings": [
+    {
+      "definition_es": "tomar algo con la mano o llevarlo consigo",
+      "structure": "coger",
+      "flags": [],
+      "translations": [{"text": "nehmen"}, {"text": "greifen"}]
+    },
+    {
+      "definition_es": "tener relaciones sexuales",
+      "structure": "coger",
+      "flags": ["offensive", "regionalism:Lateinamerika"],
+      "translations": [{"text": "ficken"}]
+    }
+  ]
+}
+```

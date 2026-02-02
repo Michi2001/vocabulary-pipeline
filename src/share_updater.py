@@ -19,24 +19,25 @@ class ShareUpdater:
         translations: List[Translation],
         vocabulary: Vocabulary,
     ) -> List[Translation]:
-        """Count variant occurrences and update estimated_share values in-place."""
-        variant_counts: Dict[int, int] = defaultdict(int)  # variant_id -> count
+        """Count entry occurrences and update estimated_share values in-place."""
+        entry_counts: Dict[int, int] = defaultdict(int)  # entry_id -> count
 
         for store in disambiguated_stores:
-            for _, variants in store:
-                for variant_id in variants:
-                    if variant_id is not None:
-                        variant_counts[variant_id] += 1
+            for _, entries in store:
+                for entry_id in entries:
+                    if entry_id is not None:
+                        entry_counts[entry_id] += 1
 
-        # Group counts by translation
+        # Group counts by translation (only for disambiguated entries)
         translation_counts: Dict[str, Dict[int, int]] = defaultdict(
             lambda: defaultdict(int)
         )  # translation_id -> meaning_idx -> count
-        for variant_id, count in variant_counts.items():
-            variant = vocabulary.word_variants[variant_id]
-            translation_counts[variant.source_translation_id][
-                variant.meaning_idx
-            ] += count
+        for entry_id, count in entry_counts.items():
+            entry = vocabulary.vocab_entries[entry_id]
+            if entry.meaning_idx is not None:  # Only disambiguated entries
+                translation_counts[entry.source_translation_id][
+                    entry.meaning_idx
+                ] += count
 
         updated_count = 0
         for translation in translations:
