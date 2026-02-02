@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from src.stores.disambiguated_store import DisambiguatedStore
 from src.vocab import Translation, Vocabulary
@@ -11,7 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class ShareUpdater:
-    """Updates estimated_share values based on actual corpus usage."""
+    """
+    Updates estimated_share values based on actual corpus usage.
+
+    Only sets estimated_share for disambiguated POS types (NOUN, VERB, ADJ, ADV).
+    Non-disambiguated POS types do not get estimated_share values.
+    """
 
     def update(
         self,
@@ -19,7 +24,8 @@ class ShareUpdater:
         translations: List[Translation],
         vocabulary: Vocabulary,
     ) -> List[Translation]:
-        """Count entry occurrences and update estimated_share values in-place."""
+        """Count entry occurrences and set estimated_share for disambiguated entries."""
+        disambiguated_pos = vocabulary.disambiguated_pos
         entry_counts: Dict[int, int] = defaultdict(int)  # entry_id -> count
 
         for store in disambiguated_stores:
@@ -41,22 +47,23 @@ class ShareUpdater:
 
         updated_count = 0
         for translation in translations:
+            # Skip non-disambiguated POS types
+            if translation.pos not in disambiguated_pos:
+                continue
+
             counts = translation_counts.get(translation.id, {})  # meaning_idx -> count
             total = sum(counts.values())
 
             if total == 0:
                 continue
 
-            if total != translation.frequency:
-                logger.warning(
-                    f"Lemma '{translation.lemma}' (ID: {translation.id}): "
-                    f"disambiguated count {total} != frequency {translation.frequency}"
-                )
-
+            # Set estimated_share for each meaning
             for idx, meaning in enumerate(translation.meanings):
                 meaning.estimated_share = counts.get(idx, 0) / total
             updated_count += 1
 
-        logger.info(f"Updated estimated_share for {updated_count} translations")
+        logger.info(
+            f"Set estimated_share for {updated_count} disambiguated translations"
+        )
 
         return translations

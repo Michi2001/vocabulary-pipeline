@@ -144,9 +144,6 @@ class LemmaTranslator:
             all_translations, id_mapping
         )
 
-        for translation in enriched_translations:
-            self._set_equal_shares(translation)
-
         # Sort by frequency descending
         enriched_translations.sort(key=lambda x: x.get("frequency", 0), reverse=True)
 
@@ -344,15 +341,3 @@ class LemmaTranslator:
 
         return translations
 
-    def _set_equal_shares(self, translation: Dict[str, Any]) -> None:
-        """Set equal estimated_share (1/n) as placeholder until disambiguation."""
-        if "meanings" not in translation or not translation["meanings"]:
-            return
-
-        num_meanings = len(translation["meanings"])
-        if num_meanings == 0:
-            return
-
-        equal_share = 1.0 / num_meanings
-        for meaning in translation["meanings"]:
-            meaning["estimated_share"] = equal_share

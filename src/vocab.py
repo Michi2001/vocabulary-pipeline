@@ -24,8 +24,8 @@ class Meaning:
     """A single meaning/sense of a lemma."""
 
     definition_es: str
-    estimated_share: float
     translations: List[Dict[str, str]]
+    estimated_share: Optional[float] = None  # Set by ShareUpdater after disambiguation
     structure: Optional[str] = None
     examples_es: Optional[List[str]] = None
     flags: Optional[List[str]] = None
@@ -67,8 +67,8 @@ class Meaning:
         """Create Meaning from dictionary."""
         return cls(
             definition_es=data.get("definition_es", ""),
-            estimated_share=data.get("estimated_share", 0.0),
             translations=data.get("translations", []),
+            estimated_share=data.get("estimated_share"),  # None if not present
             structure=data.get("structure"),
             examples_es=data.get("examples_es"),
             flags=data.get("flags", []),
@@ -84,9 +84,10 @@ class Meaning:
         """Convert to dictionary for JSON serialization."""
         result = {
             "definition_es": self.definition_es,
-            "estimated_share": self.estimated_share,
             "translations": self.translations,
         }
+        if self.estimated_share is not None:
+            result["estimated_share"] = self.estimated_share
         if self.structure is not None:
             result["structure"] = self.structure
         if self.examples_es is not None:
@@ -189,7 +190,8 @@ class VocabEntry:
     def frequency(self) -> int:
         """Derived frequency based on translation frequency and meaning's share."""
         if self.meaning_idx is not None and self.meaning is not None:
-            return int(self.translation.frequency * self.meaning.estimated_share)
+            if self.meaning.estimated_share is not None:
+                return int(self.translation.frequency * self.meaning.estimated_share)
         return self.translation.frequency
 
     @property
