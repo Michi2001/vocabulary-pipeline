@@ -45,19 +45,19 @@ def load_translation_input(csv_path):
 
 # Configuration
 INPUT_CSV = Path("test/data/translation_input.csv")
-PROMPT_FOLDER = Path("prompts/translation")
+PROMPT_FOLDER = Path("prompts/translation_v2")
 PROVIDER_TYPE = "google"
-PROVIDER_CONFIG = {  # best settings for Google Gemini
-    "model": "gemini-3-flash-preview",
-    "thinking_level": "minimal",
-    "temperature": 1.0,
-}
-# PROVIDER_CONFIG = {
-#     "model": "gemini-3-pro-preview",
-#     "thinking_level": "low",
+# PROVIDER_CONFIG = {  # best settings for Google Gemini
+#     "model": "gemini-3-flash-preview",
+#     "thinking_level": "minimal",
 #     "temperature": 1.0,
 # }
-BATCH_SIZE = 20  # Number of items to process per batch
+PROVIDER_CONFIG = {
+    "model": "gemini-3-pro-preview",
+    "thinking_level": "low",
+    "temperature": 1.0,
+}
+BATCH_SIZE = 10  # Number of items to process per batch
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_DIR = Path(f"test/outputs/test_translation/{TIMESTAMP}")
 OUTPUT_LOG_PATH = OUTPUT_DIR / "translation.log"

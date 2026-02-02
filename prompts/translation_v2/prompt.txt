@@ -1,19 +1,35 @@
 # Spanisch-Deutsch Übersetzungsprompt
 
-Du bist ein Experte für spanische Sprache und erstellst Übersetzungseinträge für eine Vokabel-Lern-App (Spanisch → Deutsch). Erstelle für jedes gegebene Lemma + POS vollständige Einträge im JSON-Format. Die Wortart (POS) bestimmt die Übersetzung — dasselbe Lemma mit anderem POS hat andere Bedeutungen.
+Du bist ein Experte für spanische Sprache und erstellst Übersetzungseinträge für eine Vokabel-Lern-App (Spanisch → Deutsch). Jede "meaning" entspricht einer separaten Lernkarte. Spalte nur auf, wenn ein Lerner mit nur einer Karte verwirrt wäre.
 
 ---
 
 ## 1. Mehrere Bedeutungen (meanings)
 
-Fokus auf 2–4 Bedeutungen, mehr nur wenn nötig.
+### Welche POS dürfen aufgespalten werden?
 
-**Grundregel:** Separate meanings nur bei unterschiedlicher deutscher Übersetzung.
-- ✅ `muñeca`: "Handgelenk" vs. "Puppe" → zwei meanings
-- ❌ `hoja`: "Blatt" (Pflanze) vs. "Blatt" (Papier) → eine meaning
+**Aufspalten erlaubt:** NOUN, VERB, ADJ, ADV
+**Immer nur EINE meaning:** ADP, CONJ, PRON, INTJ, NUM, DET
 
-**Ausnahme — Homonyme:** Semantisch unverbundene Konzepte mit gleicher deutscher Übersetzung dürfen getrennt werden. Dann MUSS ein hint zur Unterscheidung verwendet werden.
-- ✅ `banco`: "Bank" (hint: "Geldinstitut") vs. "Bank" (hint: "Sitzbank")
+### Aufspaltungskriterium (nur für NOUN, VERB, ADJ, ADV)
+
+Separate meanings nur wenn die deutschen Übersetzungen **semantisch unverbunden** sind — d.h. verschiedene Wortfelder, ein Lerner würde sie als "verschiedene Wörter" wahrnehmen.
+
+**Aufspalten:**
+- ✅ `banco`: "Bank" (Geld) vs. "Bank" (Sitzen) — Homonyme, hint zur Unterscheidung
+- ✅ `encontrar`: "finden" vs. "sich treffen" — völlig verschiedene Aktionen
+- ✅ `apenas`: "kaum" vs. "sobald" — verschiedene Konzepte
+
+**NICHT aufspalten:**
+- ❌ `después`: "danach", "später" — Synonyme, eine meaning
+- ❌ `cambiar`: "ändern", "wechseln" — kontextuelle Varianten
+- ❌ `hoja`: "Blatt" (Pflanze/Papier) — gleiche Übersetzung
+
+### Funktionswörter (ADP, CONJ, etc.)
+
+Diese haben IMMER nur eine meaning mit mehreren Übersetzungen. Die verschiedenen Verwendungen werden durch hints unterschieden:
+- `por`: eine meaning mit "wegen", "durch", "für" (hint: "Preis"), "von" (hint: "Passiv")
+- `cuando`: eine meaning mit "als" (hint: "Vergangenheit"), "wenn" (hint: "Gegenwart/Zukunft")
 
 ---
 
@@ -85,6 +101,7 @@ Verfügbare Flags:
 - Mehrere Synonyme sind erwünscht: `hablar` → "reden", "sprechen"
 - Nach Häufigkeit sortiert
 - Keine redundanten Umschreibungen: ❌ "verengen" + "enger machen" → ✅ nur "verengen"
+- **Nur echte deutsche Wörter** — keine linguistischen Fachbegriffe wie "Genitiv-Anzeiger", "Akkusativ-Marker", etc.
 
 ### Hint-Feld
 
@@ -290,7 +307,7 @@ Verfügbare Flags:
 }
 ```
 
-### ADP
+### ADP (immer EINE meaning)
 
 ```json
 {
@@ -299,34 +316,21 @@ Verfügbare Flags:
   "pos": "ADP",
   "meanings": [
     {
-      "definition_es": "indica la causa o razón de algo",
+      "definition_es": "preposición con múltiples usos: causa, movimiento, intercambio, agente",
       "structure": "por",
       "flags": [],
-      "translations": [{"text": "wegen"}, {"text": "aufgrund"}]
-    },
-    {
-      "definition_es": "indica movimiento a través de un espacio",
-      "structure": "por",
-      "flags": [],
-      "translations": [{"text": "durch"}]
-    },
-    {
-      "definition_es": "indica intercambio o precio",
-      "structure": "por",
-      "flags": [],
-      "translations": [{"text": "für", "hint": "Preis/Tausch"}]
-    },
-    {
-      "definition_es": "indica el agente en construcciones pasivas",
-      "structure": "por",
-      "flags": [],
-      "translations": [{"text": "von", "hint": "Passiv"}]
+      "translations": [
+        {"text": "wegen", "hint": "Grund"},
+        {"text": "durch", "hint": "Bewegung"},
+        {"text": "für", "hint": "Preis/Tausch"},
+        {"text": "von", "hint": "Passiv"}
+      ]
     }
   ]
 }
 ```
 
-### CONJ
+### CONJ (immer EINE meaning)
 
 ```json
 {
@@ -335,16 +339,13 @@ Verfügbare Flags:
   "pos": "CONJ",
   "meanings": [
     {
-      "definition_es": "introduce un momento específico en el pasado",
+      "definition_es": "introduce una cláusula temporal",
       "structure": "cuando",
       "flags": [],
-      "translations": [{"text": "als"}]
-    },
-    {
-      "definition_es": "introduce una acción habitual, repetida o futura",
-      "structure": "cuando",
-      "flags": [],
-      "translations": [{"text": "wenn"}]
+      "translations": [
+        {"text": "als", "hint": "Vergangenheit, einmalig"},
+        {"text": "wenn", "hint": "Gegenwart/Zukunft/wiederholt"}
+      ]
     }
   ]
 }
