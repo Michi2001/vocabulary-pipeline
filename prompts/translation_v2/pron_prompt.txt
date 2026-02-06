@@ -1,62 +1,42 @@
 # POS-spezifischer Prompt: PRON
 
-## Pronomen haben IMMER nur EINE meaning
-
-Pronomen werden NICHT in mehrere meanings aufgeteilt. Alle Verwendungen werden in einer meaning zusammengefasst.
-
----
-
 ## Beispiele
 
-### Indefinitpronomen
-
 ```json
 {
-  "id": "00901",
-  "lemma": "algo",
-  "pos": "PRON",
-  "meanings": [
+  "all_lemma_translations": [
     {
-      "definition_es": "cosa indeterminada o no especificada",
-      "structure": "algo",
-      "flags": [],
-      "translations": [{"text": "etwas"}, {"text": "irgendwas"}]
-    }
-  ]
-}
-```
-
-### Personalpronomen
-
-```json
-{
-  "id": "00902",
-  "lemma": "yo",
-  "pos": "PRON",
-  "meanings": [
+      "id": "00901",
+      "lemma": "algo",
+      "pos": "PRON",
+      "meanings": [
+        {
+          "definition_es": "cosa indeterminada o no especificada",
+          "translations": [{"text": "etwas"}, {"text": "irgendwas"}]
+        }
+      ]
+    },
     {
-      "definition_es": "pronombre personal de primera persona singular",
-      "structure": "yo",
-      "flags": [],
-      "translations": [{"text": "ich"}]
-    }
-  ]
-}
-```
-
-### Objektpronomen
-
-```json
-{
-  "id": "00903",
-  "lemma": "le",
-  "pos": "PRON",
-  "meanings": [
+      "id": "00902",
+      "lemma": "yo",
+      "pos": "PRON",
+      "meanings": [
+        {
+          "definition_es": "la persona que habla o escribe",
+          "translations": [{"text": "ich"}]
+        }
+      ]
+    },
     {
-      "definition_es": "pronombre de objeto indirecto de tercera persona",
-      "structure": "le",
-      "flags": [],
-      "translations": [{"text": "ihm"}, {"text": "ihr", "hint": "Dativ feminin"}]
+      "id": "00903",
+      "lemma": "le",
+      "pos": "PRON",
+      "meanings": [
+        {
+          "definition_es": "indica a quién se dirige la acción, tercera persona",
+          "translations": [{"text": "ihm"}, {"text": "ihr"}]
+        }
+      ]
     }
   ]
 }

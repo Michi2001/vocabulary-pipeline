@@ -1,44 +1,31 @@
 # POS-spezifischer Prompt: INTJ
 
-## Interjektionen haben IMMER nur EINE meaning
-
-Interjektionen werden NICHT in mehrere meanings aufgeteilt.
-
----
-
 ## Beispiele
 
-### Interjektion
-
 ```json
 {
-  "id": "01001",
-  "lemma": "oye",
-  "pos": "INTJ",
-  "meanings": [
+  "all_lemma_translations": [
     {
-      "definition_es": "llamar la atención de alguien de forma informal",
-      "structure": "oye",
-      "flags": [],
-      "translations": [{"text": "hey"}, {"text": "hör mal"}]
-    }
-  ]
-}
-```
-
-### Ausruf
-
-```json
-{
-  "id": "01002",
-  "lemma": "ay",
-  "pos": "INTJ",
-  "meanings": [
+      "id": "01001",
+      "lemma": "oye",
+      "pos": "INTJ",
+      "meanings": [
+        {
+          "definition_es": "llamar la atención de alguien de forma informal",
+          "translations": [{"text": "hey"}, {"text": "hör mal"}]
+        }
+      ]
+    },
     {
-      "definition_es": "expresión de dolor, sorpresa o emoción",
-      "structure": "ay",
-      "flags": [],
-      "translations": [{"text": "au"}, {"text": "ach"}]
+      "id": "01002",
+      "lemma": "ay",
+      "pos": "INTJ",
+      "meanings": [
+        {
+          "definition_es": "expresión de dolor, sorpresa o emoción",
+          "translations": [{"text": "au"}, {"text": "ach"}]
+        }
+      ]
     }
   ]
 }

@@ -45,7 +45,10 @@ class BaseLLMProvider(ABC):
 
     @abstractmethod
     def translate_lemmas(
-        self, batch: List[Dict[str, Any]], system_prompt: str
+        self,
+        batch: List[Dict[str, Any]],
+        system_prompt: str,
+        response_schema: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """
         Send batch of lemmas to LLM for translation.
@@ -53,6 +56,7 @@ class BaseLLMProvider(ABC):
         Args:
             batch: List of dicts with 'id', 'lemma', 'frequency', 'pos' keys
             system_prompt: Combined general + POS-specific translation prompt
+            response_schema: Optional POS-specific JSON schema for structured output
 
         Returns:
             Dict with 'translations' key containing list of translation objects

@@ -6,13 +6,6 @@ Du bist ein Experte für spanische Sprache und erstellst Übersetzungseinträge 
 
 ## 1. Mehrere Bedeutungen (meanings)
 
-### Welche POS dürfen aufgespalten werden?
-
-**Aufspalten erlaubt:** NOUN, VERB, ADJ, ADV
-**Immer nur EINE meaning:** ADP, CONJ, PRON, INTJ, NUM, DET
-
-### Aufspaltungskriterium (nur für NOUN, VERB, ADJ, ADV)
-
 Separate meanings nur wenn die deutschen Übersetzungen **semantisch unverbunden** sind — d.h. verschiedene Wortfelder, ein Lerner würde sie als "verschiedene Wörter" wahrnehmen.
 
 **Aufspalten:**
@@ -24,12 +17,6 @@ Separate meanings nur wenn die deutschen Übersetzungen **semantisch unverbunden
 - `después`: "danach", "später" — Synonyme, eine meaning
 - `cambiar`: "ändern", "wechseln" — kontextuelle Varianten
 - `hoja`: "Blatt" (Pflanze/Papier) — gleiche Übersetzung
-
-### Funktionswörter (ADP, CONJ, etc.)
-
-Diese haben IMMER nur eine meaning mit mehreren Übersetzungen. Die verschiedenen Verwendungen werden durch hints unterschieden:
-- `por`: eine meaning mit "wegen", "durch", "für" (hint: "Preis"), "von" (hint: "Passiv")
-- `cuando`: eine meaning mit "als" (hint: "Vergangenheit"), "wenn" (hint: "Gegenwart/Zukunft")
 
 ---
 
@@ -49,21 +36,14 @@ Diese haben IMMER nur eine meaning mit mehreren Übersetzungen. Die verschiedene
 
 ---
 
-## 3. Structure-Feld
+## 3. Flags
 
-**Grundregel:** Im Normalfall enthält das structure-Feld einfach das Lemma selbst.
-
-**Ausnahmen:**
-- **Reflexive Verben mit Bedeutungsänderung:** `encontrarse` statt `encontrar`, `irse` statt `ir`
-- **Adjektive mit ser/estar-Unterschied:** `estar listo` vs. `ser listo` (nur wenn die deutsche Übersetzung unterschiedlich ist)
-
----
-
-## 4. Flags
-
-**Pflichtfeld** — jede meaning MUSS ein `"flags"` Array enthalten (kann leer sein: `[]`).
+**Optional** — nur setzen wenn zutreffend. Weglassen bei Standardwörtern.
 
 Verfügbare Flags:
+- `"informal"`: Umgangssprachlich (z.B. tío = Typ, molar = cool finden)
+- `"formal"`: Formell, gehobener Kontext (z.B. usted, rogar)
+- `"elevated"`: Gehoben, literarisch (z.B. acaecer, menester)
 - `"offensive"`: Vulgärsprache, Schimpfwörter, sozial inakzeptable Begriffe. NICHT für medizinische/anatomische Begriffe.
 - `"sensitive"`: Neutral aber thematisch heikel für automatisch generierte Lerngeschichten (Anatomie, Körperfunktionen, Intimitäten). Unterschied zu offensive: korrekt/akzeptabel, aber in Alltagsgeschichten unpassend (z.B. pene, defecar).
 - `"regionalism:Region"`: Nur für Varianten außerhalb Spaniens. Spanien = Standard (kein Flag).
@@ -71,19 +51,13 @@ Verfügbare Flags:
   - Bevorzuge übergeordnete Regionen: `Andenregion` statt `Peru/Bolivien/Ecuador`
   - Mehrere Länder mit Schrägstrich: `"regionalism:Mexiko/Kolumbien"`
   - Pro meaning nur ein regionalism-Flag
-- `"false_friend"`: Falscher Freund (ähnlich zu Deutsch aber andere Bedeutung)
 - `"pos_warning"`: POS unrealistisch
 
-**Beispiele:**
-- `"flags": []` — Standard
-- `"flags": ["offensive"]` — Vulgär (joder, mierda)
-- `"flags": ["sensitive"]` — Heikel (pene, defecar)
-- `"flags": ["regionalism:Mexiko"]` — Mexikanisch
-- `"flags": ["offensive", "regionalism:Argentinien"]` — Vulgär + argentinisch
+**Beispiel:** `"flags": ["informal", "regionalism:Argentinien"]`
 
 ---
 
-## 5. Übersetzungen (translations)
+## 4. Übersetzungen (translations)
 
 - Mehrere Synonyme sind erwünscht: `hablar` → "reden", "sprechen"
 - Nach Häufigkeit sortiert
@@ -92,47 +66,13 @@ Verfügbare Flags:
 
 ### Hint-Feld
 
-**Bevorzuge Integration in den Text:**
-- `{"text": "treffen", "hint": "zufällig"}` → `{"text": "zufällig treffen"}`
-- `{"text": "kennenlernen", "hint": "zum ersten Mal"}` → `{"text": "kennenlernen"}`
+Kurze Zusatzinfo in Klammern, die dem Lerner hilft, die Übersetzung zu verstehen.
 
-**Hints NUR verwenden für:**
-- Disambiguierung bei mehrdeutigen deutschen Wörtern: `{"text": "löschen", "hint": "Feuer"}`
-- Fachbegriffe: `{"text": "Sehne", "hint": "Anatomie"}`
-- Register/Konnotation: `{"text": "verzehren", "hint": "gehoben"}`
-- Mehrere Infos: `"hint": "Kontext1 / Kontext2"`
+**Verwenden wenn das deutsche Wort mehrdeutig ist:**
+- `{"text": "Bank", "hint": "Sitzbank"}` vs. `{"text": "Bank", "hint": "Finanzinstitut"}`
+- `{"text": "Sehne", "hint": "Anatomie"}` vs. `{"text": "Sehne", "hint": "Geometrie"}`
+- `{"text": "auflegen", "hint": "Telefon"}` vs. `{"text": "auflegen", "hint": "Schallplatte"}`
 
-**Kein Hint bei eindeutigen Übersetzungen:** `{"text": "Instrument"}`, `{"text": "drängen"}`
+**Weglassen** wenn das deutsche Wort nur eine Bedeutung hat.
 
 ---
-
-## 6. Output-Format
-
-```json
-{
-  "all_lemma_translations": [
-    {
-      "id": "...",
-      "lemma": "...",
-      "pos": "...",
-      "meanings": [
-        {
-          "definition_es": "...",
-          "structure": "...",
-          "gender": "f/m",
-          "flags": [],
-          "translations": [
-            {"text": "...", "gender_target": "f/m/n"},
-            {"text": "...", "hint": "..."}
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
-- `gender` und `gender_target`: NUR bei POS "NOUN" (dort Pflicht!)
-- `structure`: Normalerweise das Lemma; bei Reflexivverben die Reflexivform, bei ser/estar-Adjektiven mit Bedeutungsunterschied `ser/estar + Adjektiv`
-- **Keine Beispielsätze generieren** — werden in einem separaten Schritt erstellt
-- Nur JSON zurückgeben, kein zusätzlicher Text

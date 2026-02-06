@@ -249,8 +249,10 @@ class VocabEntry:
         for translation in translations:
             if translation.pos in disambiguated_pos:
                 # Disambiguated: one entry per meaning
+                n_meanings = len(translation.meanings)
                 for idx, meaning in enumerate(translation.meanings):
-                    derived_freq = int(translation.frequency * meaning.estimated_share)
+                    share = meaning.estimated_share if meaning.estimated_share is not None else 1.0 / n_meanings
+                    derived_freq = int(translation.frequency * share)
                     entries_unsorted.append({
                         "translation": translation,
                         "meaning_idx": idx,

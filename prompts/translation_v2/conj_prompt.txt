@@ -1,47 +1,31 @@
 # POS-spezifischer Prompt: CONJ
 
-## Konjunktionen haben IMMER nur EINE meaning
-
-Konjunktionen werden NICHT in mehrere meanings aufgeteilt. Alle Verwendungen werden in einer meaning zusammengefasst, mit hints zur Unterscheidung der Kontexte.
-
----
-
 ## Beispiele
 
-### Konjunktion mit mehreren Verwendungen
-
 ```json
 {
-  "id": "00801",
-  "lemma": "cuando",
-  "pos": "CONJ",
-  "meanings": [
+  "all_lemma_translations": [
     {
-      "definition_es": "introduce una cláusula temporal",
-      "structure": "cuando",
-      "flags": [],
-      "translations": [
-        {"text": "als", "hint": "Vergangenheit, einmalig"},
-        {"text": "wenn", "hint": "Gegenwart/Zukunft/wiederholt"}
+      "id": "00801",
+      "lemma": "cuando",
+      "pos": "CONJ",
+      "meanings": [
+        {
+          "definition_es": "introduce una cláusula temporal",
+          "translations": [{"text": "als"}, {"text": "wenn"}]
+        }
       ]
-    }
-  ]
-}
-```
-
-### Einfache Konjunktion
-
-```json
-{
-  "id": "00802",
-  "lemma": "pero",
-  "pos": "CONJ",
-  "meanings": [
+    },
     {
-      "definition_es": "introduce una oposición o contraste",
-      "structure": "pero",
-      "flags": [],
-      "translations": [{"text": "aber"}, {"text": "jedoch"}]
+      "id": "00802",
+      "lemma": "pero",
+      "pos": "CONJ",
+      "meanings": [
+        {
+          "definition_es": "introduce una oposición o contraste",
+          "translations": [{"text": "aber"}, {"text": "jedoch"}]
+        }
+      ]
     }
   ]
 }

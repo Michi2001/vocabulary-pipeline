@@ -13,43 +13,49 @@ Bei Adjektiven, die mit ser und estar **verschiedene Übersetzungen** haben, ers
 
 ## Beispiele
 
-### Adjektiv mit ser/estar-Unterschied
-
 ```json
 {
-  "id": "00401",
-  "lemma": "listo",
-  "pos": "ADJ",
-  "meanings": [
+  "all_lemma_translations": [
     {
-      "definition_es": "preparado para hacer algo o partir",
-      "structure": "estar listo",
-      "flags": [],
-      "translations": [{"text": "fertig"}, {"text": "bereit"}]
+      "id": "00401",
+      "lemma": "listo",
+      "pos": "ADJ",
+      "meanings": [
+        {
+          "definition_es": "preparado para hacer algo o partir",
+          "translations": [{"text": "fertig"}, {"text": "bereit"}]
+        },
+        {
+          "definition_es": "que tiene inteligencia y aprende rápido",
+          "translations": [{"text": "schlau"}, {"text": "klug"}]
+        }
+      ]
     },
     {
-      "definition_es": "que tiene inteligencia y aprende rápido",
-      "structure": "ser listo",
-      "flags": [],
-      "translations": [{"text": "schlau"}, {"text": "klug"}]
-    }
-  ]
-}
-```
-
-### Einfaches Adjektiv
-
-```json
-{
-  "id": "00402",
-  "lemma": "importante",
-  "pos": "ADJ",
-  "meanings": [
+      "id": "00402",
+      "lemma": "importante",
+      "pos": "ADJ",
+      "meanings": [
+        {
+          "definition_es": "que tiene mucho valor o relevancia",
+          "translations": [{"text": "wichtig"}, {"text": "bedeutend"}, {"text": "einflussreich"}]
+        }
+      ]
+    },
     {
-      "definition_es": "que tiene mucho valor o relevancia",
-      "structure": "importante",
-      "flags": [],
-      "translations": [{"text": "wichtig"}, {"text": "bedeutend"}]
+      "id": "00403",
+      "lemma": "libre",
+      "pos": "ADJ",
+      "meanings": [
+        {
+          "definition_es": "que no está sometido a control o restricción",
+          "translations": [{"text": "frei"}]
+        },
+        {
+          "definition_es": "sin costo o pago",
+          "translations": [{"text": "kostenlos"}, {"text": "gratis"}]
+        }
+      ]
     }
   ]
 }

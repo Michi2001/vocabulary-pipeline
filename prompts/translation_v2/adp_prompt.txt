@@ -1,49 +1,48 @@
 # POS-spezifischer Prompt: ADP
 
-## Präpositionen haben IMMER nur EINE meaning
-
-Präpositionen werden NICHT in mehrere meanings aufgeteilt. Alle Verwendungen werden in einer meaning zusammengefasst, mit hints zur Unterscheidung der Kontexte.
-
----
-
 ## Beispiele
 
-### Präposition mit mehreren Verwendungen
-
 ```json
 {
-  "id": "00701",
-  "lemma": "por",
-  "pos": "ADP",
-  "meanings": [
+  "all_lemma_translations": [
     {
-      "definition_es": "preposición con múltiples usos: causa, movimiento, intercambio, agente",
-      "structure": "por",
-      "flags": [],
-      "translations": [
-        {"text": "wegen", "hint": "Grund"},
-        {"text": "durch", "hint": "Bewegung"},
-        {"text": "für", "hint": "Preis/Tausch"},
-        {"text": "von", "hint": "Passiv"}
+      "id": "00701",
+      "lemma": "por",
+      "pos": "ADP",
+      "meanings": [
+        {
+          "definition_es": "indica la causa o el motivo de algo",
+          "structure": "por",
+          "translations": [{"text": "wegen"}, {"text": "aufgrund"}]
+        },
+        {
+          "definition_es": "indica movimiento a través de un lugar",
+          "structure": "por",
+          "translations": [{"text": "durch"}]
+        },
+        {
+          "definition_es": "indica intercambio o precio",
+          "structure": "por",
+          "translations": [{"text": "für", "hint": "Preis/Tausch"}]
+        },
+        {
+          "definition_es": "indica el agente en construcciones pasivas",
+          "structure": "por",
+          "translations": [{"text": "von", "hint": "Passiv"}]
+        }
       ]
-    }
-  ]
-}
-```
-
-### Einfache Präposition
-
-```json
-{
-  "id": "00702",
-  "lemma": "sin",
-  "pos": "ADP",
-  "meanings": [
+    },
     {
-      "definition_es": "indica ausencia o carencia de algo",
-      "structure": "sin",
-      "flags": [],
-      "translations": [{"text": "ohne"}]
+      "id": "00702",
+      "lemma": "sin",
+      "pos": "ADP",
+      "meanings": [
+        {
+          "definition_es": "indica ausencia o carencia de algo",
+          "structure": "sin",
+          "translations": [{"text": "ohne"}]
+        }
+      ]
     }
   ]
 }

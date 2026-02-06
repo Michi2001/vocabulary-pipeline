@@ -1,0 +1,51 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "all_lemma_translations": {
+      "type": "ARRAY",
+      "items": {
+        "type": "OBJECT",
+        "properties": {
+          "id": {"type": "STRING"},
+          "lemma": {"type": "STRING"},
+          "pos": {"type": "STRING"},
+          "meanings": {
+            "type": "ARRAY",
+            "items": {
+              "type": "OBJECT",
+              "properties": {
+                "definition_es": {"type": "STRING"},
+                "gender": {
+                  "type": "STRING",
+                  "enum": ["m", "f"]
+                },
+                "flags": {
+                  "type": "ARRAY",
+                  "items": {"type": "STRING"}
+                },
+                "translations": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "text": {"type": "STRING"},
+                      "hint": {"type": "STRING"},
+                      "gender_target": {
+                        "type": "STRING",
+                        "enum": ["m", "f", "n"]
+                      }
+                    },
+                    "required": ["text", "gender_target"]
+                  }
+                }
+              },
+              "required": ["definition_es", "gender", "translations"]
+            }
+          }
+        },
+        "required": ["id", "lemma", "pos", "meanings"]
+      }
+    }
+  },
+  "required": ["all_lemma_translations"]
+}

@@ -109,11 +109,16 @@ class OpenAIProvider(BaseLLMProvider):
             raise LLMProviderError(f"OpenAI correction failed: {e}")
 
     def translate_lemmas(
-        self, batch: List[Dict[str, Any]], system_prompt: str
+        self,
+        batch: List[Dict[str, Any]],
+        system_prompt: str,
+        response_schema: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """Send batch to OpenAI API for translation."""
         user_message = self._format_batch(batch)
 
+        # TODO: Convert response_schema to OpenAI format if provided
+        # For now, use a generic schema that works for all POS types
         translation_schema = {
             "name": "translation_response",
             "strict": True,
@@ -154,7 +159,7 @@ class OpenAIProvider(BaseLLMProvider):
                                                 },
                                             },
                                         },
-                                        "required": ["definition_es", "flags", "translations"],
+                                        "required": ["definition_es", "translations"],
                                         "additionalProperties": False,
                                     },
                                 },

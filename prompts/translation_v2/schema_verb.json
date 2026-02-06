@@ -1,0 +1,44 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "all_lemma_translations": {
+      "type": "ARRAY",
+      "items": {
+        "type": "OBJECT",
+        "properties": {
+          "id": {"type": "STRING"},
+          "lemma": {"type": "STRING"},
+          "pos": {"type": "STRING"},
+          "meanings": {
+            "type": "ARRAY",
+            "items": {
+              "type": "OBJECT",
+              "properties": {
+                "definition_es": {"type": "STRING"},
+                "structure": {"type": "STRING"},
+                "flags": {
+                  "type": "ARRAY",
+                  "items": {"type": "STRING"}
+                },
+                "translations": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "text": {"type": "STRING"},
+                      "hint": {"type": "STRING"}
+                    },
+                    "required": ["text"]
+                  }
+                }
+              },
+              "required": ["definition_es", "structure", "translations"]
+            }
+          }
+        },
+        "required": ["id", "lemma", "pos", "meanings"]
+      }
+    }
+  },
+  "required": ["all_lemma_translations"]
+}

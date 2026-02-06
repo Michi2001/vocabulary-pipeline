@@ -1,44 +1,31 @@
 # POS-spezifischer Prompt: NUM
 
-## Zahlwörter haben IMMER nur EINE meaning
-
-Zahlwörter werden NICHT in mehrere meanings aufgeteilt.
-
----
-
 ## Beispiele
 
-### Kardinalzahl
-
 ```json
 {
-  "id": "01101",
-  "lemma": "cien",
-  "pos": "NUM",
-  "meanings": [
+  "all_lemma_translations": [
     {
-      "definition_es": "número equivalente a diez veces diez",
-      "structure": "cien",
-      "flags": [],
-      "translations": [{"text": "hundert"}]
-    }
-  ]
-}
-```
-
-### Ordinalzahl
-
-```json
-{
-  "id": "01102",
-  "lemma": "primero",
-  "pos": "NUM",
-  "meanings": [
+      "id": "01101",
+      "lemma": "cien",
+      "pos": "NUM",
+      "meanings": [
+        {
+          "definition_es": "número equivalente a diez veces diez",
+          "translations": [{"text": "hundert"}]
+        }
+      ]
+    },
     {
-      "definition_es": "que ocupa el lugar número uno en una serie",
-      "structure": "primero",
-      "flags": [],
-      "translations": [{"text": "erste"}, {"text": "erster"}]
+      "id": "01102",
+      "lemma": "primero",
+      "pos": "NUM",
+      "meanings": [
+        {
+          "definition_es": "que ocupa el lugar número uno en una serie",
+          "translations": [{"text": "erster"}]
+        }
+      ]
     }
   ]
 }

@@ -1,6 +1,7 @@
 """LLM-based lemma translator with caching support."""
 
 import hashlib
+import json
 import logging
 from collections import defaultdict
 from pathlib import Path
@@ -23,6 +24,18 @@ POS_PROMPT_MAP = {
     "PRON": "pron_prompt.txt",
     "INTJ": "intj_prompt.txt",
     "NUM": "num_prompt.txt",
+}
+
+POS_SCHEMA_MAP = {
+    "VERB": "schema_verb.json",
+    "NOUN": "schema_noun.json",
+    "ADJ": "schema_adj.json",
+    "ADV": "schema_adv.json",
+    "ADP": "schema_adp.json",
+    "CONJ": "schema_conj.json",
+    "PRON": "schema_pron.json",
+    "INTJ": "schema_intj.json",
+    "NUM": "schema_num.json",
 }
 
 # Order in which POS categories are processed
@@ -104,6 +117,9 @@ class LemmaTranslator:
             pos_hash = hashlib.sha256(pos_prompt.encode()).hexdigest()[:8]
             system_prompt = f"{general_prompt}\n\n{pos_prompt}"
 
+            # Load POS-specific schema
+            pos_schema = self._load_schema_for_pos(pos)
+
             # Compute combined prompt hash for cache key
             combined_prompt_hash = hashlib.sha256(
                 f"{general_hash}|{pos_hash}".encode()
@@ -134,7 +150,7 @@ class LemmaTranslator:
 
             # Process uncached batches and combine with cached translations
             batch_translations = self._process_batches_for_pos(
-                batches, pos, system_prompt, combined_prompt_hash, total_usage
+                batches, pos, system_prompt, pos_schema, combined_prompt_hash, total_usage
             )
             all_translations.extend(batch_translations)
             all_translations.extend(cached_translations)
@@ -192,6 +208,18 @@ class LemmaTranslator:
             raise FileNotFoundError(f"General prompt not found: {general_file}")
 
         return general_file.read_text(encoding="utf-8")
+
+    def _load_schema_for_pos(self, pos: str) -> Optional[Dict[str, Any]]:
+        """Load POS-specific JSON schema for structured output."""
+        if pos not in POS_SCHEMA_MAP:
+            return None
+
+        schema_file = self.prompts_dir / POS_SCHEMA_MAP[pos]
+        if not schema_file.exists():
+            logger.warning(f"Schema file not found: {schema_file}")
+            return None
+
+        return json.loads(schema_file.read_text(encoding="utf-8"))
 
     def _create_batches_from_items(
         self, items: List[Dict[str, Any]]
@@ -280,6 +308,7 @@ class LemmaTranslator:
         batches: List[List[Dict[str, Any]]],
         pos: str,
         system_prompt: str,
+        pos_schema: Optional[Dict[str, Any]],
         combined_prompt_hash: str,
         total_usage: Dict[str, int],
     ) -> List[Dict[str, Any]]:
@@ -291,7 +320,7 @@ class LemmaTranslator:
                 f"  Processing {pos} batch {i+1}/{len(batches)} ({len(batch)} uncached lemmas)"
             )
 
-            response = self.provider.translate_lemmas(batch, system_prompt)
+            response = self.provider.translate_lemmas(batch, system_prompt, pos_schema)
             batch_translations = response["all_lemma_translations"]
 
             # Track token usage

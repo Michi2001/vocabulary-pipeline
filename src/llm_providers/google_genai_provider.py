@@ -119,62 +119,18 @@ class GoogleGenAIProvider(BaseLLMProvider):
             raise LLMProviderError(f"Google GenAI correction failed: {e}")
 
     def translate_lemmas(
-        self, batch: List[Dict[str, Any]], system_prompt: str
+        self,
+        batch: List[Dict[str, Any]],
+        system_prompt: str,
+        response_schema: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """Send batch to Google GenAI API for translation."""
         user_message = self._format_batch(batch)
 
-        translation_schema = {
-            "type": "OBJECT",
-            "properties": {
-                "all_lemma_translations": {
-                    "type": "ARRAY",
-                    "items": {
-                        "type": "OBJECT",
-                        "properties": {
-                            "id": {"type": "STRING"},
-                            "lemma": {"type": "STRING"},
-                            "pos": {"type": "STRING"},
-                            "meanings": {
-                                "type": "ARRAY",
-                                "items": {
-                                    "type": "OBJECT",
-                                    "properties": {
-                                        "definition_es": {"type": "STRING"},
-                                        "structure": {"type": "STRING"},
-                                        "gender": {"type": "STRING"},
-                                        "flags": {
-                                            "type": "ARRAY",
-                                            "items": {"type": "STRING"},
-                                        },
-                                        "translations": {
-                                            "type": "ARRAY",
-                                            "items": {
-                                                "type": "OBJECT",
-                                                "properties": {
-                                                    "text": {"type": "STRING"},
-                                                    "hint": {"type": "STRING"},
-                                                    "gender_target": {"type": "STRING"},
-                                                },
-                                                "required": ["text"],
-                                            },
-                                        },
-                                    },
-                                    "required": ["definition_es", "flags", "translations"],
-                                },
-                            },
-                        },
-                        "required": ["id", "lemma", "pos", "meanings"],
-                    },
-                }
-            },
-            "required": ["all_lemma_translations"],
-        }
-
         config = types.GenerateContentConfig(
             system_instruction=system_prompt,
             response_mime_type="application/json",
-            response_schema=translation_schema,
+            response_schema=response_schema,
             thinking_config=types.ThinkingConfig(thinking_level=self.thinking_level),
             temperature=self.temperature,
         )

@@ -17,6 +17,7 @@ from datetime import datetime
 from pathlib import Path
 
 from src.frequency_counter import FrequencyCounter
+from src.lemma_cache import LemmaCache
 from src.llm_providers import create_provider
 from src.llm_translator import LemmaTranslator
 from src.vocab import Vocabulary
@@ -58,8 +59,11 @@ PROVIDER_CONFIG = {
     "temperature": 1.0,
 }
 BATCH_SIZE = 10  # Number of items to process per batch
+CACHE_DIR = Path("test/translation_cache")
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
-OUTPUT_DIR = Path(f"test/outputs/test_translation/{TIMESTAMP}")
+OUTPUT_DIR = Path(
+    f"test/outputs/test_translation/{PROVIDER_CONFIG['model']}_{TIMESTAMP}"
+)
 OUTPUT_LOG_PATH = OUTPUT_DIR / "translation.log"
 
 
@@ -90,9 +94,10 @@ class TestLemmaTranslation(unittest.TestCase):
             "output_dir": str(OUTPUT_DIR),
         }
 
-        # Create translator (cache=None disables caching)
+        # Create cache and translator
+        cache = LemmaCache({"enabled": True, "directory": str(CACHE_DIR)})
         translator = LemmaTranslator(
-            self.provider, cache=None, config=translator_config
+            self.provider, cache=cache, config=translator_config
         )
 
         # Run translation
