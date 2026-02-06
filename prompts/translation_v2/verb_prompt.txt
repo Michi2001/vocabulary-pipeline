@@ -40,7 +40,7 @@ Enthält das Verb im Infinitiv. Bei reflexiven Bedeutungen die Reflexivform.
         {
           "definition_es": "corresponder el turno o la responsabilidad a alguien",
           "structure": "tocar",
-          "translations": [{"text": "an der Reihe sein"}]
+          "translations": [{"text": "an der Reihe sein"}, {"text": "dran sein", "flags": ["informal"]}]
         },
         {
           "definition_es": "golpear una superficie para llamar la atención",
@@ -50,42 +50,67 @@ Enthält das Verb im Infinitiv. Bei reflexiven Bedeutungen die Reflexivform.
       ]
     },
     {
-      "id": "00203",
-      "lemma": "encontrar",
+      "id": "00202",
+      "lemma": "poner",
       "pos": "VERB",
       "meanings": [
         {
-          "definition_es": "dar con algo o alguien que se buscaba",
-          "structure": "encontrar",
-          "translations": [{"text": "finden"}]
+          "definition_es": "colocar algo en un lugar determinado",
+          "structure": "poner",
+          "translations": [{"text": "stellen"}, {"text": "legen"}, {"text": "setzen"}]
         },
         {
-          "definition_es": "reunirse con alguien de manera acordada o casual",
-          "structure": "encontrarse",
-          "translations": [{"text": "sich treffen"}]
+          "definition_es": "encender o activar un aparato",
+          "structure": "poner",
+          "translations": [{"text": "anmachen"}, {"text": "einschalten"}]
         },
         {
-          "definition_es": "estar en un lugar o en cierto estado",
-          "structure": "encontrarse",
-          "translations": [{"text": "sich befinden"}]
+          "definition_es": "comenzar a estar en un estado o actitud",
+          "structure": "ponerse",
+          "translations": [{"text": "werden", "hint": "Zustandsänderung"}]
         }
       ]
     },
     {
-      "id": "00202",
-      "lemma": "coger",
+      "id": "00203",
+      "lemma": "meter",
       "pos": "VERB",
       "meanings": [
         {
-          "definition_es": "tomar algo con la mano o llevarlo consigo",
-          "structure": "coger",
-          "translations": [{"text": "nehmen"}, {"text": "greifen"}]
+          "definition_es": "introducir algo dentro de otra cosa",
+          "structure": "meter",
+          "translations": [{"text": "hineinstecken"}, {"text": "hineintun"}]
         },
         {
-          "definition_es": "tener relaciones sexuales",
-          "structure": "coger",
-          "flags": ["offensive", "regionalism:Lateinamerika"],
-          "translations": [{"text": "ficken"}]
+          "definition_es": "involucrarse o entrometerse en algo",
+          "structure": "meterse",
+          "translations": [{"text": "sich einmischen"}]
+        }
+      ]
+    },
+    {
+      "id": "00204",
+      "lemma": "rogar",
+      "pos": "VERB",
+      "meanings": [
+        {
+          "definition_es": "pedir algo con mucho respeto o insistencia",
+          "structure": "rogar",
+          "flags": ["formal"],
+          "translations": [{"text": "bitten"}, {"text": "flehen"}]
+        }
+      ]
+    },
+    {
+      "id": "00205",
+      "lemma": "currar",
+      "pos": "VERB",
+      "meanings": [
+        {
+          "definition_es": "trabajar, ejercer una actividad laboral",
+          "structure": "currar",
+          "flags": ["informal"],
+          "translations": [{"text": "arbeiten"}, {"text": "schuften", "flags": ["informal"]}]
         }
       ]
     }

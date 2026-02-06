@@ -24,7 +24,7 @@ class Meaning:
     """A single meaning/sense of a lemma."""
 
     definition_es: str
-    translations: List[Dict[str, str]]
+    translations: List[Dict[str, Any]]  # text, hint?, gender_target?, flags?
     estimated_share: Optional[float] = None  # Set by ShareUpdater after disambiguation
     structure: Optional[str] = None
     examples_es: Optional[List[str]] = None

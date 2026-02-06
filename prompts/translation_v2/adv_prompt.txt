@@ -30,6 +30,46 @@
           "translations": [{"text": "immer"}, {"text": "stets"}]
         }
       ]
+    },
+    {
+      "id": "00503",
+      "lemma": "acaso",
+      "pos": "ADV",
+      "meanings": [
+        {
+          "definition_es": "introduce una pregunta retórica con duda",
+          "translations": [{"text": "etwa"}, {"text": "vielleicht"}]
+        },
+        {
+          "definition_es": "por casualidad, de manera fortuita",
+          "flags": ["rare"],
+          "translations": [{"text": "zufällig"}]
+        }
+      ]
+    },
+    {
+      "id": "00504",
+      "lemma": "antaño",
+      "pos": "ADV",
+      "meanings": [
+        {
+          "definition_es": "en tiempos pasados, hace mucho tiempo",
+          "flags": ["elevated"],
+          "translations": [{"text": "einst"}, {"text": "früher"}]
+        }
+      ]
+    },
+    {
+      "id": "00505",
+      "lemma": "nomás",
+      "pos": "ADV",
+      "meanings": [
+        {
+          "definition_es": "solamente, nada más",
+          "flags": ["regionalism:Lateinamerika"],
+          "translations": [{"text": "nur"}, {"text": "einfach"}]
+        }
+      ]
     }
   ]
 }

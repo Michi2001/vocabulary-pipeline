@@ -12,7 +12,7 @@
       "meanings": [
         {
           "definition_es": "cosa indeterminada o no especificada",
-          "translations": [{"text": "etwas"}, {"text": "irgendwas"}]
+          "translations": [{"text": "etwas"}, {"text": "irgendwas", "flags": ["informal"]}]
         }
       ]
     },
@@ -35,6 +35,30 @@
         {
           "definition_es": "indica a quién se dirige la acción, tercera persona",
           "translations": [{"text": "ihm"}, {"text": "ihr"}]
+        }
+      ]
+    },
+    {
+      "id": "00904",
+      "lemma": "cuyo",
+      "pos": "PRON",
+      "meanings": [
+        {
+          "definition_es": "indica posesión del antecedente en oraciones relativas",
+          "flags": ["elevated"],
+          "translations": [{"text": "dessen"}, {"text": "deren"}]
+        }
+      ]
+    },
+    {
+      "id": "00905",
+      "lemma": "vos",
+      "pos": "PRON",
+      "meanings": [
+        {
+          "definition_es": "la persona con quien se habla, segunda persona singular",
+          "flags": ["regionalism:Río_de_la_Plata"],
+          "translations": [{"text": "du"}]
         }
       ]
     }

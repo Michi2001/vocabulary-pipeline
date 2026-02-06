@@ -33,17 +33,6 @@ Bei Adjektiven, die mit ser und estar **verschiedene Übersetzungen** haben, ers
     },
     {
       "id": "00402",
-      "lemma": "importante",
-      "pos": "ADJ",
-      "meanings": [
-        {
-          "definition_es": "que tiene mucho valor o relevancia",
-          "translations": [{"text": "wichtig"}, {"text": "bedeutend"}, {"text": "einflussreich"}]
-        }
-      ]
-    },
-    {
-      "id": "00403",
       "lemma": "libre",
       "pos": "ADJ",
       "meanings": [
@@ -54,6 +43,41 @@ Bei Adjektiven, die mit ser und estar **verschiedene Übersetzungen** haben, ers
         {
           "definition_es": "sin costo o pago",
           "translations": [{"text": "kostenlos"}, {"text": "gratis"}]
+        }
+      ]
+    },
+    {
+      "id": "00403",
+      "lemma": "largo",
+      "pos": "ADJ",
+      "meanings": [
+        {
+          "definition_es": "que tiene mucha longitud o extensión",
+          "translations": [{"text": "lang"}]
+        }
+      ]
+    },
+    {
+      "id": "00404",
+      "lemma": "cursi",
+      "pos": "ADJ",
+      "meanings": [
+        {
+          "definition_es": "que es excesivamente sentimental o pretencioso",
+          "flags": ["informal"],
+          "translations": [{"text": "kitschig"}, {"text": "schnulzig", "flags": ["informal"]}]
+        }
+      ]
+    },
+    {
+      "id": "00405",
+      "lemma": "grávido",
+      "pos": "ADJ",
+      "meanings": [
+        {
+          "definition_es": "que está en estado de gestación",
+          "flags": ["elevated"],
+          "translations": [{"text": "schwanger"}]
         }
       ]
     }

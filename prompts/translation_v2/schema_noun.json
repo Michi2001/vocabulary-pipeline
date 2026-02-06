@@ -33,6 +33,10 @@
                       "gender_target": {
                         "type": "STRING",
                         "enum": ["m", "f", "n"]
+                      },
+                      "flags": {
+                        "type": "ARRAY",
+                        "items": {"type": "STRING"}
                       }
                     },
                     "required": ["text", "gender_target"]

@@ -69,12 +69,50 @@ Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital
         {
           "definition_es": "parte inferior del pie",
           "gender": "f",
+          "flags": ["rare"],
           "translations": [{"text": "Fußsohle", "gender_target": "f"}]
         },
         {
           "definition_es": "instalación industrial para fabricar o procesar algo",
           "gender": "f",
           "translations": [{"text": "Werk", "gender_target": "n"}, {"text": "Anlage", "hint": "Industrie", "gender_target": "f"}]
+        }
+      ]
+    },
+    {
+      "id": "00304",
+      "lemma": "tío",
+      "pos": "NOUN",
+      "meanings": [
+        {
+          "definition_es": "hermano o hermana del padre o de la madre",
+          "gender": "m",
+          "translations": [{"text": "Onkel", "gender_target": "m"}]
+        },
+        {
+          "definition_es": "manera coloquial de referirse a una persona",
+          "gender": "m",
+          "flags": ["informal"],
+          "translations": [{"text": "Typ", "gender_target": "m"}, {"text": "Kerl", "gender_target": "m"}]
+        }
+      ]
+    },
+    {
+      "id": "00305",
+      "lemma": "guagua",
+      "pos": "NOUN",
+      "meanings": [
+        {
+          "definition_es": "vehículo de transporte público urbano",
+          "gender": "f",
+          "flags": ["regionalism:Karibik"],
+          "translations": [{"text": "Bus", "gender_target": "m"}]
+        },
+        {
+          "definition_es": "bebé o niño muy pequeño",
+          "gender": "f",
+          "flags": ["regionalism:Andenregion"],
+          "translations": [{"text": "Baby", "gender_target": "n"}, {"text": "Säugling", "gender_target": "m"}]
         }
       ]
     }

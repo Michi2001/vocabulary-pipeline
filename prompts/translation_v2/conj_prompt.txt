@@ -18,12 +18,49 @@
     },
     {
       "id": "00802",
-      "lemma": "pero",
+      "lemma": "aunque",
       "pos": "CONJ",
       "meanings": [
         {
-          "definition_es": "introduce una oposición o contraste",
-          "translations": [{"text": "aber"}, {"text": "jedoch"}]
+          "definition_es": "introduce una concesión o contraste",
+          "translations": [{"text": "obwohl"}, {"text": "auch wenn"}, {"text": "selbst wenn"}]
+        }
+      ]
+    },
+    {
+      "id": "00803",
+      "lemma": "apenas",
+      "pos": "CONJ",
+      "meanings": [
+        {
+          "definition_es": "introduce un evento que ocurre inmediatamente después de otro",
+          "translations": [{"text": "sobald"}, {"text": "kaum dass"}]
+        }
+      ]
+    },
+    {
+      "id": "00804",
+      "lemma": "si",
+      "pos": "CONJ",
+      "meanings": [
+        {
+          "definition_es": "introduce una condición o hipótesis",
+          "translations": [{"text": "wenn"}, {"text": "falls"}]
+        },
+        {
+          "definition_es": "introduce una pregunta indirecta",
+          "translations": [{"text": "ob"}]
+        }
+      ]
+    },
+    {
+      "id": "00805",
+      "lemma": "conforme",
+      "pos": "CONJ",
+      "meanings": [
+        {
+          "definition_es": "a medida que algo va sucediendo",
+          "translations": [{"text": "je nachdem"}, {"text": "so wie"}]
         }
       ]
     }

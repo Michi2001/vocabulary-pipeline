@@ -12,6 +12,7 @@
       "meanings": [
         {
           "definition_es": "llamar la atención de alguien de forma informal",
+          "flags": ["informal"],
           "translations": [{"text": "hey"}, {"text": "hör mal"}]
         }
       ]
@@ -22,8 +23,46 @@
       "pos": "INTJ",
       "meanings": [
         {
-          "definition_es": "expresión de dolor, sorpresa o emoción",
-          "translations": [{"text": "au"}, {"text": "ach"}]
+          "definition_es": "expresión de dolor físico repentino",
+          "translations": [{"text": "au!"}, {"text": "autsch!"}]
+        },
+        {
+          "definition_es": "expresión de sorpresa, pena o emoción",
+          "translations": [{"text": "ach!"}, {"text": "oh!"}]
+        }
+      ]
+    },
+    {
+      "id": "01003",
+      "lemma": "vale",
+      "pos": "INTJ",
+      "meanings": [
+        {
+          "definition_es": "expresión de acuerdo o confirmación",
+          "translations": [{"text": "okay"}, {"text": "gut"}, {"text": "in Ordnung"}]
+        }
+      ]
+    },
+    {
+      "id": "01004",
+      "lemma": "órale",
+      "pos": "INTJ",
+      "meanings": [
+        {
+          "definition_es": "expresión de entusiasmo, aprobación o sorpresa",
+          "flags": ["regionalism:Mexiko", "informal"],
+          "translations": [{"text": "cool"}, {"text": "los geht's"}]
+        }
+      ]
+    },
+    {
+      "id": "01005",
+      "lemma": "ojo",
+      "pos": "INTJ",
+      "meanings": [
+        {
+          "definition_es": "advertencia para que alguien tenga cuidado",
+          "translations": [{"text": "Vorsicht"}, {"text": "Achtung"}, {"text": "aufgepasst"}]
         }
       ]
     }

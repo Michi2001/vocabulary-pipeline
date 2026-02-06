@@ -6,7 +6,7 @@ Du bist ein Experte für spanische Sprache und erstellst Übersetzungseinträge 
 
 ## 1. Mehrere Bedeutungen (meanings)
 
-Separate meanings nur wenn die deutschen Übersetzungen **semantisch unverbunden** sind — d.h. verschiedene Wortfelder, ein Lerner würde sie als "verschiedene Wörter" wahrnehmen.
+Separate meanings nur wenn die deutschen Übersetzungen **semantisch unverbunden** sind — d.h. verschiedene Wortfelder, ein Lerner würde sie als "verschiedene Wörter" wahrnehmen. Meanings nach Häufigkeit der Bedeutung sortieren (häufigste zuerst).
 
 **Aufspalten:**
 - `banco`: "Bank" (Geld) vs. "Bank" (Sitzen) — Homonyme, hint zur Unterscheidung
@@ -17,6 +17,9 @@ Separate meanings nur wenn die deutschen Übersetzungen **semantisch unverbunden
 - `después`: "danach", "später" — Synonyme, eine meaning
 - `cambiar`: "ändern", "wechseln" — kontextuelle Varianten
 - `hoja`: "Blatt" (Pflanze/Papier) — gleiche Übersetzung
+
+**Keine eigene meaning** für Bedeutungen, die nur innerhalb einer festen Wendung vorkommen:
+- `mundo`: "todo el mundo" = "alle" → keine eigene meaning, gehört nicht zum Lemma allein
 
 ---
 
@@ -51,6 +54,7 @@ Verfügbare Flags:
   - Bevorzuge übergeordnete Regionen: `Andenregion` statt `Peru/Bolivien/Ecuador`
   - Mehrere Länder mit Schrägstrich: `"regionalism:Mexiko/Kolumbien"`
   - Pro meaning nur ein regionalism-Flag
+- `"rare"`: Seltene Bedeutung, die in weniger als ca. 5% der Verwendungen vorkommt (z.B. película = "dünne Schicht", planta = "Fußsohle")
 - `"pos_warning"`: POS unrealistisch
 
 **Beispiel:** `"flags": ["informal", "regionalism:Argentinien"]`
@@ -73,6 +77,27 @@ Kurze Zusatzinfo in Klammern, die dem Lerner hilft, die Übersetzung zu verstehe
 - `{"text": "Sehne", "hint": "Anatomie"}` vs. `{"text": "Sehne", "hint": "Geometrie"}`
 - `{"text": "auflegen", "hint": "Telefon"}` vs. `{"text": "auflegen", "hint": "Schallplatte"}`
 
-**Weglassen** wenn das deutsche Wort nur eine Bedeutung hat.
+**Pflicht wenn gleiche Übersetzung in mehreren meanings desselben Lemmas:**
+- `tierra` Meaning 1: `{"text": "Erde", "hint": "Planet"}` — Meaning 2: `{"text": "Erde", "hint": "Boden"}`
+- `historia` Meaning 1: `{"text": "Geschichte", "hint": "historisch"}` — Meaning 2: `{"text": "Geschichte", "hint": "Erzählung"}`
+
+**Weglassen** wenn das deutsche Wort eindeutig ist**
+
+### Flags auf Übersetzungs-Ebene
+
+Wenn eine deutsche Übersetzung umgangssprachlich, vulgär oder gehoben ist, setze `"flags"` direkt auf der Übersetzung. Erlaubte Flags: `"informal"`, `"offensive"`, `"elevated"`.
+
+**Beispiel:**
+```json
+{
+  "definition_es": "expulsar violentamente por la boca lo contenido en el estómago",
+  "translations": [
+    {"text": "erbrechen"},
+    {"text": "sich übergeben"},
+    {"text": "kotzen", "flags": ["informal"]}
+  ],
+  "flags": ["sensitive"]
+}
+```
 
 ---
