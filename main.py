@@ -331,6 +331,8 @@ def run_pipeline(
                     "prompt_directory", "prompts/translation"
                 ),
                 "output_dir": output_dir,
+                "max_requests_per_minute": translation_config.get("max_requests_per_minute", 0),
+                "max_concurrent_requests": translation_config.get("max_concurrent_requests", 5),
             }
 
             translator = LemmaTranslator(

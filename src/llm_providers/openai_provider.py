@@ -1,6 +1,7 @@
-"""OpenAI API provider for lemma correction."""
+"""OpenAI API provider for lemma correction. DEPRECATED: Use GoogleGenAIProvider instead."""
 
 import logging
+import warnings
 from typing import List, Dict, Any
 
 from openai import OpenAI
@@ -33,6 +34,12 @@ class OpenAIProvider(BaseLLMProvider):
             }
         """
         super().__init__(config)
+
+        warnings.warn(
+            "OpenAIProvider is deprecated. Use GoogleGenAIProvider instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
         load_dotenv()
 

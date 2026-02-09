@@ -67,6 +67,15 @@ class BaseLLMProvider(ABC):
         """
         pass
 
+    async def translate_lemmas_async(
+        self,
+        batch: List[Dict[str, Any]],
+        system_prompt: str,
+        response_schema: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        """Async version of translate_lemmas. Must be overridden by subclasses that support async."""
+        raise NotImplementedError("translate_lemmas_async not implemented by this provider")
+
     @abstractmethod
     def generate_examples(
         self, batch: List[Dict[str, Any]], system_prompt: str

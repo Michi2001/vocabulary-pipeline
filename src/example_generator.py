@@ -111,6 +111,7 @@ class ExampleGenerator:
         total_usage = {
             "total_prompt_tokens": 0,
             "total_completion_tokens": 0,
+            "total_thinking_tokens": 0,
             "total_tokens": 0,
             "api_calls": 0,
             "cache_hits": cached_count,
@@ -144,9 +145,8 @@ class ExampleGenerator:
             if "_token_usage" in response:
                 usage = response["_token_usage"]
                 total_usage["total_prompt_tokens"] += usage.get("prompt_tokens", 0)
-                total_usage["total_completion_tokens"] += usage.get(
-                    "completion_tokens", 0
-                )
+                total_usage["total_completion_tokens"] += usage.get("completion_tokens", 0)
+                total_usage["total_thinking_tokens"] += usage.get("thinking_tokens", 0)
                 total_usage["total_tokens"] += usage.get("total_tokens", 0)
                 total_usage["api_calls"] += 1
 
@@ -165,6 +165,7 @@ class ExampleGenerator:
         logger.info(f"Cache Hits:         {total_usage['cache_hits']}")
         logger.info(f"Prompt Tokens:      {total_usage['total_prompt_tokens']:,}")
         logger.info(f"Completion Tokens:  {total_usage['total_completion_tokens']:,}")
+        logger.info(f"Thinking Tokens:    {total_usage['total_thinking_tokens']:,}")
         logger.info(f"Total Tokens:       {total_usage['total_tokens']:,}")
         logger.info("=" * 60 + "\n")
 

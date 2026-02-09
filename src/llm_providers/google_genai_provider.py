@@ -1,5 +1,6 @@
 """Google GenAI API provider for lemma correction and translation."""
 
+import json
 import logging
 from typing import List, Dict, Any
 
@@ -11,6 +12,7 @@ import os
 from src.llm_providers.base_provider import BaseLLMProvider, LLMProviderError
 from src.llm_providers.common import (
     retry_with_backoff,
+    async_retry_with_backoff,
     ResponseParser,
     extract_token_usage_google,
 )
@@ -118,16 +120,11 @@ class GoogleGenAIProvider(BaseLLMProvider):
         except Exception as e:
             raise LLMProviderError(f"Google GenAI correction failed: {e}")
 
-    def translate_lemmas(
-        self,
-        batch: List[Dict[str, Any]],
-        system_prompt: str,
-        response_schema: Dict[str, Any] = None,
-    ) -> Dict[str, Any]:
-        """Send batch to Google GenAI API for translation."""
-        user_message = self._format_batch(batch)
-
-        config = types.GenerateContentConfig(
+    def _translation_config(
+        self, system_prompt: str, response_schema: Dict[str, Any]
+    ) -> types.GenerateContentConfig:
+        """Build GenerateContentConfig for translation calls."""
+        return types.GenerateContentConfig(
             system_instruction=system_prompt,
             response_mime_type="application/json",
             response_schema=response_schema,
@@ -135,25 +132,35 @@ class GoogleGenAIProvider(BaseLLMProvider):
             temperature=self.temperature,
         )
 
+    def _parse_translation_response(self, response, batch_size: int) -> Dict[str, Any]:
+        """Parse translation response and attach token usage."""
+        parsed = json.loads(response.text)
+
+        token_usage = extract_token_usage_google(response)
+        if token_usage:
+            parsed["_token_usage"] = token_usage.to_dict()
+
+        logger.info(f"Successfully translated batch of {batch_size} lemmas")
+        return parsed
+
+    def translate_lemmas(
+        self,
+        batch: List[Dict[str, Any]],
+        system_prompt: str,
+        response_schema: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        """Send batch to Google GenAI API for translation."""
+        if response_schema is None:
+            raise LLMProviderError("response_schema is required for Google GenAI translation")
+
+        user_message = self._format_batch(batch)
+        config = self._translation_config(system_prompt, response_schema)
+
         def api_call():
             response = self.client.models.generate_content(
-                model=self.model,
-                contents=user_message,
-                config=config,
+                model=self.model, contents=user_message, config=config,
             )
-
-            content = response.text
-            parsed = ResponseParser.parse_json_response(content)
-
-            if not ResponseParser.validate_translation_response(parsed):
-                raise LLMProviderError(f"Invalid translation response structure")
-
-            token_usage = extract_token_usage_google(response)
-            if token_usage:
-                parsed["_token_usage"] = token_usage.to_dict()
-
-            logger.info(f"Successfully translated batch of {len(batch)} lemmas")
-            return parsed
+            return self._parse_translation_response(response, len(batch))
 
         try:
             return retry_with_backoff(
@@ -164,6 +171,35 @@ class GoogleGenAIProvider(BaseLLMProvider):
             )
         except Exception as e:
             raise LLMProviderError(f"Google GenAI translation failed: {e}")
+
+    async def translate_lemmas_async(
+        self,
+        batch: List[Dict[str, Any]],
+        system_prompt: str,
+        response_schema: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        """Async version using client.aio.models.generate_content()."""
+        if response_schema is None:
+            raise LLMProviderError("response_schema is required for Google GenAI translation")
+
+        user_message = self._format_batch(batch)
+        config = self._translation_config(system_prompt, response_schema)
+
+        async def api_call():
+            response = await self.client.aio.models.generate_content(
+                model=self.model, contents=user_message, config=config,
+            )
+            return self._parse_translation_response(response, len(batch))
+
+        try:
+            return await async_retry_with_backoff(
+                api_call,
+                max_retries=self.max_retries,
+                retry_delay=self.retry_delay,
+                operation_name="Google GenAI async translation",
+            )
+        except Exception as e:
+            raise LLMProviderError(f"Google GenAI async translation failed: {e}")
 
     def generate_examples(
         self, batch: List[Dict[str, Any]], system_prompt: str

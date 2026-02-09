@@ -1,5 +1,6 @@
 """LLM-based lemma translator with caching support."""
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -10,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from src.frequency_counter import FrequencyCounter
 from src.lemma_cache import LemmaCache
 from src.llm_providers.base_provider import BaseLLMProvider
+from src.llm_providers.common.rate_limiter import AsyncRateLimiter
 from src.vocab import Translation
 
 logger = logging.getLogger(__name__)
@@ -62,6 +64,9 @@ class LemmaTranslator:
         self.batch_size = config.get("batch_size", 25)
         self.prompts_dir = Path(config.get("prompts_dir", "prompts/translation"))
         self.output_dir = Path(config["output_dir"])
+        self.max_requests_per_minute = config.get("max_requests_per_minute", 0)
+        self.max_concurrent_requests = config.get("max_concurrent_requests", 5)
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
 
     def translate(
         self, counter: FrequencyCounter, min_frequency: int = 1
@@ -87,6 +92,7 @@ class LemmaTranslator:
         total_usage = {
             "total_prompt_tokens": 0,
             "total_completion_tokens": 0,
+            "total_thinking_tokens": 0,
             "total_tokens": 0,
             "api_calls": 0,
             "cache_hits": 0,
@@ -148,9 +154,14 @@ class LemmaTranslator:
             else:
                 logger.info(f"  All {pos} items loaded from cache - no batches needed")
 
-            # Process uncached batches and combine with cached translations
-            batch_translations = self._process_batches_for_pos(
-                batches, pos, system_prompt, pos_schema, combined_prompt_hash, total_usage
+            # Process uncached batches (async parallel) and combine with cached translations
+            batch_translations = self._run_batches_for_pos(
+                batches,
+                pos,
+                system_prompt,
+                pos_schema,
+                combined_prompt_hash,
+                total_usage,
             )
             all_translations.extend(batch_translations)
             all_translations.extend(cached_translations)
@@ -182,10 +193,172 @@ class LemmaTranslator:
         logger.info(f"Cache Hits:         {total_usage['cache_hits']}")
         logger.info(f"Prompt Tokens:      {total_usage['total_prompt_tokens']:,}")
         logger.info(f"Completion Tokens:  {total_usage['total_completion_tokens']:,}")
+        logger.info(f"Thinking Tokens:    {total_usage['total_thinking_tokens']:,}")
         logger.info(f"Total Tokens:       {total_usage['total_tokens']:,}")
         logger.info("=" * 60 + "\n")
 
         return translation_objects, total_usage
+
+    def _run_batches_for_pos(
+        self,
+        batches: List[List[Dict[str, Any]]],
+        pos: str,
+        system_prompt: str,
+        pos_schema: Optional[Dict[str, Any]],
+        combined_prompt_hash: str,
+        total_usage: Dict[str, int],
+    ) -> List[Dict[str, Any]]:
+        """Run batch processing — async if multiple concurrent requests, else sync."""
+        if not batches:
+            return []
+
+        if self.max_concurrent_requests <= 1:
+            return self._process_batches_for_pos_sync(
+                batches,
+                pos,
+                system_prompt,
+                pos_schema,
+                combined_prompt_hash,
+                total_usage,
+            )
+
+        # Reuse a single event loop across POS categories to avoid
+        # "Event loop is closed" errors from the Google aio client.
+        if self._loop is None or self._loop.is_closed():
+            self._loop = asyncio.new_event_loop()
+
+        return self._loop.run_until_complete(
+            self._process_batches_for_pos_async(
+                batches,
+                pos,
+                system_prompt,
+                pos_schema,
+                combined_prompt_hash,
+                total_usage,
+            )
+        )
+
+    def _process_batches_for_pos_sync(
+        self,
+        batches: List[List[Dict[str, Any]]],
+        pos: str,
+        system_prompt: str,
+        pos_schema: Optional[Dict[str, Any]],
+        combined_prompt_hash: str,
+        total_usage: Dict[str, int],
+    ) -> List[Dict[str, Any]]:
+        """Process uncached batches sequentially (original behavior)."""
+        batch_translations_all = []
+
+        for i, batch in enumerate(batches):
+            logger.info(
+                f"  Processing {pos} batch {i+1}/{len(batches)} ({len(batch)} uncached lemmas)"
+            )
+
+            response = self.provider.translate_lemmas(batch, system_prompt, pos_schema)
+            batch_translations = response["all_lemma_translations"]
+
+            self._accumulate_usage(total_usage, response)
+            self._cache_batch_translations(
+                batch, batch_translations, combined_prompt_hash
+            )
+            batch_translations_all.extend(batch_translations)
+
+        return batch_translations_all
+
+    async def _process_batches_for_pos_async(
+        self,
+        batches: List[List[Dict[str, Any]]],
+        pos: str,
+        system_prompt: str,
+        pos_schema: Optional[Dict[str, Any]],
+        combined_prompt_hash: str,
+        total_usage: Dict[str, int],
+    ) -> List[Dict[str, Any]]:
+        """Process uncached batches in parallel with concurrency + rate limiting."""
+        semaphore = asyncio.Semaphore(self.max_concurrent_requests)
+        rate_limiter = AsyncRateLimiter(self.max_requests_per_minute)
+
+        async def process_one_batch(
+            batch_idx: int, batch: List[Dict[str, Any]]
+        ) -> Tuple[int, List[Dict[str, Any]], Optional[Dict]]:
+            """Process a single batch, returns (batch_idx, translations, usage)."""
+            async with semaphore:
+                await rate_limiter.acquire()
+                logger.info(
+                    f"  Processing {pos} batch {batch_idx+1}/{len(batches)} "
+                    f"({len(batch)} uncached lemmas)"
+                )
+                response = await self.provider.translate_lemmas_async(
+                    batch, system_prompt, pos_schema
+                )
+                return (
+                    batch_idx,
+                    response["all_lemma_translations"],
+                    response.get("_token_usage"),
+                )
+
+        # Launch all batches concurrently (bounded by semaphore + rate limiter)
+        tasks = [process_one_batch(i, batch) for i, batch in enumerate(batches)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Process results sequentially (cache writes, token aggregation)
+        batch_translations_all = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"  Batch {i+1}/{len(batches)} failed: {result}")
+                continue
+
+            batch_idx, batch_translations, usage = result
+
+            if usage:
+                total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
+                total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
+                total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
+                total_usage["total_tokens"] += usage.get("total_tokens") or 0
+                total_usage["api_calls"] += 1
+
+            self._cache_batch_translations(
+                batches[batch_idx], batch_translations, combined_prompt_hash
+            )
+            batch_translations_all.extend(batch_translations)
+
+        return batch_translations_all
+
+    def _accumulate_usage(self, total_usage: Dict[str, int], response: Dict[str, Any]):
+        """Accumulate token usage from a response into total_usage."""
+        if "_token_usage" in response:
+            usage = response["_token_usage"]
+            total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
+            total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
+            total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
+            total_usage["total_tokens"] += usage.get("total_tokens") or 0
+            total_usage["api_calls"] += 1
+
+    def _cache_batch_translations(
+        self,
+        batch: List[Dict[str, Any]],
+        batch_translations: List[Dict[str, Any]],
+        combined_prompt_hash: str,
+    ):
+        """Cache individual translations from a batch response."""
+        if self.cache is None:
+            return
+
+        for translation in batch_translations:
+            item_id = translation["id"]
+            matching_item = next(
+                (item for item in batch if item["id"] == item_id), None
+            )
+            if matching_item:
+                self.cache.set_translation(
+                    matching_item["lemma"],
+                    matching_item["pos"],
+                    self.model_config,
+                    combined_prompt_hash,
+                    translation,
+                )
+        self.cache.save_all()
 
     def _group_by_pos(
         self, frequencies: List[Dict[str, Any]]
@@ -303,57 +476,6 @@ class LemmaTranslator:
 
         return pos_id_mapping, cached_translations, uncached_items
 
-    def _process_batches_for_pos(
-        self,
-        batches: List[List[Dict[str, Any]]],
-        pos: str,
-        system_prompt: str,
-        pos_schema: Optional[Dict[str, Any]],
-        combined_prompt_hash: str,
-        total_usage: Dict[str, int],
-    ) -> List[Dict[str, Any]]:
-        """Process uncached batches for one POS category."""
-        batch_translations_all = []
-
-        for i, batch in enumerate(batches):
-            logger.info(
-                f"  Processing {pos} batch {i+1}/{len(batches)} ({len(batch)} uncached lemmas)"
-            )
-
-            response = self.provider.translate_lemmas(batch, system_prompt, pos_schema)
-            batch_translations = response["all_lemma_translations"]
-
-            # Track token usage
-            if "_token_usage" in response:
-                usage = response["_token_usage"]
-                total_usage["total_prompt_tokens"] += usage.get("prompt_tokens", 0)
-                total_usage["total_completion_tokens"] += usage.get(
-                    "completion_tokens", 0
-                )
-                total_usage["total_tokens"] += usage.get("total_tokens", 0)
-                total_usage["api_calls"] += 1
-
-            # Cache individual translations
-            if self.cache is not None:
-                for translation in batch_translations:
-                    item_id = translation["id"]
-                    matching_item = next(
-                        (item for item in batch if item["id"] == item_id), None
-                    )
-                    if matching_item:
-                        self.cache.set_translation(
-                            matching_item["lemma"],
-                            matching_item["pos"],
-                            self.model_config,
-                            combined_prompt_hash,
-                            translation,
-                        )
-                self.cache.save_all()
-
-            batch_translations_all.extend(batch_translations)
-
-        return batch_translations_all
-
     def _enrich_with_frequency(
         self,
         translations: List[Dict[str, Any]],
@@ -369,4 +491,3 @@ class LemmaTranslator:
                 translation["frequency"] = 0
 
         return translations
-

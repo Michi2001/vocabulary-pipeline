@@ -48,17 +48,19 @@ def load_translation_input(csv_path):
 INPUT_CSV = Path("test/data/translation_input.csv")
 PROMPT_FOLDER = Path("prompts/translation_v2")
 PROVIDER_TYPE = "google"
-# PROVIDER_CONFIG = {  # best settings for Google Gemini
-#     "model": "gemini-3-flash-preview",
-#     "thinking_level": "minimal",
-#     "temperature": 1.0,
-# }
-PROVIDER_CONFIG = {
-    "model": "gemini-3-pro-preview",
-    "thinking_level": "low",
+PROVIDER_CONFIG = {  # best settings for Google Gemini
+    "model": "gemini-3-flash-preview",
+    "thinking_level": "minimal",
     "temperature": 1.0,
 }
-BATCH_SIZE = 10  # Number of items to process per batch
+# PROVIDER_CONFIG = {
+#     "model": "gemini-3-pro-preview",
+#     "thinking_level": "low",
+#     "temperature": 1.0,
+# }
+BATCH_SIZE = 5
+MAX_REQUESTS_PER_MINUTE = 20
+MAX_CONCURRENT_REQUESTS = 20
 CACHE_DIR = Path("test/translation_cache")
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_DIR = Path(
@@ -92,6 +94,8 @@ class TestLemmaTranslation(unittest.TestCase):
             "batch_size": BATCH_SIZE,
             "prompts_dir": str(PROMPT_FOLDER),
             "output_dir": str(OUTPUT_DIR),
+            "max_requests_per_minute": MAX_REQUESTS_PER_MINUTE,
+            "max_concurrent_requests": MAX_CONCURRENT_REQUESTS,
         }
 
         # Create cache and translator
@@ -133,7 +137,7 @@ class TestLemmaTranslation(unittest.TestCase):
 
         print(f"\nVocabulary saved to: {vocab_dir}")
         print(f"  Translations: {len(vocab.translations)}")
-        print(f"  Word variants: {len(vocab.word_variants)}")
+        print(f"  Vocab entries: {len(vocab.vocab_entries)}")
 
         # Verify vocabulary file was created
         translations_file = vocab_dir / "translations.json"

@@ -39,5 +39,8 @@ def create_provider(provider_type: str, config: Dict[str, Any]) -> BaseLLMProvid
             f"Available providers: {', '.join(providers.keys())}"
         )
 
+    if provider_type.lower() == "openai":
+        logger.warning("OpenAI provider is deprecated. Consider switching to 'google'.")
+
     logger.info(f"Creating {provider_type} provider")
     return provider_class(config)

@@ -61,6 +61,8 @@ llm_translation:
   enabled: true
   batch_size: 20
   prompt_directory: "prompts/translation_v2"
+  max_requests_per_minute: 20    # 0 = unlimited; Gemini 3 Pro: max 25 RPM, Gemini 3 flash: max 1k
+  max_concurrent_requests: 20     # Concurrent API requests
   llm:
     type: "google"
     google:

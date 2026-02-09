@@ -87,7 +87,7 @@ class TestProviderCorrections(unittest.TestCase):
         # Split input into batches based on BATCH_SIZE
         total_items = len(TEST_INPUT)
         all_corrections = []
-        total_tokens = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        total_tokens = {"prompt_tokens": 0, "completion_tokens": 0, "thinking_tokens": 0, "total_tokens": 0}
 
         for i in range(0, total_items, BATCH_SIZE):
             batch_input = TEST_INPUT[i : i + BATCH_SIZE]
@@ -107,6 +107,7 @@ class TestProviderCorrections(unittest.TestCase):
                 usage = batch_response["_token_usage"]
                 total_tokens["prompt_tokens"] += usage["prompt_tokens"]
                 total_tokens["completion_tokens"] += usage["completion_tokens"]
+                total_tokens["thinking_tokens"] += usage.get("thinking_tokens", 0)
                 total_tokens["total_tokens"] += usage["total_tokens"]
 
         # Print aggregated token usage
@@ -114,6 +115,7 @@ class TestProviderCorrections(unittest.TestCase):
         print(f"TOTAL TOKEN USAGE (all batches combined):")
         print(f"  Prompt tokens:     {total_tokens['prompt_tokens']}")
         print(f"  Completion tokens: {total_tokens['completion_tokens']}")
+        print(f"  Thinking tokens:   {total_tokens['thinking_tokens']}")
         print(f"  Total tokens:      {total_tokens['total_tokens']}")
         print(f"{'='*60}\n")
 
