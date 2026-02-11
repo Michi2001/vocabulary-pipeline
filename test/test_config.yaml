@@ -45,8 +45,10 @@ filtering:
 llm_correction:
   enabled: true
   batch_size: 10
-  target_output_size: 50
+  target_output_size: 0
   prompt_file: "prompts/correction/general_prompt.txt"
+  max_requests_per_minute: 20
+  max_concurrent_requests: 5
   llm:
     type: "google"
     google:
@@ -59,7 +61,7 @@ llm_correction:
 
 llm_translation:
   enabled: true
-  batch_size: 20
+  batch_size: 5
   prompt_directory: "prompts/translation_v2"
   max_requests_per_minute: 20    # 0 = unlimited; Gemini 3 Pro: max 25 RPM, Gemini 3 flash: max 1k
   max_concurrent_requests: 20     # Concurrent API requests
@@ -71,13 +73,15 @@ llm_translation:
       retry_delay: 2
       timeout: 360
       temperature: 1.0
-      thinking_level: "minimal"
+      thinking_level: "medium"
 
 # Example Generation runs automatically when disambiguation.enabled=true
 example_generation:
   batch_size: 20
   prompt_directory: "prompts/examples"
   num_examples_poly: 10
+  max_requests_per_minute: 20
+  max_concurrent_requests: 5
   llm:
     type: "google"
     google:
@@ -92,3 +96,9 @@ disambiguation:
   enabled: true
   model: "dccuchile/bert-base-spanish-wwm-cased"
   batch_size: 8
+  pos_types:
+    - NOUN
+    - VERB
+    - ADJ
+    - ADV
+

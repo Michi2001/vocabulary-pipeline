@@ -35,7 +35,7 @@ class TestPipelineIntegration(unittest.TestCase):
         self.assertIsNotNone(result.vocabulary)
         self.assertIsNotNone(result.cooccurrence_matrix)
         self.assertGreater(len(result.vocabulary.translations), 0)
-        self.assertGreater(len(result.vocabulary.word_variants), 0)
+        self.assertGreater(len(result.vocabulary.vocab_entries), 0)
 
         output_path = Path(result.output_dir)
         self.assertTrue((output_path / "translations.json").exists())
@@ -52,12 +52,12 @@ class TestPipelineIntegration(unittest.TestCase):
         self._visualize_cooccurrence_matrix(result)
         self._print_cooccurrences(result)
         self._print_store_contents(result)
-        self._print_word_variants(result)
+        self._print_vocab_entries(result)
 
         print(f"\nPipeline completed successfully!")
         print(f"Output directory: {result.output_dir}")
         print(f"Translations: {len(result.vocabulary.translations)}")
-        print(f"Word variants: {len(result.vocabulary.word_variants)}")
+        print(f"Word variants: {len(result.vocabulary.vocab_entries)}")
 
     def _visualize_cooccurrence_matrix(self, result: PipelineResult):
         """Create and save a visualization of the co-occurrence matrix."""
@@ -65,7 +65,7 @@ class TestPipelineIntegration(unittest.TestCase):
         matrix = result.cooccurrence_matrix
 
         sorted_variants = sorted(
-            vocab.word_variants,
+            vocab.vocab_entries,
             key=lambda v: (v.source_translation_id, v.meaning_idx),
         )
         reorder_map = {
@@ -135,7 +135,7 @@ class TestPipelineIntegration(unittest.TestCase):
         print("CO-OCCURRENCE DETAILS")
         print("=" * 80)
 
-        sorted_variants = sorted(vocab.word_variants, key=lambda v: -v.frequency)
+        sorted_variants = sorted(vocab.vocab_entries, key=lambda v: -v.frequency)
 
         for variant in sorted_variants:
             cooccurrences = vocab.get_cooccurrences(variant.id, top_k=50)
@@ -147,7 +147,7 @@ class TestPipelineIntegration(unittest.TestCase):
 
             cooc_parts = []
             for other_id, count in cooccurrences:
-                other = vocab.get_word_variant(other_id)
+                other = vocab.get_vocab_entry(other_id)
                 cooc_parts.append(
                     f"{other.lemma} ({other.primary_translation}) [{int(count)}]"
                 )
@@ -185,7 +185,7 @@ class TestPipelineIntegration(unittest.TestCase):
                         if v_id is None:
                             variant_strs.append("None")
                         else:
-                            variant = result.vocabulary.get_word_variant(v_id)
+                            variant = result.vocabulary.get_vocab_entry(v_id)
                             num_meanings = len(variant.translation.meanings)
                             pol_marker = "[POL]" if num_meanings > 1 else ""
                             variant_strs.append(f"{v_id}{pol_marker}")
@@ -196,7 +196,7 @@ class TestPipelineIntegration(unittest.TestCase):
                         if v_id is None:
                             translation_strs.append("None")
                         else:
-                            variant = result.vocabulary.get_word_variant(v_id)
+                            variant = result.vocabulary.get_vocab_entry(v_id)
                             num_meanings = len(variant.translation.meanings)
                             pol_marker = "[POL]" if num_meanings > 1 else ""
                             translation_strs.append(
@@ -204,13 +204,13 @@ class TestPipelineIntegration(unittest.TestCase):
                             )
                     print(f"    Translations: [{', '.join(translation_strs)}]")
 
-    def _print_word_variants(self, result):
+    def _print_vocab_entries(self, result):
         """Print all WordVariants with their IDs."""
         print("\n" + "=" * 80)
         print("WORD VARIANTS")
         print("=" * 80)
 
-        for variant in result.vocabulary.word_variants:
+        for variant in result.vocabulary.vocab_entries:
             # Check if this lemma has multiple meanings (polysemous)
             num_meanings = len(variant.translation.meanings)
             polysemy_marker = " [POL]" if num_meanings > 1 else ""
@@ -243,8 +243,8 @@ class TestPipelineIntegration(unittest.TestCase):
 
         # Verify word variants count matches
         self.assertEqual(
-            len(loaded_vocab.word_variants),
-            len(original_vocab.word_variants),
+            len(loaded_vocab.vocab_entries),
+            len(original_vocab.vocab_entries),
             "Word variant count mismatch",
         )
 
@@ -283,16 +283,16 @@ class TestPipelineIntegration(unittest.TestCase):
             )
 
         # Verify word variant lookups work
-        for variant in loaded_vocab.word_variants:
+        for variant in loaded_vocab.vocab_entries:
             # Test lookup by lemma token
             lemma_token = (variant.lemma, variant.pos)
-            variant_ids = loaded_vocab.get_variant_ids_for_lemma(lemma_token)
+            variant_ids = loaded_vocab.get_entry_ids_for_lemma(lemma_token)
             self.assertIn(
                 variant.id, variant_ids, f"Variant ID {variant.id} not in lookup"
             )
 
             # Test lookup by variant ID
-            retrieved = loaded_vocab.get_word_variant(variant.id)
+            retrieved = loaded_vocab.get_vocab_entry(variant.id)
             self.assertEqual(
                 retrieved.lemma, variant.lemma, "Variant lookup returned wrong lemma"
             )
@@ -314,7 +314,7 @@ class TestPipelineIntegration(unittest.TestCase):
 
         print(f"\nVocabulary load test passed!")
         print(f"  Translations: {len(loaded_vocab.translations)}")
-        print(f"  Word variants: {len(loaded_vocab.word_variants)}")
+        print(f"  Word variants: {len(loaded_vocab.vocab_entries)}")
         print(f"  Unique IDs verified: {len(set(translation_ids))}")
 
 

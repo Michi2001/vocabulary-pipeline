@@ -252,6 +252,8 @@ def run_pipeline(
             "system_prompt": system_prompt,
             "output_dir": output_dir,
             "target_output_size": correction_config.get("target_output_size"),
+            "max_requests_per_minute": correction_config.get("max_requests_per_minute", 0),
+            "max_concurrent_requests": correction_config.get("max_concurrent_requests", 5),
         }
         corrector = LemmaCorrector(correction_provider, llm_cache, corrector_config)
 
@@ -374,6 +376,8 @@ def run_pipeline(
                     "prompt_directory", "prompts/examples"
                 ),
                 "num_examples_poly": example_config.get("num_examples_poly", 10),
+                "max_requests_per_minute": example_config.get("max_requests_per_minute", 0),
+                "max_concurrent_requests": example_config.get("max_concurrent_requests", 5),
             }
 
             example_generator = ExampleGenerator(

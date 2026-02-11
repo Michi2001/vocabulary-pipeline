@@ -1,5 +1,6 @@
 """LLM-based lemma corrector with caching support."""
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -9,6 +10,7 @@ import csv
 
 from src.frequency_counter import FrequencyCounter
 from src.llm_providers.base_provider import BaseLLMProvider
+from src.llm_providers.common.rate_limiter import AsyncRateLimiter
 from src.lemma_cache import LemmaCache
 from src.vocab import LemmaToken
 
@@ -32,19 +34,6 @@ class LemmaCorrector:
         cache: Optional[LemmaCache],
         config: Dict[str, Any],
     ):
-        """
-        Initialize corrector.
-
-        Args:
-            provider: LLM provider instance
-            cache: Shared LemmaCache instance (None to disable caching)
-            config: {
-                'batch_size': int (default: 50),
-                'system_prompt': str,
-                'output_dir': str (for audit files),
-                'target_output_size': int (correct until output has >= this many lemmas)
-            }
-        """
         self.provider = provider
         self.cache = cache
         self.model_config = provider.get_cache_key_components()
@@ -52,23 +41,14 @@ class LemmaCorrector:
         self.system_prompt = config["system_prompt"]
         self.output_dir = Path(config["output_dir"])
         self.target_output_size = config.get("target_output_size")
+        self.max_requests_per_minute = config.get("max_requests_per_minute", 0)
+        self.max_concurrent_requests = config.get("max_concurrent_requests", 5)
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
 
     def correct(
         self, counter: FrequencyCounter, min_frequency: int = 1
     ) -> Tuple[FrequencyCounter, CorrectionMapping, Set[LemmaToken]]:
-        """
-        Apply LLM corrections to FrequencyCounter.
-
-        Args:
-            counter: Input FrequencyCounter
-            min_frequency: Minimum frequency threshold (same as output filter)
-
-        Returns:
-            Tuple of:
-                - Corrected FrequencyCounter
-                - CorrectionMapping: {(orig_lemma, pos): (corrected_lemma, pos)} for MERGE operations
-                - Set of deleted LemmaTokens
-        """
+        """Apply LLM corrections to FrequencyCounter."""
         logger.info("Starting LLM-based lemma correction...")
 
         # Step 1: Get sorted frequencies (all lemmas above min_frequency)
@@ -85,32 +65,17 @@ class LemmaCorrector:
         prompt_hash = hashlib.sha256(self.system_prompt.encode()).hexdigest()[:8]
         id_mapping = self._create_id_mapping(frequencies)
 
-        # Step 3: Process batches iteratively until target reached
+        # Step 3: Scan frequencies, separate cached vs uncached, process in parallel
         all_corrections = []
         processed_idx = 0
 
         while True:
-            # Calculate current output size
-            current_output_size = self._calculate_output_size(all_corrections, id_mapping)
-
-            # Check if target reached
-            if self.target_output_size and current_output_size >= self.target_output_size:
-                logger.info(
-                    f"Target output size reached: {current_output_size} >= {self.target_output_size}"
-                )
-                break
-
-            # Check if all lemmas processed
-            if processed_idx >= len(frequencies):
-                logger.info(f"All {len(frequencies)} lemmas processed")
-                break
-
-            # Collect items until we have batch_size uncached items (or run out or target reached)
+            # Scan remaining items: collect cached corrections and uncached items
             uncached_items = []
-            cached_count = 0
+            scan_start = processed_idx
             target_reached = False
 
-            while processed_idx < len(frequencies) and len(uncached_items) < self.batch_size:
+            while processed_idx < len(frequencies):
                 item = frequencies[processed_idx]
                 item_id = f"{processed_idx + 1:06d}"
                 item_with_id = {
@@ -120,7 +85,6 @@ class LemmaCorrector:
                     "pos": item["pos"],
                 }
 
-                # Check cache
                 cached_correction = None
                 if self.cache is not None:
                     cached_correction = self.cache.get_correction(
@@ -130,11 +94,12 @@ class LemmaCorrector:
                 if cached_correction is not None:
                     cached_correction["id"] = item_id
                     all_corrections.append(cached_correction)
-                    cached_count += 1
 
                     # Check target after each cached item
                     if self.target_output_size:
-                        current_size = self._calculate_output_size(all_corrections, id_mapping)
+                        current_size = self._calculate_output_size(
+                            all_corrections, id_mapping
+                        )
                         if current_size >= self.target_output_size:
                             target_reached = True
                             processed_idx += 1
@@ -144,44 +109,41 @@ class LemmaCorrector:
 
                 processed_idx += 1
 
-            # If target reached via cached items, skip LLM call
-            if target_reached:
+            # Process all uncached items via LLM (parallel or sync)
+            if uncached_items and not target_reached:
+                batches = []
+                for i in range(0, len(uncached_items), self.batch_size):
+                    batches.append(uncached_items[i : i + self.batch_size])
+
                 logger.info(
-                    f"Processed {processed_idx}/{len(frequencies)} lemmas "
-                    f"({cached_count} cached, 0 via LLM), "
-                    f"current output size: {self._calculate_output_size(all_corrections, id_mapping)}"
+                    f"Processing {len(uncached_items)} uncached items "
+                    f"in {len(batches)} batches"
                 )
-                continue
-
-            # Process uncached items via LLM
-            if uncached_items:
-                response = self.provider.correct_lemmas(uncached_items, self.system_prompt)
-                batch_corrections = response["corrections"]
-
-                # Cache the new corrections
-                if self.cache is not None:
-                    for correction in batch_corrections:
-                        item_id = correction["id"]
-                        matching_item = next(
-                            (item for item in uncached_items if item["id"] == item_id), None
-                        )
-                        if matching_item:
-                            self.cache.set_correction(
-                                matching_item["lemma"],
-                                matching_item["pos"],
-                                self.model_config,
-                                prompt_hash,
-                                correction,
-                            )
-                    self.cache.save_all()
-
+                batch_corrections = self._run_batches(batches, prompt_hash)
                 all_corrections.extend(batch_corrections)
 
-            logger.info(
-                f"Processed {processed_idx}/{len(frequencies)} lemmas "
-                f"({cached_count} cached, {len(uncached_items)} via LLM), "
-                f"current output size: {self._calculate_output_size(all_corrections, id_mapping)}"
+            current_output_size = self._calculate_output_size(
+                all_corrections, id_mapping
             )
+            logger.info(
+                f"Processed {processed_idx}/{len(frequencies)} lemmas, "
+                f"output size: {current_output_size}"
+            )
+
+            # Check termination conditions
+            if self.target_output_size and current_output_size >= self.target_output_size:
+                logger.info(
+                    f"Target output size reached: "
+                    f"{current_output_size} >= {self.target_output_size}"
+                )
+                break
+
+            if processed_idx >= len(frequencies):
+                logger.info(f"All {len(frequencies)} lemmas processed")
+                break
+
+            if processed_idx == scan_start:
+                break
 
         # Step 4: Trim id_mapping to only processed items
         processed_id_mapping = {
@@ -218,12 +180,113 @@ class LemmaCorrector:
 
         return corrected_counter, correction_mapping, deleted_tokens
 
+    def _run_batches(
+        self,
+        batches: List[List[Dict[str, Any]]],
+        prompt_hash: str,
+    ) -> List[Dict[str, Any]]:
+        """Run batch processing — async if multiple concurrent requests, else sync."""
+        if not batches:
+            return []
+
+        if self.max_concurrent_requests <= 1:
+            return self._process_batches_sync(batches, prompt_hash)
+
+        if self._loop is None or self._loop.is_closed():
+            self._loop = asyncio.new_event_loop()
+
+        return self._loop.run_until_complete(
+            self._process_batches_async(batches, prompt_hash)
+        )
+
+    def _process_batches_sync(
+        self,
+        batches: List[List[Dict[str, Any]]],
+        prompt_hash: str,
+    ) -> List[Dict[str, Any]]:
+        """Process batches sequentially."""
+        all_batch_corrections = []
+
+        for i, batch in enumerate(batches):
+            logger.info(
+                f"  Processing batch {i + 1}/{len(batches)} ({len(batch)} lemmas)"
+            )
+            response = self.provider.correct_lemmas(batch, self.system_prompt)
+            batch_corrections = response["corrections"]
+
+            self._cache_corrections(batch, batch_corrections, prompt_hash)
+            all_batch_corrections.extend(batch_corrections)
+
+        return all_batch_corrections
+
+    async def _process_batches_async(
+        self,
+        batches: List[List[Dict[str, Any]]],
+        prompt_hash: str,
+    ) -> List[Dict[str, Any]]:
+        """Process batches in parallel with concurrency + rate limiting."""
+        semaphore = asyncio.Semaphore(self.max_concurrent_requests)
+        rate_limiter = AsyncRateLimiter(self.max_requests_per_minute)
+
+        async def process_one_batch(
+            batch_idx: int, batch: List[Dict[str, Any]]
+        ) -> Tuple[int, List[Dict[str, Any]]]:
+            async with semaphore:
+                await rate_limiter.acquire()
+                logger.info(
+                    f"  Processing batch {batch_idx + 1}/{len(batches)} "
+                    f"({len(batch)} lemmas)"
+                )
+                response = await self.provider.correct_lemmas_async(
+                    batch, self.system_prompt
+                )
+                return batch_idx, response["corrections"]
+
+        tasks = [process_one_batch(i, batch) for i, batch in enumerate(batches)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        all_batch_corrections = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"  Batch {i + 1}/{len(batches)} failed: {result}")
+                continue
+
+            batch_idx, batch_corrections = result
+            self._cache_corrections(batches[batch_idx], batch_corrections, prompt_hash)
+            all_batch_corrections.extend(batch_corrections)
+
+        return all_batch_corrections
+
+    def _cache_corrections(
+        self,
+        batch: List[Dict[str, Any]],
+        batch_corrections: List[Dict[str, Any]],
+        prompt_hash: str,
+    ) -> None:
+        """Cache individual corrections from a batch response."""
+        if self.cache is None:
+            return
+
+        for correction in batch_corrections:
+            item_id = correction["id"]
+            matching_item = next(
+                (item for item in batch if item["id"] == item_id), None
+            )
+            if matching_item:
+                self.cache.set_correction(
+                    matching_item["lemma"],
+                    matching_item["pos"],
+                    self.model_config,
+                    prompt_hash,
+                    correction,
+                )
+        self.cache.save_all()
+
     def _create_id_mapping(self, frequencies: List[Dict[str, Any]]) -> Dict[str, Dict]:
         """Create ID mapping for all frequency items."""
         id_mapping = {}
         for idx, item in enumerate(frequencies):
             item_id = f"{idx + 1:06d}"
-            # Use counter_key if available (original key in counter), else construct from lemma|pos
             key = item.get("counter_key", f"{item['lemma']}|{item['pos']}")
             id_mapping[item_id] = {
                 "lemma": item["lemma"],
@@ -250,7 +313,6 @@ class LemmaCorrector:
             elif op == "MERGE":
                 merge_targets.add(corr["target"])
 
-        # Merge targets count only if not already in kept_keys
         return len(kept_keys) + len(merge_targets - kept_keys)
 
     def _apply_corrections(
@@ -266,17 +328,6 @@ class LemmaCorrector:
         1. Build deletion and merge maps
         2. Process KEEP operations
         3. Process MERGE operations with frequency accumulation
-
-        Args:
-            counter: Original FrequencyCounter
-            id_mapping: ID to lemma mapping
-            corrections: List of correction operations from LLM
-
-        Returns:
-            Tuple of:
-                - New corrected FrequencyCounter
-                - CorrectionMapping for MERGE operations
-                - Set of deleted LemmaTokens
         """
         corrected_counter = FrequencyCounter()
 
@@ -299,17 +350,14 @@ class LemmaCorrector:
         correction_mapping: CorrectionMapping = {}
         deleted_tokens: Set[LemmaToken] = set()
 
-        # Build deleted tokens set
         for item_id in deleted_ids:
             item_data = id_mapping[item_id]
             lemma_token: LemmaToken = (item_data["lemma"], item_data["pos"])
             deleted_tokens.add(lemma_token)
 
-        # Build correction mapping for MERGE operations
         for item_id, target_key in merge_sources.items():
             item_data = id_mapping[item_id]
             original_token: LemmaToken = (item_data["lemma"], item_data["pos"])
-            # Parse target_key "lemma|POS" -> (lemma, pos)
             parts = target_key.split("|")
             if len(parts) == 2:
                 target_token: LemmaToken = (parts[0], parts[1])
@@ -318,20 +366,17 @@ class LemmaCorrector:
         # Second pass: process KEEP operations
         keep_count = 0
         for item_id, item_data in id_mapping.items():
-            # Skip deleted and merged items
             if item_id in deleted_ids or item_id in merge_sources:
                 continue
 
             original_key = item_data["key"]
 
-            # KEEP: copy to corrected counter
             freq = counter.lemma_counts.get(original_key, 0)
             if freq > 0:
                 corrected_counter.lemma_counts[original_key] = freq
                 corrected_counter.total_tokens += freq
                 keep_count += 1
 
-                # Copy POS details
                 if original_key in counter.lemma_pos_details:
                     corrected_counter.lemma_pos_details[original_key] = (
                         counter.lemma_pos_details[original_key].copy()
@@ -344,26 +389,20 @@ class LemmaCorrector:
             original_key = id_mapping[item_id]["key"]
             target_key = merge_sources[item_id]
 
-            # Get frequency from original counter
             freq = counter.lemma_counts.get(original_key, 0)
 
-            # Accumulate in merge map
             if target_key not in merge_accumulator:
                 merge_accumulator[target_key] = 0
             merge_accumulator[target_key] += freq
 
-        # Add merged items to corrected counter
         for target_key, accumulated_freq in merge_accumulator.items():
-            # Check if target already exists (from KEEP operations)
             if target_key in corrected_counter.lemma_counts:
                 corrected_counter.lemma_counts[target_key] += accumulated_freq
                 corrected_counter.total_tokens += accumulated_freq
             else:
-                # Create new entry
                 corrected_counter.lemma_counts[target_key] = accumulated_freq
                 corrected_counter.total_tokens += accumulated_freq
 
-                # Extract POS from target_key for pos_details
                 parts = target_key.split("|")
                 if len(parts) == 2:
                     corrected_counter.lemma_pos_details[target_key] = {parts[1]}
@@ -378,13 +417,7 @@ class LemmaCorrector:
         return corrected_counter, correction_mapping, deleted_tokens
 
     def _save_original(self, id_mapping: Dict[str, Dict], output_path: Path) -> None:
-        """
-        Save original list with IDs to CSV.
-
-        Args:
-            id_mapping: ID to lemma mapping
-            output_path: Path to output CSV
-        """
+        """Save original list with IDs to CSV."""
         with open(output_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["id", "lemma", "frequency", "pos"])
@@ -400,13 +433,7 @@ class LemmaCorrector:
     def _save_corrections(
         self, corrections: List[Dict[str, Any]], output_path: Path
     ) -> None:
-        """
-        Save LLM corrections to CSV.
-
-        Args:
-            corrections: List of correction operations
-            output_path: Path to output CSV
-        """
+        """Save LLM corrections to CSV."""
         with open(output_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["id", "operation", "target"])
@@ -423,16 +450,7 @@ class LemmaCorrector:
         deleted_tokens: Set[LemmaToken],
         output_path: Path,
     ) -> None:
-        """
-        Save correction mapping to JSON for use by SentenceStore.
-
-        Args:
-            correction_mapping: Mapping from original to corrected tokens
-            deleted_tokens: Set of deleted tokens
-            output_path: Path to output JSON file
-        """
-        # Convert to JSON-serializable format
-        # LemmaToken tuples become lists: [lemma, pos]
+        """Save correction mapping to JSON for use by SentenceStore."""
         data = {
             "merge_mapping": [
                 {"from": list(orig), "to": list(target)}
@@ -453,15 +471,7 @@ class LemmaCorrector:
     def load_correction_mapping(
         mapping_path: Path,
     ) -> Tuple[CorrectionMapping, Set[LemmaToken]]:
-        """
-        Load correction mapping from JSON file.
-
-        Args:
-            mapping_path: Path to correction_mapping.json
-
-        Returns:
-            Tuple of (CorrectionMapping, Set of deleted tokens)
-        """
+        """Load correction mapping from JSON file."""
         with open(mapping_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 

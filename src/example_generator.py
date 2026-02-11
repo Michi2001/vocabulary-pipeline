@@ -1,5 +1,6 @@
 """LLM-based example sentence generator with caching support."""
 
+import asyncio
 import hashlib
 import logging
 import re
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
 from src.llm_providers.base_provider import BaseLLMProvider
+from src.llm_providers.common.rate_limiter import AsyncRateLimiter
 from src.lemma_cache import LemmaCache
 from src.vocab import Translation
 
@@ -29,24 +31,15 @@ class ExampleGenerator:
         cache: Optional[LemmaCache],
         config: Dict[str, Any],
     ):
-        """
-        Initialize generator.
-
-        Args:
-            provider: LLM provider instance
-            cache: Shared LemmaCache instance (None to disable caching)
-            config: {
-                'batch_size': int,
-                'prompts_dir': str,
-                'num_examples_poly': int (examples per meaning for polysemantic words)
-            }
-        """
         self.provider = provider
         self.cache = cache
         self.model_config = provider.get_cache_key_components()
         self.batch_size = config.get("batch_size", 50)
         self.prompts_dir = Path(config.get("prompts_dir", "prompts/examples"))
         self.num_examples_poly = config.get("num_examples_poly", 10)
+        self.max_requests_per_minute = config.get("max_requests_per_minute", 0)
+        self.max_concurrent_requests = config.get("max_concurrent_requests", 5)
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
 
         # Load prompt and compute hash
         self.system_prompt = self._load_prompt()
@@ -55,15 +48,7 @@ class ExampleGenerator:
     def generate(
         self, translations: List[Translation]
     ) -> Tuple[List[Translation], Dict[str, int]]:
-        """
-        Generate examples for all translations.
-
-        Args:
-            translations: List of Translation objects (without examples)
-
-        Returns:
-            Tuple of (translations_with_examples, usage_stats)
-        """
+        """Generate examples for all translations."""
         logger.info("Starting example sentence generation...")
 
         # Collect all meaning items that need examples
@@ -89,7 +74,6 @@ class ExampleGenerator:
                     )
 
                 if cached is not None:
-                    # Apply cached examples
                     self._apply_examples_to_meaning(meaning, cached["examples_es"])
                     cached_count += 1
                 else:
@@ -127,35 +111,7 @@ class ExampleGenerator:
             f"Created {len(batches)} batches for {len(items_to_process)} meanings"
         )
 
-        for batch_idx, batch in enumerate(batches):
-            logger.info(
-                f"Processing batch {batch_idx + 1}/{len(batches)} ({len(batch)} meanings)"
-            )
-
-            # Prepare batch for LLM
-            batch_input = self._prepare_batch_input(batch)
-
-            # Call LLM
-            prompt_with_num = self.system_prompt.replace(
-                "{num_examples}", str(batch[0]["num_examples"])
-            )
-            response = self.provider.generate_examples(batch_input, prompt_with_num)
-
-            # Track token usage
-            if "_token_usage" in response:
-                usage = response["_token_usage"]
-                total_usage["total_prompt_tokens"] += usage.get("prompt_tokens", 0)
-                total_usage["total_completion_tokens"] += usage.get("completion_tokens", 0)
-                total_usage["total_thinking_tokens"] += usage.get("thinking_tokens", 0)
-                total_usage["total_tokens"] += usage.get("total_tokens", 0)
-                total_usage["api_calls"] += 1
-
-            # Apply examples to meanings and cache
-            self._apply_batch_results(batch, response.get("all_examples", []))
-
-            # Commit cache after each batch
-            if self.cache is not None:
-                self.cache.save_all()
+        self._run_batches(batches, total_usage)
 
         # Log usage summary
         logger.info("\n" + "=" * 60)
@@ -171,6 +127,112 @@ class ExampleGenerator:
 
         return translations, total_usage
 
+    def _run_batches(
+        self,
+        batches: List[List[Dict]],
+        total_usage: Dict[str, int],
+    ) -> None:
+        """Run batch processing — async if multiple concurrent requests, else sync."""
+        if not batches:
+            return
+
+        if self.max_concurrent_requests <= 1:
+            self._process_batches_sync(batches, total_usage)
+            return
+
+        if self._loop is None or self._loop.is_closed():
+            self._loop = asyncio.new_event_loop()
+
+        self._loop.run_until_complete(
+            self._process_batches_async(batches, total_usage)
+        )
+
+    def _process_batches_sync(
+        self,
+        batches: List[List[Dict]],
+        total_usage: Dict[str, int],
+    ) -> None:
+        """Process batches sequentially (original behavior)."""
+        for batch_idx, batch in enumerate(batches):
+            logger.info(
+                f"Processing batch {batch_idx + 1}/{len(batches)} ({len(batch)} meanings)"
+            )
+
+            batch_input = self._prepare_batch_input(batch)
+            prompt_with_num = self.system_prompt.replace(
+                "{num_examples}", str(batch[0]["num_examples"])
+            )
+            response = self.provider.generate_examples(batch_input, prompt_with_num)
+
+            self._accumulate_usage(total_usage, response)
+            self._apply_batch_results(batch, response.get("all_examples", []))
+
+            if self.cache is not None:
+                self.cache.save_all()
+
+    async def _process_batches_async(
+        self,
+        batches: List[List[Dict]],
+        total_usage: Dict[str, int],
+    ) -> None:
+        """Process batches in parallel with concurrency + rate limiting."""
+        semaphore = asyncio.Semaphore(self.max_concurrent_requests)
+        rate_limiter = AsyncRateLimiter(self.max_requests_per_minute)
+
+        async def process_one_batch(
+            batch_idx: int, batch: List[Dict]
+        ) -> Tuple[int, List[Dict], Optional[Dict]]:
+            async with semaphore:
+                await rate_limiter.acquire()
+                logger.info(
+                    f"Processing batch {batch_idx + 1}/{len(batches)} "
+                    f"({len(batch)} meanings)"
+                )
+                batch_input = self._prepare_batch_input(batch)
+                prompt_with_num = self.system_prompt.replace(
+                    "{num_examples}", str(batch[0]["num_examples"])
+                )
+                response = await self.provider.generate_examples_async(
+                    batch_input, prompt_with_num
+                )
+                return (
+                    batch_idx,
+                    response.get("all_examples", []),
+                    response.get("_token_usage"),
+                )
+
+        tasks = [process_one_batch(i, batch) for i, batch in enumerate(batches)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"Batch {i + 1}/{len(batches)} failed: {result}")
+                continue
+
+            batch_idx, all_examples, usage = result
+
+            if usage:
+                total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
+                total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
+                total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
+                total_usage["total_tokens"] += usage.get("total_tokens") or 0
+                total_usage["api_calls"] += 1
+
+            self._apply_batch_results(batches[batch_idx], all_examples)
+
+        if self.cache is not None:
+            self.cache.save_all()
+
+    def _accumulate_usage(self, total_usage: Dict[str, int], response: Dict[str, Any]):
+        """Accumulate token usage from a response into total_usage."""
+        if "_token_usage" in response:
+            usage = response["_token_usage"]
+            total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
+            total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
+            total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
+            total_usage["total_tokens"] += usage.get("total_tokens") or 0
+            total_usage["api_calls"] += 1
+
     def _load_prompt(self) -> str:
         """Load example generation prompt."""
         prompt_file = self.prompts_dir / "general_prompt.txt"
@@ -184,17 +246,14 @@ class ExampleGenerator:
 
     def _create_batches(self, items: List[Dict]) -> List[List[Dict]]:
         """Create batches from items, grouping by num_examples."""
-        # Group by num_examples (mono vs poly)
         mono = [i for i in items if i["num_examples"] == 1]
         poly = [i for i in items if i["num_examples"] > 1]
 
         batches = []
 
-        # Batch mono items
         for i in range(0, len(mono), self.batch_size):
             batches.append(mono[i : i + self.batch_size])
 
-        # Batch poly items
         for i in range(0, len(poly), self.batch_size):
             batches.append(poly[i : i + self.batch_size])
 
@@ -213,7 +272,6 @@ class ExampleGenerator:
 
     def _apply_batch_results(self, batch: List[Dict], results: List[Dict]):
         """Apply LLM results to meanings and cache."""
-        # Build lookup by (lemma, pos, definition_es)
         result_lookup = {}
         for result in results:
             key = (result["lemma"], result["pos"], result["definition_es"])
@@ -234,10 +292,8 @@ class ExampleGenerator:
                 )
                 continue
 
-            # Apply to meaning
             self._apply_examples_to_meaning(item["meaning"], examples)
 
-            # Cache
             if self.cache is not None:
                 self.cache.set_examples(
                     item["translation"].lemma,

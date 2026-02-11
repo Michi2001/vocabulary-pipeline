@@ -120,6 +120,44 @@ class GoogleGenAIProvider(BaseLLMProvider):
         except Exception as e:
             raise LLMProviderError(f"Google GenAI correction failed: {e}")
 
+    async def correct_lemmas_async(
+        self, batch: List[Dict[str, Any]], system_prompt: str
+    ) -> Dict[str, Any]:
+        """Async version using client.aio.models.generate_content()."""
+        user_message = self._format_batch(batch)
+
+        config = types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            response_mime_type="application/json",
+            thinking_config=types.ThinkingConfig(thinking_level=self.thinking_level),
+            temperature=self.temperature,
+            seed=42,
+        )
+
+        async def api_call():
+            response = await self.client.aio.models.generate_content(
+                model=self.model, contents=user_message, config=config,
+            )
+            content = response.text
+            parsed = ResponseParser.parse_json_response(content)
+            if not ResponseParser.validate_correction_response(parsed):
+                raise LLMProviderError("Invalid response structure")
+            token_usage = extract_token_usage_google(response)
+            if token_usage:
+                parsed["_token_usage"] = token_usage.to_dict()
+            logger.info(f"Successfully corrected batch of {len(batch)} lemmas")
+            return parsed
+
+        try:
+            return await async_retry_with_backoff(
+                api_call,
+                max_retries=self.max_retries,
+                retry_delay=self.retry_delay,
+                operation_name="Google GenAI async correction",
+            )
+        except Exception as e:
+            raise LLMProviderError(f"Google GenAI async correction failed: {e}")
+
     def _translation_config(
         self, system_prompt: str, response_schema: Dict[str, Any]
     ) -> types.GenerateContentConfig:
@@ -255,4 +293,41 @@ class GoogleGenAIProvider(BaseLLMProvider):
             )
         except Exception as e:
             raise LLMProviderError(f"Google GenAI example generation failed: {e}")
+
+    async def generate_examples_async(
+        self, batch: List[Dict[str, Any]], system_prompt: str
+    ) -> Dict[str, Any]:
+        """Async version using client.aio.models.generate_content()."""
+        user_message = self._format_examples_batch(batch)
+
+        config = types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            response_mime_type="application/json",
+            thinking_config=types.ThinkingConfig(thinking_level=self.thinking_level),
+            temperature=self.temperature,
+        )
+
+        async def api_call():
+            response = await self.client.aio.models.generate_content(
+                model=self.model, contents=user_message, config=config,
+            )
+            content = response.text
+            parsed = ResponseParser.parse_json_response(content)
+            if not ResponseParser.validate_examples_response(parsed):
+                raise LLMProviderError("Invalid examples response structure")
+            token_usage = extract_token_usage_google(response)
+            if token_usage:
+                parsed["_token_usage"] = token_usage.to_dict()
+            logger.info(f"Successfully generated examples for {len(batch)} meanings")
+            return parsed
+
+        try:
+            return await async_retry_with_backoff(
+                api_call,
+                max_retries=self.max_retries,
+                retry_delay=self.retry_delay,
+                operation_name="Google GenAI async example generation",
+            )
+        except Exception as e:
+            raise LLMProviderError(f"Google GenAI async example generation failed: {e}")
 

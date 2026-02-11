@@ -66,6 +66,8 @@ llm_correction:
   batch_size: 25  # Lemmas per LLM request
   prompt_file: "prompts/correction/general_prompt.txt"
   target_output_size: 5000  # Correct until output has >= this many lemmas; If number of lemmas in cache > this, the output might be larger
+  max_requests_per_minute: 0       # 0 = unlimited
+  max_concurrent_requests: 20      # Concurrent API requests
   llm:
     type: "google"  # openai or google
     openai:
@@ -110,6 +112,8 @@ example_generation:
   batch_size: 50  # Meanings per LLM request (larger since less output per item)
   prompt_directory: "prompts/examples"
   num_examples_poly: 10  # Examples per meaning for polysemantic words
+  max_requests_per_minute: 0       # 0 = unlimited
+  max_concurrent_requests: 20      # Concurrent API requests
   llm:
     type: "openai"  # Can use different/cheaper provider than translation
     openai:
