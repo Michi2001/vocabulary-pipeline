@@ -35,7 +35,7 @@ Enthält das Verb im Infinitiv. Bei reflexiven Bedeutungen die Reflexivform.
         {
           "definition_es": "producir música con un instrumento",
           "structure": "tocar",
-          "translations": [{"text": "spielen", "hint": ["Instrument"]}]
+          "translations": [{"text": "spielen", "hints": ["Instrument"]}]
         },
         {
           "definition_es": "corresponder el turno o la responsabilidad a alguien",
@@ -67,7 +67,7 @@ Enthält das Verb im Infinitiv. Bei reflexiven Bedeutungen die Reflexivform.
         {
           "definition_es": "comenzar a estar en un estado o actitud",
           "structure": "ponerse",
-          "translations": [{"text": "werden", "hint": ["Zustandsänderung"]}]
+          "translations": [{"text": "werden", "hints": ["Zustandsänderung"]}]
         }
       ]
     },

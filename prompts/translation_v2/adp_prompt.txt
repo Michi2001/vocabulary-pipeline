@@ -20,11 +20,11 @@
         },
         {
           "definition_es": "indica intercambio o precio",
-          "translations": [{"text": "für", "hint": ["Preis", "Tausch"]}]
+          "translations": [{"text": "für", "hints": ["Preis", "Tausch"]}]
         },
         {
           "definition_es": "indica el agente en construcciones pasivas",
-          "translations": [{"text": "von", "hint": ["Passiv"]}]
+          "translations": [{"text": "von", "hints": ["Passiv"]}]
         }
       ]
     },
@@ -50,7 +50,7 @@
         },
         {
           "definition_es": "indica la dirección o el destino",
-          "translations": [{"text": "nach", "hint": ["Richtung", "Ziel"]}]
+          "translations": [{"text": "nach", "hints": ["Richtung", "Ziel"]}]
         }
       ]
     },
@@ -61,7 +61,7 @@
       "meanings": [
         {
           "definition_es": "delante de o en presencia de alguien o algo",
-          "translations": [{"text": "vor", "hint": ["räumlich"]}]
+          "translations": [{"text": "vor", "hints": ["räumlich"]}]
         },
         {
           "definition_es": "frente a una situación o circunstancia",
@@ -71,6 +71,21 @@
     },
     {
       "id": "00705",
+      "lemma": "desde",
+      "pos": "ADP",
+      "meanings": [
+        {
+          "definition_es": "indica el punto de origen en el espacio",
+          "translations": [{"text": "von", "hints": ["räumlich"]}, {"text": "aus", "hints": ["räumlich"]}]
+        },
+        {
+          "definition_es": "indica el punto de inicio en el tiempo",
+          "translations": [{"text": "seit", "hints": ["zeitlich"]}, {"text": "ab", "hints": ["zeitlich"]}]
+        }
+      ]
+    },
+    {
+      "id": "00706",
       "lemma": "tras",
       "pos": "ADP",
       "meanings": [
@@ -80,7 +95,7 @@
         },
         {
           "definition_es": "indica sucesión temporal, después de",
-          "translations": [{"text": "nach", "hint": ["zeitlich"]}]
+          "translations": [{"text": "nach", "hints": ["zeitlich"]}]
         }
       ]
     }

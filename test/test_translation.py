@@ -50,12 +50,12 @@ PROMPT_FOLDER = Path("prompts/translation_v2")
 PROVIDER_TYPE = "google"
 PROVIDER_CONFIG = {  # best settings for Google Gemini
     "model": "gemini-3-flash-preview",
-    "thinking_level": "minimal",
+    "thinking_level": "medium",
     "temperature": 1.0,
 }
 # PROVIDER_CONFIG = {
 #     "model": "gemini-3-pro-preview",
-#     "thinking_level": "low",
+#     "thinking_level": "high",
 #     "temperature": 1.0,
 # }
 BATCH_SIZE = 5
@@ -64,7 +64,7 @@ MAX_CONCURRENT_REQUESTS = 20
 CACHE_DIR = Path("test/translation_cache")
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_DIR = Path(
-    f"test/outputs/test_translation/{PROVIDER_CONFIG['model']}_{TIMESTAMP}"
+    f"test/outputs/test_translation/{PROVIDER_CONFIG['model']}_{BATCH_SIZE}_{PROVIDER_CONFIG['thinking_level']}_{TIMESTAMP}"
 )
 OUTPUT_LOG_PATH = OUTPUT_DIR / "translation.log"
 

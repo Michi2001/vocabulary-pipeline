@@ -25,12 +25,12 @@ Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital
         {
           "definition_es": "institución financiera donde se guarda y presta dinero",
           "gender": "m",
-          "translations": [{"text": "Bank", "hint": ["Geldinstitut"], "gender_target": "f"}]
+          "translations": [{"text": "Bank", "hints": ["Geldinstitut"], "gender_target": "f"}]
         },
         {
           "definition_es": "asiento largo para varias personas",
           "gender": "m",
-          "translations": [{"text": "Bank", "hint": ["Sitzbank"], "gender_target": "f"}]
+          "translations": [{"text": "Bank", "hints": ["Sitzbank"], "gender_target": "f"}]
         }
       ]
     },
@@ -75,7 +75,7 @@ Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital
         {
           "definition_es": "instalación industrial para fabricar o procesar algo",
           "gender": "f",
-          "translations": [{"text": "Werk", "gender_target": "n"}, {"text": "Anlage", "hint": ["Industrie"], "gender_target": "f"}]
+          "translations": [{"text": "Werk", "gender_target": "n"}, {"text": "Anlage", "hints": ["Industrie"], "gender_target": "f"}]
         }
       ]
     },

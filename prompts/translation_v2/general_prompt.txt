@@ -9,7 +9,7 @@ Du bist ein Experte für spanische Sprache und erstellst Übersetzungseinträge 
 Separate meanings nur wenn die deutschen Übersetzungen **semantisch unverbunden** sind — d.h. verschiedene Wortfelder, ein Lerner würde sie als "verschiedene Wörter" wahrnehmen. Meanings nach Häufigkeit der Bedeutung sortieren (häufigste zuerst).
 
 **Aufspalten:**
-- `banco`: "Bank" (Geld) vs. "Bank" (Sitzen) — Homonyme, hint zur Unterscheidung
+- `banco`: "Bank" (Geld) vs. "Bank" (Sitzen) — Homonyme, hints zur Unterscheidung
 - `encontrar`: "finden" vs. "sich treffen" — völlig verschiedene Aktionen
 - `apenas`: "kaum" vs. "sobald" — verschiedene Konzepte
 
@@ -68,20 +68,30 @@ Verfügbare Flags:
 - Keine redundanten Umschreibungen: "verengen" + "enger machen" → nur "verengen"
 - **Nur echte deutsche Wörter** — keine linguistischen Fachbegriffe wie "Genitiv-Anzeiger", "Akkusativ-Marker", etc.
 
-### Hint-Feld
+### Hints-Feld
 
 Kurze Zusatzinfo in Klammern, die dem Lerner hilft, die Übersetzung zu verstehen.
 
 **Verwenden wenn das deutsche Wort mehrdeutig ist:**
-- `{"text": "Bank", "hint": ["Sitzbank"]}` vs. `{"text": "Bank", "hint": ["Finanzinstitut"]}`
-- `{"text": "Sehne", "hint": ["Anatomie"]}` vs. `{"text": "Sehne", "hint": ["Geometrie"]}`
-- `{"text": "Aufnahme", "hint": ["Foto", "Audio"]}` vs. `{"text": "Aufnahme", "hint": ["Zulassung"]}`
+- `{"text": "Bank", "hints": ["Sitzbank"]}` vs. `{"text": "Bank", "hints": ["Finanzinstitut"]}`
+- `{"text": "Sehne", "hints": ["Anatomie"]}` vs. `{"text": "Sehne", "hints": ["Geometrie"]}`
+- `{"text": "Aufnahme", "hints": ["Foto", "Audio"]}` vs. `{"text": "Aufnahme", "hints": ["Zulassung"]}`
 
 **Pflicht wenn gleiche Übersetzung in mehreren meanings desselben Lemmas:**
-- `tierra` Meaning 1: `{"text": "Erde", "hint": ["Planet"]}` — Meaning 2: `{"text": "Erde", "hint": ["Boden"]}`
-- `historia` Meaning 1: `{"text": "Geschichte", "hint": ["historisch"]}` — Meaning 2: `{"text": "Geschichte", "hint": ["Erzählung"]}`
+- `tierra` Meaning 1: `{"text": "Erde", "hints": ["Planet"]}` — Meaning 2: `{"text": "Erde", "hints": ["Boden"]}`
+- `historia` Meaning 1: `{"text": "Geschichte", "hints": ["historisch"]}` — Meaning 2: `{"text": "Geschichte", "hints": ["Erzählung"]}`
 
 **Weglassen** wenn das deutsche Wort eindeutig ist**
+
+**Jeder Hint ist ein separater Array-Eintrag — NICHT mit Trennzeichen kombinieren:**
+- FALSCH: `"hints": ["zeitlich oder örtlich"]`
+- RICHTIG: `"hints": ["zeitlich", "örtlich"]`
+- FALSCH: `"hints": ["Preis/Tausch"]`
+- RICHTIG: `"hints": ["Preis", "Tausch"]`
+
+**Hints sind kurze Stichwörter (1–2 Wörter), keine Beschreibungen oder Satzfragmente:**
+- FALSCH: `"hints": ["den Darm"]` → RICHTIG: `"hints": ["Darm"]`
+- FALSCH: `"hints": ["vulgär für Gesäß"]` → RICHTIG: `"hints": ["Gesäß"]`
 
 ### Flags auf Übersetzungs-Ebene
 
