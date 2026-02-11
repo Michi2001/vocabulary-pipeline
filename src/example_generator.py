@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from src.llm_providers.base_provider import BaseLLMProvider
 from src.llm_providers.common.rate_limiter import AsyncRateLimiter
 from src.lemma_cache import LemmaCache
-from src.vocab import Translation
+from src.vocab import DEFAULT_DISAMBIGUATED_POS, Translation
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,8 @@ class ExampleGenerator:
     """
     Generates diverse example sentences for translation meanings.
 
-    For polysemantic words (2+ meanings): generates num_examples_poly examples per meaning.
-    For monosemantic words (1 meaning): generates 1 example.
+    For polysemantic words in disambiguated POS: generates num_examples_poly examples per meaning.
+    For all other words: generates 1 example per meaning.
     """
 
     def __init__(
@@ -30,6 +30,7 @@ class ExampleGenerator:
         provider: BaseLLMProvider,
         cache: Optional[LemmaCache],
         config: Dict[str, Any],
+        disambiguated_pos: Optional[set] = None,
     ):
         self.provider = provider
         self.cache = cache
@@ -37,6 +38,7 @@ class ExampleGenerator:
         self.batch_size = config.get("batch_size", 50)
         self.prompts_dir = Path(config.get("prompts_dir", "prompts/examples"))
         self.num_examples_poly = config.get("num_examples_poly", 10)
+        self.disambiguated_pos = disambiguated_pos or DEFAULT_DISAMBIGUATED_POS
         self.max_requests_per_minute = config.get("max_requests_per_minute", 0)
         self.max_concurrent_requests = config.get("max_concurrent_requests", 5)
         self._loop: Optional[asyncio.AbstractEventLoop] = None
@@ -56,8 +58,8 @@ class ExampleGenerator:
         cached_count = 0
 
         for translation in translations:
-            num_meanings = len(translation.meanings)
-            num_examples = 1 if num_meanings == 1 else self.num_examples_poly
+            is_poly = len(translation.meanings) > 1 and translation.pos in self.disambiguated_pos
+            num_examples = self.num_examples_poly if is_poly else 1
 
             for meaning_idx, meaning in enumerate(translation.meanings):
                 definition_hash = self._compute_definition_hash(meaning.definition_es)

@@ -380,8 +380,11 @@ def run_pipeline(
                 "max_concurrent_requests": example_config.get("max_concurrent_requests", 5),
             }
 
+            disambiguated_pos = set(
+                disambiguation_config.get("pos_types", ["NOUN", "VERB", "ADJ", "ADV"])
+            )
             example_generator = ExampleGenerator(
-                example_provider, llm_cache, example_gen_config
+                example_provider, llm_cache, example_gen_config, disambiguated_pos
             )
             translations, _ = example_generator.generate(translations)
             logger.info("Example generation completed")

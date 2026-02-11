@@ -157,7 +157,7 @@ class TestPipelineIntegration(unittest.TestCase):
         print("=" * 80)
 
     def _print_store_contents(self, result):
-        """Print contents of all stores."""
+        """Print contents of all stores in a readable table format."""
         print("\n" + "=" * 80)
         print("STORE CONTENTS")
         print("=" * 80)
@@ -175,34 +175,33 @@ class TestPipelineIntegration(unittest.TestCase):
                 _, lemma_tokens = lemmas[i]
                 variants = disambiguated[i][1] if disambiguated else None
 
-                print(f"\n  Sentence {sid}:")
-                print(f"    Tokens:  {tokens}")
-                print(f"    Lemmas:  {lemma_tokens}")
-                if variants is not None:
-                    # Mark polysemous variants with [POL]
-                    variant_strs = []
-                    for v_id in variants:
-                        if v_id is None:
-                            variant_strs.append("None")
-                        else:
-                            variant = result.vocabulary.get_vocab_entry(v_id)
-                            num_meanings = len(variant.translation.meanings)
-                            pol_marker = "[POL]" if num_meanings > 1 else ""
-                            variant_strs.append(f"{v_id}{pol_marker}")
-                    print(f"    Variants: [{', '.join(variant_strs)}]")
-                    # Show all translations for each variant, mark polysemous with [POL]
-                    translation_strs = []
-                    for v_id in variants:
-                        if v_id is None:
-                            translation_strs.append("None")
-                        else:
-                            variant = result.vocabulary.get_vocab_entry(v_id)
-                            num_meanings = len(variant.translation.meanings)
-                            pol_marker = "[POL]" if num_meanings > 1 else ""
-                            translation_strs.append(
-                                f"{variant.all_translations}{pol_marker}"
-                            )
-                    print(f"    Translations: [{', '.join(translation_strs)}]")
+                print(f"\n  Sentence {sid}: \"{' '.join(tokens)}\"")
+
+                if variants is None:
+                    for token, (lemma, pos) in zip(tokens, lemma_tokens):
+                        print(f"    {token:<16} {pos:<5}")
+                    continue
+
+                skipped_pos = []
+                for j, (token, (lemma, pos)) in enumerate(zip(tokens, lemma_tokens)):
+                    v_id = variants[j]
+                    if v_id is None:
+                        skipped_pos.append(pos)
+                        continue
+                    entry = result.vocabulary.get_vocab_entry(v_id)
+                    pol = " [POL]" if entry.is_disambiguated else ""
+                    translation = entry.all_translations
+                    print(
+                        f"    {token:<16} {pos:<5} "
+                        f"\u2192 {translation:<35}{pol} #{v_id}"
+                    )
+
+                if skipped_pos:
+                    counts = {}
+                    for p in skipped_pos:
+                        counts[p] = counts.get(p, 0) + 1
+                    parts = [f"{c}x {p}" if c > 1 else p for p, c in counts.items()]
+                    print(f"    ({len(skipped_pos)} skipped: {', '.join(parts)})")
 
     def _print_vocab_entries(self, result):
         """Print all WordVariants with their IDs."""
@@ -210,15 +209,13 @@ class TestPipelineIntegration(unittest.TestCase):
         print("WORD VARIANTS")
         print("=" * 80)
 
-        for variant in result.vocabulary.vocab_entries:
-            # Check if this lemma has multiple meanings (polysemous)
-            num_meanings = len(variant.translation.meanings)
-            polysemy_marker = " [POL]" if num_meanings > 1 else ""
+        for entry in result.vocabulary.vocab_entries:
+            pol = " [POL]" if entry.is_disambiguated else ""
             print(
-                f"  ID {variant.id}: {variant.lemma}|{variant.pos} "
-                f"-> {variant.all_translations} "
-                f"(meaning_idx={variant.meaning_idx}, freq={variant.frequency}, "
-                f"string_id={variant.string_id}){polysemy_marker}"
+                f"  ID {entry.id}: {entry.lemma}|{entry.pos} "
+                f"-> {entry.all_translations} "
+                f"(meaning_idx={entry.meaning_idx}, freq={entry.frequency}, "
+                f"string_id={entry.string_id}){pol}"
             )
 
     def test_load_saved_vocabulary(self):

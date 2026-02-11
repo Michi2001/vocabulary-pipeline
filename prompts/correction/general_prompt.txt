@@ -77,6 +77,8 @@ Map words back to their canonical dictionary form if the lemmatizer failed.
      * 'atrevido' [daring/bold] → KEEP ✓ (distinct from "atreverse" [to dare])
      * 'callado' [quiet person] → KEEP ✓ (distinct from "callar" [to silence])
      * 'educado' [polite] → KEEP ✓ (distinct from "educar" [to educate])
+     * 'pasado' [past/last] → KEEP ✓ (distinct from "pasar" [to pass/happen])
+     * 'muerto' [dead] → KEEP ✓ (distinct from "morir" [to die])
      * 'parado' [standing/unemployed] → KEEP ✓ (distinct from "parar" [to stop])
    - The verb form is uncommon/rare in modern Spanish:
      * 'descabellado' [absurd/crazy] → KEEP ✓ ('descabellar' is rarely used)

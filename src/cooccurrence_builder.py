@@ -89,19 +89,16 @@ class CoOccurrenceBuilder:
                 # Count co-occurrences (all pairs)
                 seen_pairs: Set[Tuple[int, int]] = set()
                 for i, id_i in enumerate(entry_ids):
-                    for j, id_j in enumerate(entry_ids):
-                        if i >= j:  # Skip self and duplicates (symmetric)
-                            continue
+                    for j in range(i + 1, len(entry_ids)):
+                        id_j = entry_ids[j]
 
-                        # Ensure consistent ordering for symmetric matrix
-                        if id_i > id_j:
-                            id_i, id_j = id_j, id_i
+                        # Consistent ordering for symmetric matrix
+                        a, b = (id_i, id_j) if id_i < id_j else (id_j, id_i)
 
-                        pair_key = (id_i, id_j)
-                        if pair_key not in seen_pairs:
-                            matrix[id_i, id_j] += 1
-                            matrix[id_j, id_i] += 1  # Symmetric
-                            seen_pairs.add(pair_key)
+                        if (a, b) not in seen_pairs:
+                            matrix[a, b] += 1
+                            matrix[b, a] += 1  # Symmetric
+                            seen_pairs.add((a, b))
                             pair_count += 1
 
                 sentence_count += 1
