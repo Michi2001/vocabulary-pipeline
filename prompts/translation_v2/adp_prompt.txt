@@ -20,11 +20,11 @@
         },
         {
           "definition_es": "indica intercambio o precio",
-          "translations": [{"text": "für", "hint": "Preis/Tausch"}]
+          "translations": [{"text": "für", "hint": ["Preis", "Tausch"]}]
         },
         {
           "definition_es": "indica el agente en construcciones pasivas",
-          "translations": [{"text": "von", "hint": "Passiv"}]
+          "translations": [{"text": "von", "hint": ["Passiv"]}]
         }
       ]
     },
@@ -50,7 +50,7 @@
         },
         {
           "definition_es": "indica la dirección o el destino",
-          "translations": [{"text": "nach", "hint": "Richtung"}]
+          "translations": [{"text": "nach", "hint": ["Richtung", "Ziel"]}]
         }
       ]
     },
@@ -61,7 +61,7 @@
       "meanings": [
         {
           "definition_es": "delante de o en presencia de alguien o algo",
-          "translations": [{"text": "vor", "hint": "räumlich/Person"}]
+          "translations": [{"text": "vor", "hint": ["räumlich"]}]
         },
         {
           "definition_es": "frente a una situación o circunstancia",
@@ -80,7 +80,7 @@
         },
         {
           "definition_es": "indica sucesión temporal, después de",
-          "translations": [{"text": "nach", "hint": "zeitlich"}]
+          "translations": [{"text": "nach", "hint": ["zeitlich"]}]
         }
       ]
     }

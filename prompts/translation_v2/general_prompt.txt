@@ -73,13 +73,13 @@ Verfügbare Flags:
 Kurze Zusatzinfo in Klammern, die dem Lerner hilft, die Übersetzung zu verstehen.
 
 **Verwenden wenn das deutsche Wort mehrdeutig ist:**
-- `{"text": "Bank", "hint": "Sitzbank"}` vs. `{"text": "Bank", "hint": "Finanzinstitut"}`
-- `{"text": "Sehne", "hint": "Anatomie"}` vs. `{"text": "Sehne", "hint": "Geometrie"}`
-- `{"text": "auflegen", "hint": "Telefon"}` vs. `{"text": "auflegen", "hint": "Schallplatte"}`
+- `{"text": "Bank", "hint": ["Sitzbank"]}` vs. `{"text": "Bank", "hint": ["Finanzinstitut"]}`
+- `{"text": "Sehne", "hint": ["Anatomie"]}` vs. `{"text": "Sehne", "hint": ["Geometrie"]}`
+- `{"text": "Aufnahme", "hint": ["Foto", "Audio"]}` vs. `{"text": "Aufnahme", "hint": ["Zulassung"]}`
 
 **Pflicht wenn gleiche Übersetzung in mehreren meanings desselben Lemmas:**
-- `tierra` Meaning 1: `{"text": "Erde", "hint": "Planet"}` — Meaning 2: `{"text": "Erde", "hint": "Boden"}`
-- `historia` Meaning 1: `{"text": "Geschichte", "hint": "historisch"}` — Meaning 2: `{"text": "Geschichte", "hint": "Erzählung"}`
+- `tierra` Meaning 1: `{"text": "Erde", "hint": ["Planet"]}` — Meaning 2: `{"text": "Erde", "hint": ["Boden"]}`
+- `historia` Meaning 1: `{"text": "Geschichte", "hint": ["historisch"]}` — Meaning 2: `{"text": "Geschichte", "hint": ["Erzählung"]}`
 
 **Weglassen** wenn das deutsche Wort eindeutig ist**
 

@@ -24,7 +24,7 @@ class Meaning:
     """A single meaning/sense of a lemma."""
 
     definition_es: str
-    translations: List[Dict[str, Any]]  # text, hint?, gender_target?, flags?
+    translations: List[Dict[str, Any]]  # text, hint?: list[str], gender_target?, flags?
     estimated_share: Optional[float] = None  # Set by ShareUpdater after disambiguation
     structure: Optional[str] = None
     examples_es: Optional[List[str]] = None
@@ -39,7 +39,8 @@ class Meaning:
         """Returns the primary (first) translation text."""
         if self.translations:
             primary = self.translations[0]
-            hint = f" ({primary.get('hint', '')})" if primary.get("hint") else ""
+            hints = primary.get("hint", [])
+            hint = f" ({' / '.join(hints)})" if hints else ""
             return primary.get("text", "") + hint
         return ""
 
@@ -51,7 +52,8 @@ class Meaning:
         parts = []
         for t in self.translations:
             text = t.get("text", "")
-            hint = f" ({t.get('hint', '')})" if t.get("hint") else ""
+            hints = t.get("hint", [])
+            hint = f" ({' / '.join(hints)})" if hints else ""
             parts.append(text + hint)
         return " / ".join(parts)
 

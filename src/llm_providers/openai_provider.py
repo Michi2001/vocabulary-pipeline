@@ -158,7 +158,7 @@ class OpenAIProvider(BaseLLMProvider):
                                                     "type": "object",
                                                     "properties": {
                                                         "text": {"type": "string"},
-                                                        "hint": {"type": "string"},
+                                                        "hint": {"type": "array", "items": {"type": "string"}},
                                                         "gender_target": {"type": "string"},
                                                     },
                                                     "required": ["text"],

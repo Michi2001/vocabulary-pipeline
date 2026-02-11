@@ -25,7 +25,7 @@
                     "type": "OBJECT",
                     "properties": {
                       "text": {"type": "STRING"},
-                      "hint": {"type": "STRING"},
+                      "hint": {"type": "ARRAY", "items": {"type": "STRING"}},
                       "flags": {
                         "type": "ARRAY",
                         "items": {"type": "STRING"}
