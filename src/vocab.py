@@ -228,9 +228,14 @@ class VocabEntry:
         """Returns all translations concatenated."""
         if self.meaning is not None:
             return self.meaning.all_translations
-        if self.translation.meanings:
-            return self.translation.meanings[0].all_translations
-        return ""
+        # Non-disambiguated: collect texts from all meanings, no hints
+        parts = []
+        for meaning in self.translation.meanings:
+            for t in meaning.translations:
+                text = t.get("text", "")
+                if text and text not in parts:
+                    parts.append(text)
+        return " / ".join(parts)
 
     @property
     def bert_embedding(self) -> Optional[np.ndarray]:

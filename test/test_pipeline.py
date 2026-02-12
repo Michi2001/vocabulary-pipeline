@@ -210,7 +210,7 @@ class TestPipelineIntegration(unittest.TestCase):
         print("=" * 80)
 
         for entry in result.vocabulary.vocab_entries:
-            pol = " [POL]" if entry.is_disambiguated else ""
+            pol = " [POL]" if len(entry.translation.meanings) > 1 else ""
             print(
                 f"  ID {entry.id}: {entry.lemma}|{entry.pos} "
                 f"-> {entry.all_translations} "
