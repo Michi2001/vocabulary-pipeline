@@ -33,8 +33,8 @@ processing:
   sentence_batch_size: 10000  # Sentences read from corpus per batch
 
 output:
-  directory: "output/spanish_lemma_frequencies"
-  min_frequency: 5  # Only include lemmas with freq >= this in output CSV
+  directory: "output/spanish_german"
+  min_frequency: 20  # Only include lemmas with freq >= this in output CSV
 
 cache:
   directory: "cache"
@@ -62,75 +62,60 @@ filtering:
   include_countries: true  # Allow country names (PROPN) from babel
 
 llm_correction:
-  enabled: false
-  batch_size: 25  # Lemmas per LLM request
+  enabled: true
+  batch_size: 10  # Lemmas per LLM request
   prompt_file: "prompts/correction/general_prompt.txt"
-  target_output_size: 5000  # Correct until output has >= this many lemmas; If number of lemmas in cache > this, the output might be larger
+  target_output_size: 20000  # Correct until output has >= this many lemmas; If number of lemmas in cache > this, the output might be larger
   max_requests_per_minute: 0       # 0 = unlimited
-  max_concurrent_requests: 20      # Concurrent API requests
+  max_concurrent_requests: 100      # Concurrent API requests
   llm:
     type: "google"  # openai or google
-    openai:
-      model: "gpt-5-mini"
-      max_retries: 3
-      retry_delay: 2
-      timeout: 60
     google:
       model: "gemini-3-flash-preview"
-      max_retries: 3
+      max_retries: 10
       retry_delay: 2
       timeout: 60
       temperature: 1.0
       thinking_level: "minimal"  # minimal, low, medium, high
 
 llm_translation:
-  enabled: false
-  batch_size: 20  # Lemmas per LLM request
+  enabled: true
+  batch_size: 5  # Lemmas per LLM request
   prompt_directory: "prompts/translation_v2"
-  max_requests_per_minute: 20    # 0 = unlimited; Gemini 3 Pro: max 25 RPM, Gemini 3 flash: max 1k
-  max_concurrent_requests: 20     # Concurrent API requests
+  max_requests_per_minute: 0    # 0 = unlimited; Gemini 3 Pro: max 25 RPM, Gemini 3 flash: max 1k
+  max_concurrent_requests: 100     # Concurrent API requests
   llm:
     type: "google"
-    openai:
-      model: "gpt-5-mini"
-      max_retries: 3
-      retry_delay: 2
-      timeout: 300
     google:
       model: "gemini-3-flash-preview"
-      max_retries: 3
+      max_retries: 5
       retry_delay: 2
       timeout: 360
       temperature: 1.0
-      thinking_level: "minimal"
+      thinking_level: "medium"
 
 # Example Generation runs automatically when disambiguation.enabled=true
 # Examples are required for embedding-based disambiguation.
 # For monosemantic words (1 meaning): 1 example
 # For polysemantic words (2+ meanings): num_examples_poly examples per meaning
 example_generation:
-  batch_size: 50  # Meanings per LLM request (larger since less output per item)
+  batch_size: 10  # Meanings per LLM request (larger since less output per item)
   prompt_directory: "prompts/examples"
   num_examples_poly: 10  # Examples per meaning for polysemantic words
   max_requests_per_minute: 0       # 0 = unlimited
-  max_concurrent_requests: 20      # Concurrent API requests
+  max_concurrent_requests: 100      # Concurrent API requests
   llm:
-    type: "openai"  # Can use different/cheaper provider than translation
-    openai:
-      model: "gpt-4o-mini"
-      max_retries: 3
-      retry_delay: 2
-      timeout: 300
+    type: "google"  # Can use different/cheaper provider than translation
     google:
       model: "gemini-3-flash-preview"
-      max_retries: 3
+      max_retries: 5
       retry_delay: 2
       timeout: 360
       temperature: 1.0
       thinking_level: "minimal"
 
 disambiguation:
-  enabled: false  # Also enables example_generation!
+  enabled: true  # Also enables example_generation!
   model: "dccuchile/bert-base-spanish-wwm-cased"  # BERT model for embeddings
   batch_size: 32  # Sentences per BERT batch
   # POS types that will be disambiguated (multiple meanings per lemma)

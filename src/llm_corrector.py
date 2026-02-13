@@ -69,8 +69,11 @@ class LemmaCorrector:
         all_corrections = []
         processed_idx = 0
 
-        while True:
-            # Scan remaining items: collect cached corrections and uncached items
+        # Max uncached items to collect before sending to LLM
+        max_uncached_per_round = self.batch_size * self.max_concurrent_requests
+
+        while processed_idx < len(frequencies):
+            # Scan items: resolve cached, collect uncached up to one parallel round
             uncached_items = []
             scan_start = processed_idx
             target_reached = False
@@ -109,14 +112,18 @@ class LemmaCorrector:
 
                 processed_idx += 1
 
-            # Process all uncached items via LLM (parallel or sync)
-            if uncached_items and not target_reached:
-                batches = []
-                for i in range(0, len(uncached_items), self.batch_size):
-                    batches.append(uncached_items[i : i + self.batch_size])
+                # Stop scanning once we have enough uncached items for one parallel round
+                if len(uncached_items) >= max_uncached_per_round:
+                    break
 
+            # Process uncached items via LLM in parallel batches
+            if uncached_items and not target_reached:
+                batches = [
+                    uncached_items[i : i + self.batch_size]
+                    for i in range(0, len(uncached_items), self.batch_size)
+                ]
                 logger.info(
-                    f"Processing {len(uncached_items)} uncached items "
+                    f"Processing {len(uncached_items)} uncached lemmas "
                     f"in {len(batches)} batches"
                 )
                 batch_corrections = self._run_batches(batches, prompt_hash)
@@ -136,10 +143,6 @@ class LemmaCorrector:
                     f"Target output size reached: "
                     f"{current_output_size} >= {self.target_output_size}"
                 )
-                break
-
-            if processed_idx >= len(frequencies):
-                logger.info(f"All {len(frequencies)} lemmas processed")
                 break
 
             if processed_idx == scan_start:
