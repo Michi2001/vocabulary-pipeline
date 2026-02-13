@@ -230,10 +230,12 @@ class LemmaCorrector:
         """Process batches in parallel with concurrency + rate limiting."""
         semaphore = asyncio.Semaphore(self.max_concurrent_requests)
         rate_limiter = AsyncRateLimiter(self.max_requests_per_minute)
+        all_batch_corrections: List[Dict[str, Any]] = []
+        cache_lock = asyncio.Lock()
 
         async def process_one_batch(
             batch_idx: int, batch: List[Dict[str, Any]]
-        ) -> Tuple[int, List[Dict[str, Any]]]:
+        ) -> None:
             async with semaphore:
                 await rate_limiter.acquire()
                 logger.info(
@@ -243,20 +245,20 @@ class LemmaCorrector:
                 response = await self.provider.correct_lemmas_async(
                     batch, self.system_prompt
                 )
-                return batch_idx, response["corrections"]
+                batch_corrections = response["corrections"]
+
+                # Cache and accumulate under lock (SQLite is not thread-safe)
+                async with cache_lock:
+                    self._cache_corrections(batch, batch_corrections, prompt_hash)
+                    all_batch_corrections.extend(batch_corrections)
 
         tasks = [process_one_batch(i, batch) for i, batch in enumerate(batches)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        all_batch_corrections = []
+        # Log failed batches
         for i, result in enumerate(results):
             if isinstance(result, Exception):
                 logger.error(f"  Batch {i + 1}/{len(batches)} failed: {result}")
-                continue
-
-            batch_idx, batch_corrections = result
-            self._cache_corrections(batches[batch_idx], batch_corrections, prompt_hash)
-            all_batch_corrections.extend(batch_corrections)
 
         return all_batch_corrections
 

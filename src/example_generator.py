@@ -180,10 +180,11 @@ class ExampleGenerator:
         """Process batches in parallel with concurrency + rate limiting."""
         semaphore = asyncio.Semaphore(self.max_concurrent_requests)
         rate_limiter = AsyncRateLimiter(self.max_requests_per_minute)
+        cache_lock = asyncio.Lock()
 
         async def process_one_batch(
             batch_idx: int, batch: List[Dict]
-        ) -> Tuple[int, List[Dict], Optional[Dict]]:
+        ) -> None:
             async with semaphore:
                 await rate_limiter.acquire()
                 logger.info(
@@ -197,33 +198,28 @@ class ExampleGenerator:
                 response = await self.provider.generate_examples_async(
                     batch_input, prompt_with_num
                 )
-                return (
-                    batch_idx,
-                    response.get("all_examples", []),
-                    response.get("_token_usage"),
-                )
+                all_examples = response.get("all_examples", [])
+                usage = response.get("_token_usage")
+
+                # Cache and accumulate under lock (SQLite is not thread-safe)
+                async with cache_lock:
+                    if usage:
+                        total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
+                        total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
+                        total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
+                        total_usage["total_tokens"] += usage.get("total_tokens") or 0
+                        total_usage["api_calls"] += 1
+                    self._apply_batch_results(batch, all_examples)
+                    if self.cache is not None:
+                        self.cache.save_all()
 
         tasks = [process_one_batch(i, batch) for i, batch in enumerate(batches)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
+        # Log failed batches
         for i, result in enumerate(results):
             if isinstance(result, Exception):
                 logger.error(f"Batch {i + 1}/{len(batches)} failed: {result}")
-                continue
-
-            batch_idx, all_examples, usage = result
-
-            if usage:
-                total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
-                total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
-                total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
-                total_usage["total_tokens"] += usage.get("total_tokens") or 0
-                total_usage["api_calls"] += 1
-
-            self._apply_batch_results(batches[batch_idx], all_examples)
-
-        if self.cache is not None:
-            self.cache.save_all()
 
     def _accumulate_usage(self, total_usage: Dict[str, int], response: Dict[str, Any]):
         """Accumulate token usage from a response into total_usage."""

@@ -39,15 +39,18 @@ class GoogleGenAIProvider(BaseLLMProvider):
         """
         super().__init__(config)
 
-        load_dotenv()
-        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-
         self.model = config.get("model", "gemini-3-flash-preview")
         self.max_retries = config.get("max_retries", 3)
         self.retry_delay = config.get("retry_delay", 2)
         self.timeout = config.get("timeout", 360)
         self.temperature = config.get("temperature", 1.0)
         self.thinking_level = config.get("thinking_level", "minimal")
+
+        load_dotenv()
+        self.client = genai.Client(
+            api_key=os.getenv("GOOGLE_API_KEY"),
+            http_options=types.HttpOptions(timeout=self.timeout * 1000),
+        )
 
     def get_cache_key_components(self) -> str:
         """

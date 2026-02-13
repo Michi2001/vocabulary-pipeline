@@ -278,11 +278,13 @@ class LemmaTranslator:
         """Process uncached batches in parallel with concurrency + rate limiting."""
         semaphore = asyncio.Semaphore(self.max_concurrent_requests)
         rate_limiter = AsyncRateLimiter(self.max_requests_per_minute)
+        batch_translations_all: List[Dict[str, Any]] = []
+        cache_lock = asyncio.Lock()
 
         async def process_one_batch(
             batch_idx: int, batch: List[Dict[str, Any]]
-        ) -> Tuple[int, List[Dict[str, Any]], Optional[Dict]]:
-            """Process a single batch, returns (batch_idx, translations, usage)."""
+        ) -> None:
+            """Process a single batch, cache immediately on success."""
             async with semaphore:
                 await rate_limiter.acquire()
                 logger.info(
@@ -292,36 +294,30 @@ class LemmaTranslator:
                 response = await self.provider.translate_lemmas_async(
                     batch, system_prompt, pos_schema
                 )
-                return (
-                    batch_idx,
-                    response["all_lemma_translations"],
-                    response.get("_token_usage"),
-                )
+                batch_translations = response["all_lemma_translations"]
+                usage = response.get("_token_usage")
+
+                # Cache and accumulate under lock (SQLite is not thread-safe)
+                async with cache_lock:
+                    if usage:
+                        total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
+                        total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
+                        total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
+                        total_usage["total_tokens"] += usage.get("total_tokens") or 0
+                        total_usage["api_calls"] += 1
+                    self._cache_batch_translations(
+                        batch, batch_translations, combined_prompt_hash
+                    )
+                    batch_translations_all.extend(batch_translations)
 
         # Launch all batches concurrently (bounded by semaphore + rate limiter)
         tasks = [process_one_batch(i, batch) for i, batch in enumerate(batches)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        # Process results sequentially (cache writes, token aggregation)
-        batch_translations_all = []
+        # Log failed batches
         for i, result in enumerate(results):
             if isinstance(result, Exception):
                 logger.error(f"  Batch {i+1}/{len(batches)} failed: {result}")
-                continue
-
-            batch_idx, batch_translations, usage = result
-
-            if usage:
-                total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
-                total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
-                total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
-                total_usage["total_tokens"] += usage.get("total_tokens") or 0
-                total_usage["api_calls"] += 1
-
-            self._cache_batch_translations(
-                batches[batch_idx], batch_translations, combined_prompt_hash
-            )
-            batch_translations_all.extend(batch_translations)
 
         return batch_translations_all
 

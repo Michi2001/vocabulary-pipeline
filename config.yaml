@@ -90,7 +90,7 @@ llm_translation:
       model: "gemini-3-flash-preview"
       max_retries: 5
       retry_delay: 2
-      timeout: 360
+      timeout: 180
       temperature: 1.0
       thinking_level: "medium"
 
@@ -110,7 +110,7 @@ example_generation:
       model: "gemini-3-flash-preview"
       max_retries: 5
       retry_delay: 2
-      timeout: 360
+      timeout: 180
       temperature: 1.0
       thinking_level: "minimal"
 
