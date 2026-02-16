@@ -35,7 +35,7 @@ class Lemmatizer:
         self.language_model = language_model
         self.batch_size = batch_size
 
-        self.nlp = spacy.load(language_model)
+        self.nlp = spacy.load(language_model, disable=["parser", "ner"])
         self.nlp.max_length = 2000000
 
     def _process_sentences_aligned(
