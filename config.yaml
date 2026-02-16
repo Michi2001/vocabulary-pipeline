@@ -117,7 +117,7 @@ example_generation:
 disambiguation:
   enabled: true  # Also enables example_generation!
   model: "dccuchile/bert-base-spanish-wwm-cased"  # BERT model for embeddings
-  batch_size: 32  # Sentences per BERT batch
+  bert_batch_tokens: 2048  # Max tokens per BERT batch
   # POS types that will be disambiguated (multiple meanings per lemma)
   # Other POS types get a single VocabEntry per lemma (no disambiguation)
   pos_types:

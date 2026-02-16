@@ -18,6 +18,15 @@ from src.vocab import Translation
 logger = logging.getLogger(__name__)
 
 
+def _get_torch_device() -> torch.device:
+    """Select best available device: CUDA > MPS > CPU."""
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
+
+
 class MeaningEmbeddingGenerator:
     """
     Generates BERT embeddings for target words in example sentences.
@@ -29,28 +38,20 @@ class MeaningEmbeddingGenerator:
     def __init__(
         self,
         model_name: str = "dccuchile/bert-base-spanish-wwm-cased",
-        batch_size: int = 32,
     ):
-        """
-        Initialize with BERT model.
-
-        Args:
-            model_name: HuggingFace model identifier (default: BETO)
-            batch_size: Batch size for encoding
-        """
         self.model_name = model_name
-        self.batch_size = batch_size
         self._model = None
         self._tokenizer = None
+        self._device = None
 
     def _load_model(self):
         """Lazy load BERT model and tokenizer."""
         if self._model is None:
-            logger.info(f"Loading BERT model: {self.model_name}")
+            self._device = _get_torch_device()
+            logger.info(f"Loading BERT model: {self.model_name} (device: {self._device})")
             self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            self._model = AutoModel.from_pretrained(self.model_name)
+            self._model = AutoModel.from_pretrained(self.model_name).to(self._device)
             self._model.eval()
-            logger.info("BERT model loaded successfully")
 
     def _get_contextual_embedding(
         self, sentence: str, char_start: int, char_end: int
@@ -78,7 +79,7 @@ class MeaningEmbeddingGenerator:
             max_length=512,
         )
 
-        # Find token positions for target word using character-to-token mapping
+        # Find token positions BEFORE moving tensors to device (char_to_token needs CPU)
         target_positions = []
         for char_pos in range(char_start, char_end):
             token_idx = inputs.char_to_token(0, char_pos)
@@ -92,6 +93,9 @@ class MeaningEmbeddingGenerator:
             )
             return None
 
+        # Move inputs to device
+        inputs = {k: v.to(self._device) for k, v in inputs.items()}
+
         # Get BERT embeddings from second-to-last hidden layer
         with torch.no_grad():
             outputs = self._model(**inputs, output_hidden_states=True)
@@ -102,7 +106,7 @@ class MeaningEmbeddingGenerator:
         # Average embeddings of target word tokens
         word_embedding = embeddings[target_positions].mean(dim=0)
 
-        return word_embedding.tolist()
+        return word_embedding.cpu().tolist()
 
     def generate(self, translations: List[Translation]) -> List[Translation]:
         """

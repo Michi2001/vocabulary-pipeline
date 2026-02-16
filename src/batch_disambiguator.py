@@ -84,6 +84,15 @@ class OrderedWriteBuffer:
 # =============================================================================
 
 
+def _get_torch_device() -> torch.device:
+    """Select best available device: CUDA > MPS > CPU."""
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
+
+
 class BertBatchProcessor:
     """Handles BERT encoding and embedding extraction."""
 
@@ -91,17 +100,16 @@ class BertBatchProcessor:
         self.model_name = model_name
         self._model = None
         self._tokenizer = None
+        self._device = None
 
     def _load_model(self) -> None:
         if self._model is not None:
             return
-        logger.info(f"Loading BERT model: {self.model_name}")
+        self._device = _get_torch_device()
+        logger.info(f"Loading BERT model: {self.model_name} (device: {self._device})")
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self._model = AutoModel.from_pretrained(self.model_name)
+        self._model = AutoModel.from_pretrained(self.model_name).to(self._device)
         self._model.eval()
-        if torch.cuda.is_available():
-            self._model = self._model.cuda()
-            logger.info("Using CUDA for disambiguation")
 
     def extract_embeddings(
         self, tasks: List[BertTask]
@@ -126,8 +134,19 @@ class BertBatchProcessor:
             padding=True,
         )
 
-        if torch.cuda.is_available():
-            inputs = {k: v.cuda() for k, v in inputs.items()}
+        # Resolve char_to_token BEFORE moving tensors to device
+        token_positions: Dict[Tuple[int, int], List[int]] = {}
+        for task_idx, task in enumerate(tasks):
+            for pi in task.poly_infos:
+                bert_positions = []
+                for char_pos in range(pi.char_start, pi.char_end):
+                    bert_idx = inputs.char_to_token(task_idx, char_pos)
+                    if bert_idx is not None and bert_idx not in bert_positions:
+                        bert_positions.append(bert_idx)
+                if bert_positions:
+                    token_positions[(task_idx, pi.token_idx)] = bert_positions
+
+        inputs = {k: v.to(self._device) for k, v in inputs.items()}
 
         with torch.no_grad():
             outputs = self._model(**inputs, output_hidden_states=True)
@@ -135,18 +154,9 @@ class BertBatchProcessor:
 
         result: Dict[Tuple[int, int], np.ndarray] = {}
 
-        for task_idx, task in enumerate(tasks):
-            for pi in task.poly_infos:
-                # Map character positions to BERT subword positions
-                bert_positions = []
-                for char_pos in range(pi.char_start, pi.char_end):
-                    bert_idx = inputs.char_to_token(task_idx, char_pos)
-                    if bert_idx is not None and bert_idx not in bert_positions:
-                        bert_positions.append(bert_idx)
-
-                if bert_positions:
-                    emb = hidden_states[task_idx, bert_positions].mean(dim=0)
-                    result[(task_idx, pi.token_idx)] = emb.cpu().numpy()
+        for (task_idx, token_idx), bert_positions in token_positions.items():
+            emb = hidden_states[task_idx, bert_positions].mean(dim=0)
+            result[(task_idx, token_idx)] = emb.cpu().numpy()
 
         return result
 
@@ -351,9 +361,7 @@ class BatchDisambiguator:
         stats = {"total": 0, "poly": 0, "disambiguated": 0}
 
         for sid, original_tokens, lemma_tokens in sentences:
-            entries, poly_infos = self._classify_sentence(
-                original_tokens, lemma_tokens
-            )
+            entries, poly_infos = self._classify_sentence(original_tokens, lemma_tokens)
 
             if not poly_infos:
                 # No polysemous tokens - write directly
