@@ -414,6 +414,7 @@ def run_pipeline(
             )
             meaning_emb_generator = MeaningEmbeddingGenerator(
                 model_name=model_name,
+                bert_batch_tokens=disambiguation_config.get("bert_batch_tokens", 4096),
             )
             translations = meaning_emb_generator.generate(translations)
             logger.info("Meaning embeddings generated")

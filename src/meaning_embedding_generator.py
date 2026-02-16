@@ -7,7 +7,7 @@ These embeddings are used later by the BatchDisambiguator for WSD.
 """
 
 import logging
-from typing import List, Optional
+from typing import Dict, List, NamedTuple, Tuple
 
 import numpy as np
 import torch
@@ -16,6 +16,16 @@ from transformers import AutoTokenizer, AutoModel
 from src.vocab import Translation
 
 logger = logging.getLogger(__name__)
+
+
+class EmbeddingTask(NamedTuple):
+    """Tracks which meaning an example sentence belongs to."""
+
+    translation_idx: int
+    meaning_idx: int
+    sentence: str
+    char_start: int
+    char_end: int
 
 
 def _get_torch_device() -> torch.device:
@@ -38,8 +48,10 @@ class MeaningEmbeddingGenerator:
     def __init__(
         self,
         model_name: str = "dccuchile/bert-base-spanish-wwm-cased",
+        bert_batch_tokens: int = 4096,
     ):
         self.model_name = model_name
+        self.bert_batch_tokens = bert_batch_tokens
         self._model = None
         self._tokenizer = None
         self._device = None
@@ -48,134 +60,149 @@ class MeaningEmbeddingGenerator:
         """Lazy load BERT model and tokenizer."""
         if self._model is None:
             self._device = _get_torch_device()
-            logger.info(f"Loading BERT model: {self.model_name} (device: {self._device})")
+            logger.info(
+                f"Loading BERT model: {self.model_name} (device: {self._device})"
+            )
             self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             self._model = AutoModel.from_pretrained(self.model_name).to(self._device)
             self._model.eval()
 
-    def _get_contextual_embedding(
-        self, sentence: str, char_start: int, char_end: int
-    ) -> Optional[List[float]]:
-        """
-        Get BERT contextual embedding for target word.
-
-        Uses second-to-last hidden layer and averages subtoken embeddings.
-
-        Args:
-            sentence: Sentence text (without brackets)
-            char_start: Character start position of target word
-            char_end: Character end position of target word
-
-        Returns:
-            Embedding as list of floats, or None if extraction fails
-        """
-        self._load_model()
-
-        # Tokenize sentence
-        inputs = self._tokenizer(
-            sentence,
-            return_tensors="pt",
-            truncation=True,
-            max_length=512,
-        )
-
-        # Find token positions BEFORE moving tensors to device (char_to_token needs CPU)
-        target_positions = []
-        for char_pos in range(char_start, char_end):
-            token_idx = inputs.char_to_token(0, char_pos)
-            if token_idx is not None and token_idx not in target_positions:
-                target_positions.append(token_idx)
-
-        if not target_positions:
-            target_word = sentence[char_start:char_end]
-            logger.warning(
-                f"Target word '{target_word}' not found in tokenized sentence"
-            )
-            return None
-
-        # Move inputs to device
-        inputs = {k: v.to(self._device) for k, v in inputs.items()}
-
-        # Get BERT embeddings from second-to-last hidden layer
-        with torch.no_grad():
-            outputs = self._model(**inputs, output_hidden_states=True)
-            hidden_states = outputs.hidden_states
-            # Use second-to-last layer (index -2)
-            embeddings = hidden_states[-2][0]  # [seq_len, hidden_dim]
-
-        # Average embeddings of target word tokens
-        word_embedding = embeddings[target_positions].mean(dim=0)
-
-        return word_embedding.cpu().tolist()
-
-    def generate(self, translations: List[Translation]) -> List[Translation]:
-        """
-        Add averaged BERT embedding from multiple examples per meaning.
-
-        Expects that ExampleGenerator has already extracted and stored:
-        - _target_starts: Character start positions (list, one per example)
-        - _target_ends: Character end positions (list, one per example)
-        - examples_es: List of example sentences
-
-        Modifies Translation objects in-place.
-
-        Args:
-            translations: List of Translation objects
-
-        Returns:
-            Same list with averaged embeddings added to meanings
-        """
-        logger.info(f"Generating meaning embeddings for {len(translations)} lemmas...")
-
+    def _collect_tasks(
+        self, translations: List[Translation]
+    ) -> Tuple[List[EmbeddingTask], int, int]:
+        """Collect all valid example sentences as embedding tasks."""
+        tasks = []
         total_meanings = 0
-        successful_embeddings = 0
         missing_metadata = 0
-        total_examples_processed = 0
 
-        for translation in translations:
+        for t_idx, translation in enumerate(translations):
             if not translation.meanings:
                 continue
 
-            for meaning in translation.meanings:
+            for m_idx, meaning in enumerate(translation.meanings):
                 total_meanings += 1
 
                 if not meaning.examples_es:
                     continue
 
-                # Check if metadata exists (extracted by ExampleGenerator)
                 if meaning._target_starts is None or meaning._target_ends is None:
                     missing_metadata += 1
                     continue
 
-                # Collect embeddings from all valid examples
-                embeddings = []
-                for i, example in enumerate(meaning.examples_es):
-                    if i >= len(meaning._target_starts) or i >= len(meaning._target_ends):
+                for e_idx, example in enumerate(meaning.examples_es):
+                    if e_idx >= len(meaning._target_starts) or e_idx >= len(
+                        meaning._target_ends
+                    ):
                         break
 
-                    char_start = meaning._target_starts[i]
-                    char_end = meaning._target_ends[i]
+                    char_start = meaning._target_starts[e_idx]
+                    char_end = meaning._target_ends[e_idx]
 
-                    # Skip examples with missing position data
                     if char_start is None or char_end is None:
                         continue
 
-                    embedding = self._get_contextual_embedding(
-                        example, char_start, char_end
+                    tasks.append(
+                        EmbeddingTask(
+                            translation_idx=t_idx,
+                            meaning_idx=m_idx,
+                            sentence=example,
+                            char_start=char_start,
+                            char_end=char_end,
+                        )
                     )
-                    if embedding is not None:
-                        embeddings.append(embedding)
-                        total_examples_processed += 1
 
-                # Average all embeddings for this meaning
-                if embeddings:
-                    averaged = np.mean(embeddings, axis=0).tolist()
-                    meaning._bert_embedding = averaged
-                    successful_embeddings += 1
+        return tasks, total_meanings, missing_metadata
+
+    def _process_batch(self, batch: List[EmbeddingTask]) -> Dict[int, List[float]]:
+        """Run BERT on a batch and return {batch_index: embedding}."""
+        texts = [t.sentence for t in batch]
+        inputs = self._tokenizer(
+            texts,
+            return_tensors="pt",
+            truncation=True,
+            max_length=512,
+            padding=True,
+        )
+
+        # Resolve char_to_token BEFORE moving tensors to device
+        token_positions: Dict[int, List[int]] = {}
+        for idx, task in enumerate(batch):
+            positions = []
+            for char_pos in range(task.char_start, task.char_end):
+                bert_idx = inputs.char_to_token(idx, char_pos)
+                if bert_idx is not None and bert_idx not in positions:
+                    positions.append(bert_idx)
+            if positions:
+                token_positions[idx] = positions
+
+        inputs = {k: v.to(self._device) for k, v in inputs.items()}
+
+        with torch.no_grad():
+            outputs = self._model(**inputs, output_hidden_states=True)
+            hidden_states = outputs.hidden_states[-2]  # (batch, seq, hidden)
+
+        result: Dict[int, List[float]] = {}
+        for idx, positions in token_positions.items():
+            emb = hidden_states[idx, positions].mean(dim=0)
+            result[idx] = emb.cpu().tolist()
+
+        return result
+
+    def _flush_batch(
+        self,
+        batch: List[EmbeddingTask],
+        embeddings: Dict[Tuple[int, int], List[List[float]]],
+    ) -> None:
+        """Process a batch and accumulate results into embeddings dict."""
+        results = self._process_batch(batch)
+        for idx, emb in results.items():
+            task = batch[idx]
+            key = (task.translation_idx, task.meaning_idx)
+            if key not in embeddings:
+                embeddings[key] = []
+            embeddings[key].append(emb)
+
+    def generate(self, translations: List[Translation]) -> List[Translation]:
+        """Add averaged BERT embedding from multiple examples per meaning."""
+        logger.info(f"Generating meaning embeddings for {len(translations)} lemmas...")
+        self._load_model()
+
+        # Phase 1: Collect all tasks
+        tasks, total_meanings, missing_metadata = self._collect_tasks(translations)
+        logger.info(f"Collected {len(tasks)} examples from {total_meanings} meanings")
+
+        # Phase 2: Process in token-budget batches
+        embeddings: Dict[Tuple[int, int], List[List[float]]] = (
+            {}
+        )  # (translation_idx, meaning_idx) -> list of embeddings
+        batch: List[EmbeddingTask] = []
+        batch_tokens = 0
+        total_processed = 0
+
+        for task in tasks:
+            batch.append(task)
+            batch_tokens += len(task.sentence.split())
+
+            if batch_tokens >= self.bert_batch_tokens:
+                self._flush_batch(batch, embeddings)
+                total_processed += len(batch)
+                batch = []
+                batch_tokens = 0
+
+        if batch:
+            self._flush_batch(batch, embeddings)
+            total_processed += len(batch)
+
+        # Phase 3: Average and assign
+        successful = 0
+        for (t_idx, m_idx), emb_list in embeddings.items():
+            averaged = np.mean(emb_list, axis=0).tolist()
+            translations[t_idx].meanings[m_idx]._bert_embedding = averaged
+            successful += 1
 
         logger.info(
-            f"Meaning embeddings generated: {successful_embeddings}/{total_meanings} "
-            f"(from {total_examples_processed} examples, missing metadata: {missing_metadata})"
+            f"Meaning embeddings generated: {successful}/{total_meanings} "
+            f"(from {total_processed} examples, missing metadata: {missing_metadata})"
         )
 
         return translations
