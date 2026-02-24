@@ -43,6 +43,7 @@ class LemmaCorrector:
         self.target_output_size = config.get("target_output_size")
         self.max_requests_per_minute = config.get("max_requests_per_minute", 0)
         self.max_concurrent_requests = config.get("max_concurrent_requests", 5)
+        self.cache_only = config.get("cache_only", False)
         self._loop: Optional[asyncio.AbstractEventLoop] = None
 
     def correct(
@@ -118,16 +119,21 @@ class LemmaCorrector:
 
             # Process uncached items via LLM in parallel batches
             if uncached_items and not target_reached:
-                batches = [
-                    uncached_items[i : i + self.batch_size]
-                    for i in range(0, len(uncached_items), self.batch_size)
-                ]
-                logger.info(
-                    f"Processing {len(uncached_items)} uncached lemmas "
-                    f"in {len(batches)} batches"
-                )
-                batch_corrections = self._run_batches(batches, prompt_hash)
-                all_corrections.extend(batch_corrections)
+                if self.cache_only:
+                    logger.info(
+                        f"Cache-only mode: skipping {len(uncached_items)} uncached lemmas"
+                    )
+                else:
+                    batches = [
+                        uncached_items[i : i + self.batch_size]
+                        for i in range(0, len(uncached_items), self.batch_size)
+                    ]
+                    logger.info(
+                        f"Processing {len(uncached_items)} uncached lemmas "
+                        f"in {len(batches)} batches"
+                    )
+                    batch_corrections = self._run_batches(batches, prompt_hash)
+                    all_corrections.extend(batch_corrections)
 
             current_output_size = self._calculate_output_size(
                 all_corrections, id_mapping

@@ -41,6 +41,7 @@ class ExampleGenerator:
         self.disambiguated_pos = disambiguated_pos or DEFAULT_DISAMBIGUATED_POS
         self.max_requests_per_minute = config.get("max_requests_per_minute", 0)
         self.max_concurrent_requests = config.get("max_concurrent_requests", 5)
+        self.cache_only = config.get("cache_only", False)
         self._loop: Optional[asyncio.AbstractEventLoop] = None
 
         # Load prompt and compute hash
@@ -105,6 +106,12 @@ class ExampleGenerator:
 
         if not items_to_process:
             logger.info("All examples loaded from cache")
+            return translations, total_usage
+
+        if self.cache_only:
+            logger.info(
+                f"Cache-only mode: skipping {len(items_to_process)} uncached meanings"
+            )
             return translations, total_usage
 
         # Process in batches

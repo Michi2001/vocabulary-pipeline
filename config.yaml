@@ -33,12 +33,14 @@ processing:
   sentence_batch_size: 10000  # Sentences read from corpus per batch
 
 output:
-  directory: "output/spanish_german"
+  directory: "output/test"
   min_frequency: 20  # Only include lemmas with freq >= this in output CSV
 
 cache:
   directory: "cache"
   llm_directory: "cache/llm_results"
+
+cache_only: true  # When true, skip all LLM API calls; only use cached results
 
 filtering:
   # POS tags: NOUN, VERB, ADJ, ADV, ADP, CONJ, AUX, CCONJ, SCONJ, PROPN, DET, PRON, NUM, etc.

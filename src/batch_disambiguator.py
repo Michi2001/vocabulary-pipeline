@@ -32,7 +32,12 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class PolyTokenInfo:
-    """Polysemous token identified during sentence classification."""
+    """Polysemous token identified during sentence classification.
+
+    char_start/char_end are character offsets within the reconstructed sentence
+    (tokens joined by spaces). These are needed to map original tokens to BERT
+    sub-word token positions via BatchEncoding.char_to_token().
+    """
 
     token_idx: int
     char_start: int
@@ -42,12 +47,17 @@ class PolyTokenInfo:
 
 @dataclass
 class BertTask:
-    """A sentence queued for BERT processing."""
+    """A sentence queued for BERT processing.
+
+    entries is pre-filled during classification: mono-semantic and non-disambiguated
+    tokens already have their entry IDs set, only polysemous slots (None) will be
+    resolved after BERT embedding extraction.
+    """
 
     sid: int
     text: str
     token_count: int
-    entries: List[Optional[int]]  # Pre-filled mono-semantic/non-disambiguated results
+    entries: List[Optional[int]]
     poly_infos: List[PolyTokenInfo] = field(default_factory=list)
 
 
@@ -57,7 +67,13 @@ class BertTask:
 
 
 class OrderedWriteBuffer:
-    """Maintains sentence order when writing results."""
+    """Maintains sentence order when writing results.
+
+    Sentences may arrive out of order because mono-only sentences are written
+    immediately while polysemous sentences are batched for BERT first. The buffer
+    holds early-arriving results and flushes them in sequential sid order to
+    preserve store index alignment.
+    """
 
     def __init__(self, writer):
         self._writer = writer
@@ -136,7 +152,11 @@ class BertBatchProcessor:
             padding=True,
         )
 
-        # Resolve char_to_token BEFORE moving tensors to device
+        # Map character spans to BERT sub-word token indices. Must happen before
+        # moving tensors to device because char_to_token() requires CPU-based
+        # BatchEncoding. One original token may span multiple sub-word tokens
+        # (e.g. "corriendo" -> ["corr", "##iendo"]), so we collect all unique
+        # sub-word positions to average their hidden states later.
         token_positions: Dict[Tuple[int, int], List[int]] = {}
         for task_idx, task in enumerate(tasks):
             for pi in task.poly_infos:
@@ -153,12 +173,18 @@ class BertBatchProcessor:
 
         with torch.no_grad():
             outputs = self._model(**inputs)
-            hidden_states = outputs.hidden_states[-2].cpu()  # Move to CPU immediately
+            # Use second-to-last hidden layer: it captures richer contextual
+            # features than the final layer, which is more task-specific.
+            # Move to CPU immediately to free GPU/MPS memory for next batch.
+            hidden_states = outputs.hidden_states[-2].cpu()
         del outputs, inputs
 
         result: Dict[Tuple[int, int], np.ndarray] = {}
 
         for (task_idx, token_idx), bert_positions in token_positions.items():
+            # Average sub-word embeddings to get a single token-level embedding.
+            # This matches the approach used in MeaningEmbeddingGenerator so that
+            # runtime embeddings are comparable to pre-computed meaning embeddings.
             emb = hidden_states[task_idx, bert_positions].mean(dim=0)
             result[(task_idx, token_idx)] = emb.numpy()
 
@@ -193,14 +219,13 @@ class BatchDisambiguator:
         self.bert_batch_tokens = bert_batch_tokens
         self._bert = BertBatchProcessor(model_name)
 
-        # For disambiguated POS: mono/poly lookup
-        self._mono_entries: Dict[LemmaToken, int] = {}
-        self._poly_entries: Dict[LemmaToken, List[Tuple[int, np.ndarray]]] = {}
-
-        # For non-disambiguated POS: direct lookup
-        self._non_disambiguated_entries: Dict[LemmaToken, int] = {}
-
-        # All vocab tokens
+        # Three-tier lookup for token classification (avoids BERT for most tokens):
+        # 1. non-disambiguated: POS types excluded from disambiguation -> direct ID
+        # 2. mono-semantic: only one meaning with embedding -> direct ID
+        # 3. polysemous: multiple meanings with embeddings -> requires BERT
+        self._mono_entries: Dict[LemmaToken, int] = {}  # lemma_token -> entry_id
+        self._poly_entries: Dict[LemmaToken, List[Tuple[int, np.ndarray]]] = {}  # lemma_token -> [(entry_id, embedding)]
+        self._non_disambiguated_entries: Dict[LemmaToken, int] = {}  # lemma_token -> entry_id
         self._vocab_tokens: Set[LemmaToken] = set()
 
         self._build_lookups()
@@ -294,7 +319,10 @@ class BatchDisambiguator:
                     )
                 )
 
-            char_pos += len(orig) + 1  # +1 for space
+            # +1 for the space separator — must match the " ".join(original_tokens)
+            # used to reconstruct sentence text in BertTask, so char offsets align
+            # with BERT's char_to_token() mapping.
+            char_pos += len(orig) + 1
 
         return entries, poly_infos
 
@@ -367,7 +395,17 @@ class BatchDisambiguator:
         sentences: Iterator[Tuple[int, List[str], List[LemmaToken]]],
         writer,
     ) -> Dict[str, int]:
-        """Main processing loop with batching logic."""
+        """Two-pass processing loop.
+
+        Pass 1 (classification): Each sentence is classified token-by-token.
+        Sentences without polysemous tokens are written immediately. Sentences
+        with polysemous tokens are queued for BERT.
+
+        Pass 2 (BERT batch): When the queue reaches bert_batch_tokens, all queued
+        sentences are processed in a single BERT forward pass. Token-based batching
+        (not sentence-based) ensures consistent GPU memory usage regardless of
+        sentence length distribution.
+        """
         buffer = OrderedWriteBuffer(writer)
         bert_queue: List[BertTask] = []
         queue_tokens = 0

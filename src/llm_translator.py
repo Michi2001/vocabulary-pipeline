@@ -66,6 +66,7 @@ class LemmaTranslator:
         self.output_dir = Path(config["output_dir"])
         self.max_requests_per_minute = config.get("max_requests_per_minute", 0)
         self.max_concurrent_requests = config.get("max_concurrent_requests", 5)
+        self.cache_only = config.get("cache_only", False)
         self._loop: Optional[asyncio.AbstractEventLoop] = None
 
     def translate(
@@ -146,25 +147,32 @@ class LemmaTranslator:
             id_counter += len(pos_items)
 
             # Create batches only for uncached items
-            batches = self._create_batches_from_items(uncached_items)
-            if uncached_items:
-                logger.info(
-                    f"  Created {len(batches)} batches for {len(uncached_items)} uncached {pos} items"
-                )
+            if self.cache_only:
+                if uncached_items:
+                    logger.info(
+                        f"  Cache-only mode: skipping {len(uncached_items)} uncached {pos} items"
+                    )
+                all_translations.extend(cached_translations)
             else:
-                logger.info(f"  All {pos} items loaded from cache - no batches needed")
+                batches = self._create_batches_from_items(uncached_items)
+                if uncached_items:
+                    logger.info(
+                        f"  Created {len(batches)} batches for {len(uncached_items)} uncached {pos} items"
+                    )
+                else:
+                    logger.info(f"  All {pos} items loaded from cache - no batches needed")
 
-            # Process uncached batches (async parallel) and combine with cached translations
-            batch_translations = self._run_batches_for_pos(
-                batches,
-                pos,
-                system_prompt,
-                pos_schema,
-                combined_prompt_hash,
-                total_usage,
-            )
-            all_translations.extend(batch_translations)
-            all_translations.extend(cached_translations)
+                # Process uncached batches (async parallel) and combine with cached translations
+                batch_translations = self._run_batches_for_pos(
+                    batches,
+                    pos,
+                    system_prompt,
+                    pos_schema,
+                    combined_prompt_hash,
+                    total_usage,
+                )
+                all_translations.extend(batch_translations)
+                all_translations.extend(cached_translations)
 
         # Enrich with frequencies
         enriched_translations = self._enrich_with_frequency(

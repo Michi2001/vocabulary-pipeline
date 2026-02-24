@@ -102,6 +102,7 @@ def run_pipeline(
     cache_config = config.get("cache", {})
     filter_config = config.get("filtering", {})
     disambiguation_config = config.get("disambiguation", {"enabled": False})
+    cache_only = config.get("cache_only", False)
 
     # Create timestamped output directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -132,6 +133,8 @@ def run_pipeline(
     logger.info(f"Log file: {log_file_path}")
 
     logger.info("Starting pipeline...")
+    if cache_only:
+        logger.info("Cache-only mode: LLM API calls will be skipped")
     logger.info(f"Output directory: {output_dir}")
     logger.info(f"Model: {lemma_config['model']}")
 
@@ -258,6 +261,7 @@ def run_pipeline(
             "max_concurrent_requests": correction_config.get(
                 "max_concurrent_requests", 5
             ),
+            "cache_only": cache_only,
         }
         corrector = LemmaCorrector(correction_provider, llm_cache, corrector_config)
 
@@ -343,6 +347,7 @@ def run_pipeline(
                 "max_concurrent_requests": translation_config.get(
                     "max_concurrent_requests", 5
                 ),
+                "cache_only": cache_only,
             }
 
             translator = LemmaTranslator(
@@ -390,6 +395,7 @@ def run_pipeline(
                 "max_concurrent_requests": example_config.get(
                     "max_concurrent_requests", 5
                 ),
+                "cache_only": cache_only,
             }
 
             disambiguated_pos = set(
