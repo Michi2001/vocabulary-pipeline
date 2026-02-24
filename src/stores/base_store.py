@@ -23,14 +23,14 @@ class BaseStoreWriter:
 
     def __enter__(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._file = gzip.open(self.path, "wt", encoding="utf-8")
+        self._file = gzip.open(self.path, "wb")
         self._count = 0
         return self
 
     def write(self, sid: int, data):
         """Write a single sentence's data."""
         json_data = self._serialize_fn(sid, data)
-        self._file.write(json.dumps(json_data, ensure_ascii=False) + "\n")
+        self._file.write(json.dumps(json_data, ensure_ascii=False).encode("utf-8") + b"\n")
         self._count += 1
         if self._count % 100000 == 0:
             logger.info(f"Written {self._count:,} entries to {self.path.name}")
@@ -60,7 +60,7 @@ class BaseStore(ABC, Generic[T]):
         if not self.exists():
             return 0
         count = 0
-        with gzip.open(self.path, "rt", encoding="utf-8") as f:
+        with gzip.open(self.path, "rb") as f:
             for _ in f:
                 count += 1
         self._count = count
@@ -70,7 +70,7 @@ class BaseStore(ABC, Generic[T]):
         """Iterate over (sid, data) pairs."""
         if not self.exists():
             raise FileNotFoundError(f"Store not found: {self.path}")
-        with gzip.open(self.path, "rt", encoding="utf-8") as f:
+        with gzip.open(self.path, "rb") as f:
             for line in f:
                 if not line.strip():
                     continue

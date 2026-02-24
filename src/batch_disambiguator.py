@@ -108,7 +108,9 @@ class BertBatchProcessor:
         self._device = _get_torch_device()
         logger.info(f"Loading BERT model: {self.model_name} (device: {self._device})")
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self._model = AutoModel.from_pretrained(self.model_name).to(self._device)
+        self._model = AutoModel.from_pretrained(
+            self.model_name, output_hidden_states=True
+        ).to(self._device)
         self._model.eval()
 
     def extract_embeddings(
@@ -126,7 +128,7 @@ class BertBatchProcessor:
         self._load_model()
 
         texts = [t.text for t in tasks]
-        inputs = self._tokenizer(
+        batch_encoding = self._tokenizer(
             texts,
             return_tensors="pt",
             truncation=True,
@@ -140,25 +142,37 @@ class BertBatchProcessor:
             for pi in task.poly_infos:
                 bert_positions = []
                 for char_pos in range(pi.char_start, pi.char_end):
-                    bert_idx = inputs.char_to_token(task_idx, char_pos)
+                    bert_idx = batch_encoding.char_to_token(task_idx, char_pos)
                     if bert_idx is not None and bert_idx not in bert_positions:
                         bert_positions.append(bert_idx)
                 if bert_positions:
                     token_positions[(task_idx, pi.token_idx)] = bert_positions
 
-        inputs = {k: v.to(self._device) for k, v in inputs.items()}
+        inputs = {k: v.to(self._device) for k, v in batch_encoding.items()}
+        del batch_encoding
 
         with torch.no_grad():
-            outputs = self._model(**inputs, output_hidden_states=True)
-            hidden_states = outputs.hidden_states[-2]  # (batch, seq, hidden)
+            outputs = self._model(**inputs)
+            hidden_states = outputs.hidden_states[-2].cpu()  # Move to CPU immediately
+        del outputs, inputs
 
         result: Dict[Tuple[int, int], np.ndarray] = {}
 
         for (task_idx, token_idx), bert_positions in token_positions.items():
             emb = hidden_states[task_idx, bert_positions].mean(dim=0)
-            result[(task_idx, token_idx)] = emb.cpu().numpy()
+            result[(task_idx, token_idx)] = emb.numpy()
+
+        del hidden_states
+        self._clear_device_cache()
 
         return result
+
+    def _clear_device_cache(self) -> None:
+        """Release cached memory on GPU/MPS device."""
+        if self._device.type == "cuda":
+            torch.cuda.empty_cache()
+        elif self._device.type == "mps":
+            torch.mps.empty_cache()
 
 
 # =============================================================================

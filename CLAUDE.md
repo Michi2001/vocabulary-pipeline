@@ -9,8 +9,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Code Style
 - **Imports:** ALWAYS at the TOP of the file. NEVER inside functions/methods.
 - **Keep it Simple:** Avoid over-engineering. Minimal code for the task.
-- **Comments:** Only for non-obvious logic.
-- **Docstrings:** One-line for most functions. Only elaborate when truly needed.
 - **Dicts:** Comment key→value types if not obvious, e.g. `# lemma -> frequency`
 
 ### Error Handling
