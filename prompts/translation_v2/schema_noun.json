@@ -15,6 +15,7 @@
               "type": "OBJECT",
               "properties": {
                 "definition_es": {"type": "STRING"},
+                "estimated_share": {"type": "NUMBER"},
                 "gender": {
                   "type": "STRING",
                   "enum": ["m", "f"]

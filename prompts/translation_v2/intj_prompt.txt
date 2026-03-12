@@ -24,10 +24,12 @@
       "meanings": [
         {
           "definition_es": "expresión de dolor físico repentino",
+          "estimated_share": 0.55,
           "translations": [{"text": "au!"}, {"text": "autsch!"}]
         },
         {
           "definition_es": "expresión de sorpresa, pena o emoción",
+          "estimated_share": 0.45,
           "translations": [{"text": "ach!"}, {"text": "oh!"}]
         }
       ]

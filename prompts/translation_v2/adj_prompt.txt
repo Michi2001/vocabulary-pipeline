@@ -23,10 +23,12 @@ Bei Adjektiven, die mit ser und estar **verschiedene Übersetzungen** haben, ers
       "meanings": [
         {
           "definition_es": "preparado para hacer algo o partir",
+          "estimated_share": 0.55,
           "translations": [{"text": "fertig"}, {"text": "bereit"}]
         },
         {
           "definition_es": "que tiene inteligencia y aprende rápido",
+          "estimated_share": 0.45,
           "translations": [{"text": "schlau"}, {"text": "klug"}]
         }
       ]
@@ -38,10 +40,12 @@ Bei Adjektiven, die mit ser und estar **verschiedene Übersetzungen** haben, ers
       "meanings": [
         {
           "definition_es": "que no está sometido a control o restricción",
+          "estimated_share": 0.95,
           "translations": [{"text": "frei"}]
         },
         {
           "definition_es": "sin costo o pago",
+          "estimated_share": 0.05,
           "translations": [{"text": "kostenlos"}, {"text": "gratis"}]
         }
       ]

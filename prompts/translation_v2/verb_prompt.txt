@@ -29,21 +29,25 @@ Enthält das Verb im Infinitiv. Bei reflexiven Bedeutungen die Reflexivform.
       "meanings": [
         {
           "definition_es": "poner la mano o los dedos sobre algo o alguien",
+          "estimated_share": 0.35,
           "structure": "tocar",
           "translations": [{"text": "anfassen"}, {"text": "berühren"}]
         },
         {
           "definition_es": "producir música con un instrumento",
+          "estimated_share": 0.30,
           "structure": "tocar",
           "translations": [{"text": "spielen", "hints": ["Instrument"]}]
         },
         {
           "definition_es": "corresponder el turno o la responsabilidad a alguien",
+          "estimated_share": 0.25,
           "structure": "tocar",
           "translations": [{"text": "an der Reihe sein"}, {"text": "dran sein", "flags": ["informal"]}]
         },
         {
           "definition_es": "golpear una superficie para llamar la atención",
+          "estimated_share": 0.10,
           "structure": "tocar",
           "translations": [{"text": "klopfen"}]
         }
@@ -56,16 +60,19 @@ Enthält das Verb im Infinitiv. Bei reflexiven Bedeutungen die Reflexivform.
       "meanings": [
         {
           "definition_es": "colocar algo en un lugar determinado",
+          "estimated_share": 0.50,
           "structure": "poner",
           "translations": [{"text": "stellen"}, {"text": "legen"}, {"text": "setzen"}]
         },
         {
           "definition_es": "encender o activar un aparato",
+          "estimated_share": 0.15,
           "structure": "poner",
           "translations": [{"text": "anmachen"}, {"text": "einschalten"}]
         },
         {
           "definition_es": "comenzar a estar en un estado o actitud",
+          "estimated_share": 0.35,
           "structure": "ponerse",
           "translations": [{"text": "werden", "hints": ["Zustandsänderung"]}]
         }
@@ -78,11 +85,13 @@ Enthält das Verb im Infinitiv. Bei reflexiven Bedeutungen die Reflexivform.
       "meanings": [
         {
           "definition_es": "introducir algo dentro de otra cosa",
+          "estimated_share": 0.65,
           "structure": "meter",
           "translations": [{"text": "hineinstecken"}, {"text": "hineintun"}]
         },
         {
           "definition_es": "involucrarse o entrometerse en algo",
+          "estimated_share": 0.35,
           "structure": "meterse",
           "translations": [{"text": "sich einmischen"}]
         }

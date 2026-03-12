@@ -45,10 +45,12 @@
       "meanings": [
         {
           "definition_es": "introduce una condición o hipótesis",
+          "estimated_share": 0.65,
           "translations": [{"text": "wenn"}, {"text": "falls"}]
         },
         {
           "definition_es": "introduce una pregunta indirecta",
+          "estimated_share": 0.35,
           "translations": [{"text": "ob"}]
         }
       ]

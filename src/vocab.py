@@ -24,8 +24,12 @@ class Meaning:
     """A single meaning/sense of a lemma."""
 
     definition_es: str
-    translations: List[Dict[str, Any]]  # text, hints?: list[str], gender_target?, flags?
-    estimated_share: Optional[float] = None  # Set by ShareUpdater after disambiguation
+    translations: List[
+        Dict[str, Any]
+    ]  # text, hints?: list[str], gender_target?, flags?
+    estimated_share: Optional[float] = (
+        None  # Set by LLM, optionally refined by ShareUpdater
+    )
     structure: Optional[str] = None
     examples_es: Optional[List[str]] = None
     flags: Optional[List[str]] = None
@@ -258,20 +262,28 @@ class VocabEntry:
                 # Disambiguated: one entry per meaning
                 n_meanings = len(translation.meanings)
                 for idx, meaning in enumerate(translation.meanings):
-                    share = meaning.estimated_share if meaning.estimated_share is not None else 1.0 / n_meanings
+                    share = (
+                        meaning.estimated_share
+                        if meaning.estimated_share is not None
+                        else 1.0 / n_meanings
+                    )
                     derived_freq = int(translation.frequency * share)
-                    entries_unsorted.append({
-                        "translation": translation,
-                        "meaning_idx": idx,
-                        "derived_freq": derived_freq,
-                    })
+                    entries_unsorted.append(
+                        {
+                            "translation": translation,
+                            "meaning_idx": idx,
+                            "derived_freq": derived_freq,
+                        }
+                    )
             else:
                 # Non-disambiguated: one entry for entire lemma
-                entries_unsorted.append({
-                    "translation": translation,
-                    "meaning_idx": None,
-                    "derived_freq": translation.frequency,
-                })
+                entries_unsorted.append(
+                    {
+                        "translation": translation,
+                        "meaning_idx": None,
+                        "derived_freq": translation.frequency,
+                    }
+                )
 
         # Sort by frequency descending, then by translation_id and meaning_idx
         def sort_key(v):

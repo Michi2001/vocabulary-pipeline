@@ -12,18 +12,22 @@
       "meanings": [
         {
           "definition_es": "indica la causa o el motivo de algo",
+          "estimated_share": 0.35,
           "translations": [{"text": "wegen"}, {"text": "aufgrund"}]
         },
         {
           "definition_es": "indica movimiento a través de un lugar",
+          "estimated_share": 0.25,
           "translations": [{"text": "durch"}]
         },
         {
           "definition_es": "indica intercambio o precio",
+          "estimated_share": 0.25,
           "translations": [{"text": "für", "hints": ["Preis", "Tausch"]}]
         },
         {
           "definition_es": "indica el agente en construcciones pasivas",
+          "estimated_share": 0.15,
           "translations": [{"text": "von", "hints": ["Passiv"]}]
         }
       ]
@@ -46,10 +50,12 @@
       "meanings": [
         {
           "definition_es": "indica el propósito o la finalidad de algo",
+          "estimated_share": 0.75,
           "translations": [{"text": "für"}, {"text": "um ... zu"}]
         },
         {
           "definition_es": "indica la dirección o el destino",
+          "estimated_share": 0.25,
           "translations": [{"text": "nach", "hints": ["Richtung", "Ziel"]}]
         }
       ]
@@ -61,10 +67,12 @@
       "meanings": [
         {
           "definition_es": "delante de o en presencia de alguien o algo",
+          "estimated_share": 0.40,
           "translations": [{"text": "vor", "hints": ["räumlich"]}]
         },
         {
           "definition_es": "frente a una situación o circunstancia",
+          "estimated_share": 0.60,
           "translations": [{"text": "angesichts"}, {"text": "gegenüber"}]
         }
       ]
@@ -76,10 +84,12 @@
       "meanings": [
         {
           "definition_es": "indica el punto de origen en el espacio",
+          "estimated_share": 0.45,
           "translations": [{"text": "von", "hints": ["räumlich"]}, {"text": "aus", "hints": ["räumlich"]}]
         },
         {
           "definition_es": "indica el punto de inicio en el tiempo",
+          "estimated_share": 0.55,
           "translations": [{"text": "seit", "hints": ["zeitlich"]}, {"text": "ab", "hints": ["zeitlich"]}]
         }
       ]
@@ -91,10 +101,12 @@
       "meanings": [
         {
           "definition_es": "indica posición detrás de algo o alguien",
+          "estimated_share": 0.35,
           "translations": [{"text": "hinter"}]
         },
         {
           "definition_es": "indica sucesión temporal, después de",
+          "estimated_share": 0.65,
           "translations": [{"text": "nach", "hints": ["zeitlich"]}]
         }
       ]

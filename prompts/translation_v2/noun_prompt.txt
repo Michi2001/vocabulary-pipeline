@@ -24,11 +24,13 @@ Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital
       "meanings": [
         {
           "definition_es": "institución financiera donde se guarda y presta dinero",
+          "estimated_share": 0.70,
           "gender": "m",
           "translations": [{"text": "Bank", "hints": ["Geldinstitut"], "gender_target": "f"}]
         },
         {
           "definition_es": "asiento largo para varias personas",
+          "estimated_share": 0.30,
           "gender": "m",
           "translations": [{"text": "Bank", "hints": ["Sitzbank"], "gender_target": "f"}]
         }
@@ -41,11 +43,13 @@ Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital
       "meanings": [
         {
           "definition_es": "ciudad principal donde reside el gobierno de un país",
+          "estimated_share": 0.60,
           "gender": "f",
           "translations": [{"text": "Hauptstadt", "gender_target": "f"}]
         },
         {
           "definition_es": "dinero o bienes que se invierten",
+          "estimated_share": 0.40,
           "gender": "m",
           "translations": [{"text": "Kapital", "gender_target": "n"}]
         }
@@ -58,22 +62,26 @@ Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital
       "meanings": [
         {
           "definition_es": "ser vivo que crece en la tierra",
+          "estimated_share": 0.45,
           "gender": "f",
           "translations": [{"text": "Pflanze", "gender_target": "f"}]
         },
         {
           "definition_es": "piso o nivel de un edificio",
+          "estimated_share": 0.30,
           "gender": "f",
           "translations": [{"text": "Stockwerk", "gender_target": "n"}, {"text": "Etage", "gender_target": "f"}]
         },
         {
           "definition_es": "parte inferior del pie",
+          "estimated_share": 0.05,
           "gender": "f",
           "flags": ["rare"],
           "translations": [{"text": "Fußsohle", "gender_target": "f"}]
         },
         {
           "definition_es": "instalación industrial para fabricar o procesar algo",
+          "estimated_share": 0.20,
           "gender": "f",
           "translations": [{"text": "Werk", "gender_target": "n"}, {"text": "Anlage", "hints": ["Industrie"], "gender_target": "f"}]
         }
@@ -86,11 +94,13 @@ Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital
       "meanings": [
         {
           "definition_es": "hermano o hermana del padre o de la madre",
+          "estimated_share": 0.40,
           "gender": "m",
           "translations": [{"text": "Onkel", "gender_target": "m"}]
         },
         {
           "definition_es": "manera coloquial de referirse a una persona",
+          "estimated_share": 0.60,
           "gender": "m",
           "flags": ["informal"],
           "translations": [{"text": "Typ", "gender_target": "m"}, {"text": "Kerl", "gender_target": "m"}]
@@ -104,12 +114,14 @@ Unterschiedliches Geschlecht kann separate meanings rechtfertigen (z.B. `capital
       "meanings": [
         {
           "definition_es": "vehículo de transporte público urbano",
+          "estimated_share": 0.55,
           "gender": "f",
           "flags": ["regionalism:Karibik"],
           "translations": [{"text": "Bus", "gender_target": "m"}]
         },
         {
           "definition_es": "bebé o niño muy pequeño",
+          "estimated_share": 0.45,
           "gender": "f",
           "flags": ["regionalism:Andenregion"],
           "translations": [{"text": "Baby", "gender_target": "n"}, {"text": "Säugling", "gender_target": "m"}]

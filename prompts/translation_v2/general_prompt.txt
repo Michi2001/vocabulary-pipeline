@@ -111,3 +111,19 @@ Wenn eine deutsche Übersetzung umgangssprachlich, vulgär oder gehoben ist, set
 ```
 
 ---
+
+## 5. Geschätzter Anteil (estimated_share)
+
+- **Pflichtfeld** für jede meaning (wenn mehrere meanings vorhanden)
+- Dezimalzahl zwischen 0.0 und 1.0
+- Gibt an, wie häufig diese Bedeutung im Vergleich zu den anderen vorkommt
+- Alle estimated_share-Werte eines Lemmas müssen sich zu 1.0 summieren
+- Bei nur einer meaning: weglassen (wird automatisch auf 1.0 gesetzt)
+- Sortierung der meanings nach estimated_share (häufigste zuerst) — deckt sich mit bestehender Regel "nach Häufigkeit sortieren"
+
+**DENKE WIE EIN KORPUSLINGUIST:** Stelle dir vor, du analysierst 100 zufällige Korpussätze mit diesem Wort. Wie viele davon nutzen DIESE spezifische Bedeutung? Das ist dein estimated_share.
+
+**Beispiel:**
+- `banco`: Meaning 1 (Finanzinstitut): `"estimated_share": 0.7` — Meaning 2 (Sitzbank): `"estimated_share": 0.3`
+
+---

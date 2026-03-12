@@ -265,6 +265,8 @@ class LemmaTranslator:
 
             response = self.provider.translate_lemmas(batch, system_prompt, pos_schema)
             batch_translations = response["all_lemma_translations"]
+            for translation in batch_translations:
+                self._normalize_shares(translation)
 
             self._accumulate_usage(total_usage, response)
             self._cache_batch_translations(
@@ -303,6 +305,8 @@ class LemmaTranslator:
                     batch, system_prompt, pos_schema
                 )
                 batch_translations = response["all_lemma_translations"]
+                for translation in batch_translations:
+                    self._normalize_shares(translation)
                 usage = response.get("_token_usage")
 
                 # Cache and accumulate under lock (SQLite is not thread-safe)
@@ -338,6 +342,29 @@ class LemmaTranslator:
             total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
             total_usage["total_tokens"] += usage.get("total_tokens") or 0
             total_usage["api_calls"] += 1
+
+    def _normalize_shares(self, translation: Dict[str, Any]) -> None:
+        """Normalize estimated_share values to sum to 1.0."""
+        meanings = translation.get("meanings", [])
+        if len(meanings) <= 1:
+            if meanings:
+                meanings[0]["estimated_share"] = 1.0
+            return
+
+        shares = [m.get("estimated_share") for m in meanings]
+        total = sum(s for s in shares if s is not None)
+
+        if total > 0:
+            for m in meanings:
+                s = m.get("estimated_share")
+                if s is not None:
+                    m["estimated_share"] = s / total
+                else:
+                    m["estimated_share"] = 0.0
+        else:
+            equal = 1.0 / len(meanings)
+            for m in meanings:
+                m["estimated_share"] = equal
 
     def _cache_batch_translations(
         self,

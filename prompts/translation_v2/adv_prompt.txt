@@ -12,10 +12,12 @@
       "meanings": [
         {
           "definition_es": "indica que algo ha ocurrido antes del momento presente",
+          "estimated_share": 0.75,
           "translations": [{"text": "schon"}, {"text": "bereits"}]
         },
         {
           "definition_es": "expresa urgencia o inmediatez",
+          "estimated_share": 0.25,
           "translations": [{"text": "sofort"}, {"text": "jetzt gleich"}]
         }
       ]
@@ -38,10 +40,12 @@
       "meanings": [
         {
           "definition_es": "introduce una pregunta retórica con duda",
+          "estimated_share": 0.85,
           "translations": [{"text": "etwa"}, {"text": "vielleicht"}]
         },
         {
           "definition_es": "por casualidad, de manera fortuita",
+          "estimated_share": 0.15,
           "flags": ["rare"],
           "translations": [{"text": "zufällig"}]
         }
