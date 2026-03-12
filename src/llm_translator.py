@@ -263,7 +263,16 @@ class LemmaTranslator:
                 f"  Processing {pos} batch {i+1}/{len(batches)} ({len(batch)} uncached lemmas)"
             )
 
-            response = self.provider.translate_lemmas(batch, system_prompt, pos_schema)
+            try:
+                response = self.provider.translate_lemmas(batch, system_prompt, pos_schema)
+            except Exception as e:
+                failed_lemmas = [item["lemma"] for item in batch]
+                logger.error(
+                    f"  Batch {i+1}/{len(batches)} failed permanently: {e}\n"
+                    f"  Lost lemmas: {failed_lemmas}"
+                )
+                continue
+
             batch_translations = response["all_lemma_translations"]
             for translation in batch_translations:
                 self._normalize_shares(translation)
@@ -326,10 +335,14 @@ class LemmaTranslator:
         tasks = [process_one_batch(i, batch) for i, batch in enumerate(batches)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        # Log failed batches
+        # Log failed batches with their lemmas
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                logger.error(f"  Batch {i+1}/{len(batches)} failed: {result}")
+                failed_lemmas = [item["lemma"] for item in batches[i]]
+                logger.error(
+                    f"  Batch {i+1}/{len(batches)} failed permanently: {result}\n"
+                    f"  Lost lemmas: {failed_lemmas}"
+                )
 
         return batch_translations_all
 
