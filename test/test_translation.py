@@ -49,7 +49,7 @@ INPUT_CSV = Path("test/data/translation_input.csv")
 PROMPT_FOLDER = Path("prompts/translation_v2")
 PROVIDER_TYPE = "google"
 PROVIDER_CONFIG = {  # best settings for Google Gemini
-    "model": "gemini-3-flash-preview",
+    "model": "gemini-3.1-pro-preview",
     "thinking_level": "medium",
     "temperature": 1.0,
 }

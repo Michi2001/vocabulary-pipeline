@@ -18,6 +18,9 @@ Separate meanings nur wenn die deutschen Übersetzungen **semantisch unverbunden
 - `cambiar`: "ändern", "wechseln" — kontextuelle Varianten
 - `hoja`: "Blatt" (Pflanze/Papier) — gleiche Übersetzung
 
+**Grammatische Verwandtschaft ist kein Gruppierungsgrund.** Reflexive und nicht-reflexive Formen (z.B. `encontrar`/`encontrarse`) können semantisch unverbundene Bedeutungen haben — diese trotzdem aufspalten:
+- `encontrar`: "finden" vs. "sich treffen" vs. "sich befinden" — 3 meanings, obwohl "sich treffen" und "sich befinden" beide von `encontrarse` kommen
+
 **Keine eigene meaning** für Bedeutungen, die nur innerhalb einer festen Wendung vorkommen:
 - `mundo`: "todo el mundo" = "alle" → keine eigene meaning, gehört nicht zum Lemma allein
 

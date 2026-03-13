@@ -33,14 +33,14 @@ processing:
   sentence_batch_size: 10000  # Sentences read from corpus per batch
 
 output:
-  directory: "output/test"
+  directory: "output/spanish_translation_only"
   min_frequency: 20  # Only include lemmas with freq >= this in output CSV
 
 cache:
   directory: "cache"
   llm_directory: "cache/llm_results"
 
-cache_only: true  # When true, skip all LLM API calls; only use cached results
+cache_only: false  # When true, skip all LLM API calls; only use cached results
 
 filtering:
   # POS tags: NOUN, VERB, ADJ, ADV, ADP, CONJ, AUX, CCONJ, SCONJ, PROPN, DET, PRON, NUM, etc.
@@ -49,14 +49,14 @@ filtering:
     - VERB
     - ADJ
     - ADV
-    - ADP
-    - CONJ
+    # - ADP
+    # - CONJ
     - AUX     # Mapped to VERB
-    - CCONJ   # Mapped to CONJ
-    - SCONJ   # Mapped to CONJ
-    - PRON
-    - INTJ
-    - NUM
+    # - CCONJ   # Mapped to CONJ
+    # - SCONJ   # Mapped to CONJ
+    # - PRON
+    # - INTJ
+    # - NUM
   pos_mappings:
     AUX: VERB
     CCONJ: CONJ
@@ -117,7 +117,7 @@ example_generation:
       thinking_level: "minimal"
 
 disambiguation:
-  enabled: true  # Also enables example_generation!
+  enabled: false  # Also enables example_generation!
   model: "dccuchile/bert-base-spanish-wwm-cased"  # BERT model for embeddings
   bert_batch_tokens: 1024  # Max tokens per BERT batch
   # POS types that will be disambiguated (multiple meanings per lemma)

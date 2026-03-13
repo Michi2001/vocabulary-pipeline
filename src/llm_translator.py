@@ -160,7 +160,9 @@ class LemmaTranslator:
                         f"  Created {len(batches)} batches for {len(uncached_items)} uncached {pos} items"
                     )
                 else:
-                    logger.info(f"  All {pos} items loaded from cache - no batches needed")
+                    logger.info(
+                        f"  All {pos} items loaded from cache - no batches needed"
+                    )
 
                 # Process uncached batches (async parallel) and combine with cached translations
                 batch_translations = self._run_batches_for_pos(
@@ -264,12 +266,17 @@ class LemmaTranslator:
             )
 
             try:
-                response = self.provider.translate_lemmas(batch, system_prompt, pos_schema)
+                response = self.provider.translate_lemmas(
+                    batch, system_prompt, pos_schema
+                )
             except Exception as e:
-                failed_lemmas = [item["lemma"] for item in batch]
+                failed_items = [
+                    (item["id"], item["lemma"], item["frequency"], item["pos"])
+                    for item in batch
+                ]
                 logger.error(
                     f"  Batch {i+1}/{len(batches)} failed permanently: {e}\n"
-                    f"  Lost lemmas: {failed_lemmas}"
+                    f"  Lost items: {failed_items}"
                 )
                 continue
 
@@ -321,9 +328,15 @@ class LemmaTranslator:
                 # Cache and accumulate under lock (SQLite is not thread-safe)
                 async with cache_lock:
                     if usage:
-                        total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
-                        total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
-                        total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
+                        total_usage["total_prompt_tokens"] += (
+                            usage.get("prompt_tokens") or 0
+                        )
+                        total_usage["total_completion_tokens"] += (
+                            usage.get("completion_tokens") or 0
+                        )
+                        total_usage["total_thinking_tokens"] += (
+                            usage.get("thinking_tokens") or 0
+                        )
                         total_usage["total_tokens"] += usage.get("total_tokens") or 0
                         total_usage["api_calls"] += 1
                     self._cache_batch_translations(
@@ -338,10 +351,13 @@ class LemmaTranslator:
         # Log failed batches with their lemmas
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                failed_lemmas = [item["lemma"] for item in batches[i]]
+                failed_items = [
+                    (item["id"], item["lemma"], item["frequency"], item["pos"])
+                    for item in batches[i]
+                ]
                 logger.error(
                     f"  Batch {i+1}/{len(batches)} failed permanently: {result}\n"
-                    f"  Lost lemmas: {failed_lemmas}"
+                    f"  Lost items: {failed_items}"
                 )
 
         return batch_translations_all
@@ -351,7 +367,9 @@ class LemmaTranslator:
         if "_token_usage" in response:
             usage = response["_token_usage"]
             total_usage["total_prompt_tokens"] += usage.get("prompt_tokens") or 0
-            total_usage["total_completion_tokens"] += usage.get("completion_tokens") or 0
+            total_usage["total_completion_tokens"] += (
+                usage.get("completion_tokens") or 0
+            )
             total_usage["total_thinking_tokens"] += usage.get("thinking_tokens") or 0
             total_usage["total_tokens"] += usage.get("total_tokens") or 0
             total_usage["api_calls"] += 1
