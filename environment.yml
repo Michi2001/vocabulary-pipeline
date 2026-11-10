@@ -11,6 +11,7 @@ dependencies:
   - pyyaml
   - spacy
   - pip
+  - pip:
     - torch
     - transformers
     - scikit-learn
@@ -19,4 +20,3 @@ dependencies:
     - sentence-transformers
     - umap-learn
     - google-genai
-prefix: /Users/michael/anaconda3/envs/LanguageApp-new

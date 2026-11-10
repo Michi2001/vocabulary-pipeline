@@ -4,7 +4,7 @@ Unit tests for LLM provider corrections using test cases from CSV files.
 This test validates that LLM providers correctly identify operations (KEEP, DELETE, MERGE)
 and targets for a set of 50 Spanish lemmas. The test data is loaded from CSV files.
 
-Run with: python -m unittest src.test_provider
+Run with: PYTHONPATH=.:test python test/test_correction.py
 Requires: OPENAI_API_KEY environment variable
 """
 

@@ -4,7 +4,7 @@ Unit tests for LLM translation using test cases from CSV files.
 This test validates that LLM providers correctly translate Spanish lemmas to German.
 The test data is loaded from CSV files.
 
-Run with: python -m unittest test.test_translation
+Run with: PYTHONPATH=.:test python test/test_translation.py
 Requires: GOOGLE_API_KEY or OPENAI_API_KEY environment variable
 """
 

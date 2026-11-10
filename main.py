@@ -352,7 +352,7 @@ def _stage_4_translation(ctx: PipelineContext) -> None:
     translator_config = {
         "batch_size": translation_config.get("batch_size", 25),
         "prompts_dir": translation_config.get(
-            "prompt_directory", "prompts/translation"
+            "prompt_directory", "prompts/translation_v2"
         ),
         "output_dir": ctx.output_dir,
         "max_requests_per_minute": translation_config.get("max_requests_per_minute", 0),

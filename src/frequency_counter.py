@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Tuple, Generator, Dict, List
+from typing import Any, Tuple, Generator, Dict, List
 import logging
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class FrequencyCounter:
                     f"({len(self.lemma_counts):,} unique lemmas)"
                 )
 
-    def get_sorted_frequencies(self, min_frequency: int = 1) -> List[Dict[str, any]]:
+    def get_sorted_frequencies(self, min_frequency: int = 1) -> List[Dict[str, Any]]:
         """
         Get lemma frequencies sorted by count (descending).
 
@@ -108,7 +108,7 @@ class FrequencyCounter:
 
         self.total_tokens += other.total_tokens
 
-    def to_dict(self) -> Dict[str, any]:
+    def to_dict(self) -> Dict[str, Any]:
         """
         Export frequency data to dictionary for serialization.
 
@@ -124,7 +124,7 @@ class FrequencyCounter:
         }
 
     @staticmethod
-    def from_dict(data: Dict[str, any]) -> "FrequencyCounter":
+    def from_dict(data: Dict[str, Any]) -> "FrequencyCounter":
         """
         Create FrequencyCounter from dictionary.
 
@@ -142,7 +142,7 @@ class FrequencyCounter:
         counter.total_tokens = data["total_tokens"]
         return counter
 
-    def get_statistics(self) -> Dict[str, any]:
+    def get_statistics(self) -> Dict[str, Any]:
         """
         Get statistics about the frequency data.
 

@@ -62,7 +62,7 @@ class LemmaTranslator:
         self.cache = cache
         self.model_config = provider.get_cache_key_components()
         self.batch_size = config.get("batch_size", 25)
-        self.prompts_dir = Path(config.get("prompts_dir", "prompts/translation"))
+        self.prompts_dir = Path(config.get("prompts_dir", "prompts/translation_v2"))
         self.output_dir = Path(config["output_dir"])
         self.max_requests_per_minute = config.get("max_requests_per_minute", 0)
         self.max_concurrent_requests = config.get("max_concurrent_requests", 5)

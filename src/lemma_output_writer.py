@@ -1,6 +1,5 @@
 import csv
-import json
-from typing import List, Dict
+from typing import Any, List, Dict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,7 +13,7 @@ class LemmaFrequencyOutputWriter:
     """
 
     @staticmethod
-    def write_csv(data: List[Dict[str, any]], output_path: str) -> None:
+    def write_csv(data: List[Dict[str, Any]], output_path: str) -> None:
         """
         Write frequency data to CSV file.
 
